@@ -39,8 +39,8 @@ BUILD_RET_VAL=$?
 if [ ${BUILD_RET_VAL} -eq 0 ]
 then
     echo "Double checking clojure test-report, Errors or Failures:"
-    egrep -il '<fail|<error' ../*/target/test-reports/*.xml | xargs -I '{}' bash -c "echo -n '{}':' '; egrep -ic '<fail|<error' '{}'"
-    egrep -iq '<fail|<error' ../*/target/test-reports/*.xml 
+    egrep -il '<fail|<error' */target/test-reports/*.xml | xargs -I '{}' bash -c "echo -n '{}':' '; egrep -ic '<fail|<error' '{}'"
+    egrep -iq '<fail|<error' */target/test-reports/*.xml 
     BUILD_RET_VAL=$? 
 fi
 

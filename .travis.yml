@@ -4,5 +4,6 @@ jdk:
   - oraclejdk8
 before_script: 
   - rvm use 2.1.5 --install
+  - nvm install 0.12.2
   - nvm use 0.12.2
 script: /bin/bash ./dev-tools/travis/travis-build.sh `pwd`

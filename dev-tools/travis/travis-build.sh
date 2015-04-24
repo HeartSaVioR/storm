@@ -32,7 +32,7 @@ export LOG_LEVEL=WARN
 export STORM_TEST_TIMEOUT_MS=100000
 
 # We now lean on Travis CI's implicit behavior, ```mvn clean install -DskipTests``` before running script
-mvn test
+mvn test -fae
 
 BUILD_RET_VAL=$?
 

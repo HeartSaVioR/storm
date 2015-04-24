@@ -11,6 +11,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+PYTHON_VERSION=`python --version`
+RUBY_VERSION=`ruby -v`
+NODEJS_VERSION=`node -v`
+
+echo "Python version : $PYTHON_VERSION"
+echo "Ruby version : $RUBY_VERSION"
+echo "NodeJs version : $NODEJS_VERSION"
+
 STORM_SRC_ROOT_DIR=$1
 
 TRAVIS_SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )

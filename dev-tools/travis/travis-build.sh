@@ -41,7 +41,14 @@ then
     echo "Double checking clojure test-report, Errors or Failures:"
     egrep -il '<fail|<error' */target/test-reports/*.xml | xargs -I '{}' bash -c "echo -n '{}':' '; egrep -ic '<fail|<error' '{}'"
     egrep -iq '<fail|<error' */target/test-reports/*.xml 
-    BUILD_RET_VAL=$? 
+
+    # it should be checked to error when one of patterns are found
+    if [ $? -eq 0 ]
+    then
+        BUILD_RET_VAL=1
+    else
+        BUILD_RET_VAL=0
+    fi
 fi
 
 if [ ${BUILD_RET_VAL} -ne 0 ]

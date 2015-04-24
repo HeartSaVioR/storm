@@ -11,7 +11,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-PYTHON_VERSION=`python --version`
+PYTHON_VERSION_TO_FILE=`python -V > /tmp/python_version 2>&1`
+PYTHON_VERSION=`cat /tmp/python_version`
 RUBY_VERSION=`ruby -v`
 NODEJS_VERSION=`node -v`
 

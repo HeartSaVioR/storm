@@ -74,6 +74,8 @@ public class TestUtils {
         props.put("metadata.broker.list", brokerConnectionString);
         props.put("request.required.acks", "1");
         props.put("serializer.class", "kafka.serializer.StringEncoder");
+        props.put("retry.backoff.ms", 500);
+        props.put("message.send.max.retries", 5);
         config.put(KafkaBolt.KAFKA_BROKER_PROPERTIES, props);
         config.put(KafkaBolt.TOPIC, TOPIC);
 

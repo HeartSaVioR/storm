@@ -113,7 +113,6 @@
   (let [local-tasks (-> worker :task-ids set)
         local-transfer (:transfer-local-fn worker)
         ^DisruptorQueue transfer-queue (:transfer-queue worker)
-        try-serialize-local ((:storm-conf worker) TOPOLOGY-TESTING-ALWAYS-TRY-SERIALIZE)
         transfer-fn
           (fn [^KryoTupleSerializer serializer tuple-batch]
             (let [local (ArrayList.)
@@ -124,13 +123,7 @@
                   (.add remote (TaskMessage. task (.serialize serializer tuple)))))
               (local-transfer local)
               (disruptor/publish transfer-queue remote)))]
-    (if try-serialize-local
-      (do 
-        (log-warn "WILL TRY TO SERIALIZE ALL TUPLES (Turn off " TOPOLOGY-TESTING-ALWAYS-TRY-SERIALIZE " for production)")
-        (fn [^KryoTupleSerializer serializer tuple-batch]
-          (assert-can-serialize serializer tuple-batch)
-          (transfer-fn serializer tuple-batch)))
-      transfer-fn)))
+      transfer-fn))
 
 (defn- mk-receive-queue-map [storm-conf executors]
   (->> executors

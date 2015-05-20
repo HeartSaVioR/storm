@@ -319,7 +319,7 @@
         ]
     (disruptor/clojure-handler
       (fn [packets _ batch-end?]
-        (.addAll buffer packets)
+        (.add buffer packets)
 
         (when batch-end?
           (read-locked endpoint-socket-lock

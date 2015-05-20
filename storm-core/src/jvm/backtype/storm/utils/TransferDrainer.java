@@ -24,7 +24,7 @@ import backtype.storm.messaging.TaskMessage;
 
 public class TransferDrainer {
   public void send(HashMap<Integer, String> taskToHostPort, HashMap<String, IConnection> connections,
-                   List<TaskMessage> buffer) {
+                   List<List<TaskMessage>> buffer) {
     Map<String, List<TaskMessage>> messageGroupedByDest = groupMessageByDestination(taskToHostPort, buffer);
     for (String hostPort : messageGroupedByDest.keySet()) {
       IConnection connection = connections.get(hostPort);
@@ -39,21 +39,23 @@ public class TransferDrainer {
   }
 
   private HashMap<String, List<TaskMessage>> groupMessageByDestination(HashMap<Integer, String> taskToHostPort,
-                                                                            List<TaskMessage> buffer) {
+                                                                       List<List<TaskMessage>> buffer) {
     HashMap<String, List<TaskMessage>> groupedMessage = new HashMap<String, List<TaskMessage>>();
-    for (TaskMessage message : buffer) {
-      int taskId = message.task();
+    for (List<TaskMessage> chunk : buffer) {
+      for (TaskMessage message : chunk) {
+        int taskId = message.task();
 
-      String hostAndPort = taskToHostPort.get(taskId);
-      if (null != hostAndPort) {
-        List<TaskMessage> messages = groupedMessage.get(hostAndPort);
+        String hostAndPort = taskToHostPort.get(taskId);
+        if (null != hostAndPort) {
+          List<TaskMessage> messages = groupedMessage.get(hostAndPort);
 
-        if (null == messages) {
-          messages = new ArrayList<TaskMessage>();
-          groupedMessage.put(hostAndPort, messages);
+          if (null == messages) {
+            messages = new ArrayList<TaskMessage>();
+            groupedMessage.put(hostAndPort, messages);
+          }
+
+          messages.add(message);
         }
-
-        messages.add(message);
       }
     }
     return groupedMessage;

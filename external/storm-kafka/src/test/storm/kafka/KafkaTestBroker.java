@@ -48,7 +48,7 @@ public class KafkaTestBroker {
         try {
             server = new TestingServer();
             String zookeeperConnectionString = server.getConnectString();
-            ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(1000, 3);
+            ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(10000, 3);
             zookeeper = CuratorFrameworkFactory.newClient(zookeeperConnectionString, retryPolicy);
             zookeeper.start();
             port = InstanceSpec.getRandomPort();

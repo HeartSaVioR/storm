@@ -68,7 +68,7 @@
 
 (deftest deny-drpc-test
   (let [client-port (available-port)
-        invocations-port (available-port (inc client-port))
+        invocations-port (available-port (inc client-port) client-port)
         storm-conf (read-storm-config)]
     (with-server [storm-conf "backtype.storm.security.auth.authorizer.DenyAuthorizer"
                   nil nil client-port invocations-port]
@@ -83,7 +83,7 @@
 
 (deftest deny-drpc-digest-test
   (let [client-port (available-port)
-        invocations-port (available-port (inc client-port))
+        invocations-port (available-port (inc client-port) client-port)
         storm-conf (read-storm-config)]
     (with-server [storm-conf "backtype.storm.security.auth.authorizer.DenyAuthorizer"
                   "backtype.storm.security.auth.digest.DigestSaslTransportPlugin"
@@ -103,7 +103,7 @@
 (defmacro with-simple-drpc-test-scenario
   [[strict? alice-client bob-client charlie-client alice-invok charlie-invok] & body]
   (let [client-port (available-port)
-        invocations-port (available-port (inc client-port))
+        invocations-port (available-port (inc client-port) client-port)
         storm-conf (merge (read-storm-config)
                           {DRPC-AUTHORIZER-ACL-STRICT strict?
                            DRPC-AUTHORIZER-ACL-FILENAME "drpc-simple-acl-test-scenario.yaml"

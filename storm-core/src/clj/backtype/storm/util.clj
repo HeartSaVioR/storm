@@ -229,7 +229,13 @@
      (try
        (try-port preferred)
        (catch java.io.IOException e
-         (available-port))))))
+         (available-port))))
+    ([preferred avoided]
+      (try
+        (available-port preferred)
+        (finally
+          (when (= preferred avoided)
+            (available-port (inc preferred) avoided)))))))
 
 (defn uuid []
   (str (UUID/randomUUID)))

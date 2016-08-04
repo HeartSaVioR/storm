@@ -382,6 +382,14 @@
                 <include>storm*jar</include>
             </includes>
         </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../../external/storm-submit/target</directory>
+            <outputDirectory>external/storm-submit</outputDirectory>
+            <includes>
+                <include>storm*jar</include>
+            </includes>
+        </fileSet>
+
 
         <!-- $STORM_HOME/extlib -->
         <fileSet>

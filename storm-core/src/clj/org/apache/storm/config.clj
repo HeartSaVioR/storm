@@ -141,6 +141,10 @@
   [conf stormconf-path]
   (merge conf (clojurify-structure (Utils/fromCompressedJsonConf (FileUtils/readFileToByteArray (File. stormconf-path))))))
 
+(defn read-supervisor-storm-code-given-path
+  [stormcode-path]
+  (Utils/deserialize (FileUtils/readFileToByteArray (File. stormcode-path)) StormTopology))
+
 (defn master-storm-metafile-path [stormroot ]
   (str stormroot file-path-separator "storm-code-distributor.meta"))
 

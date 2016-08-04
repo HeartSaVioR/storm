@@ -24,6 +24,7 @@ import shlex
 import tempfile
 import uuid
 import subprocess as sub
+import json
 
 import sys
 
@@ -96,6 +97,8 @@ if JAVA_HOME and not os.path.exists(JAVA_CMD):
     sys.exit(1)
 STORM_EXT_CLASSPATH = os.getenv('STORM_EXT_CLASSPATH', None)
 STORM_EXT_CLASSPATH_DAEMON = os.getenv('STORM_EXT_CLASSPATH_DAEMON', None)
+DEP_JARS_OPTS = []
+DEP_PACKAGES_OPTS = []
 
 def get_config_opts():
     global CONFIG_OPTS
@@ -153,6 +156,39 @@ def confvalue(name, extrapaths, daemon=True):
         if tokens[0] == "VALUE:":
             return " ".join(tokens[1:])
     return ""
+
+def resolve_dependencies(packages):
+    print("Resolving dependencies on demand: packages (%s)" % packages)
+    sys.stdout.flush()
+
+    # TODO: should we move some external modules to outer place?
+
+    # storm-submit module doesn't rely on storm-core and relevant libs
+    extrajars = get_jars_full(STORM_DIR + "/external/storm-submit")
+    classpath = normclasspath(os.pathsep.join(extrajars))
+
+    command = [
+        JAVA_CMD, "-client", "-cp", classpath, "org.apache.storm.submit.command.DependencyResolverMain",
+        ",".join(DEP_PACKAGES_OPTS)
+    ]
+
+    p = sub.Popen(command, stdout=sub.PIPE)
+    output, errors = p.communicate()
+    if p.returncode != 0:
+        raise RuntimeError("dependency handler returns non-zero code: code<%s> syserr<%s>" % (p.returncode, errors))
+
+    # python 3
+    if not isinstance(output, str):
+        output = output.decode('utf-8')
+
+    # For debug purpose, uncomment when you need to debug DependencyResolver
+    #print("Resolved dependencies: %s" % output)
+
+    try:
+        out_dict = json.loads(output)
+        return out_dict
+    except:
+        raise RuntimeError("dependency handler returns non-json response: sysout<%s>", output)
 
 def print_localconfvalue(name):
     """Syntax: [storm localconfvalue conf-name]
@@ -233,43 +269,75 @@ def jar(jarfile, klass, *args):
     (http://storm.apache.org/releases/current/javadocs/org/apache/storm/StormSubmitter.html)
     will upload the jar at topology-jar-path when the topology is submitted.
     """
+    global DEP_JARS_OPTS, DEP_PACKAGES_OPTS
+
+    local_jars = DEP_JARS_OPTS
+    artifact_to_package_jars = resolve_dependencies(DEP_PACKAGES_OPTS)
+
     transform_class = confvalue("client.jartransformer.class", [CLUSTER_CONF_DIR])
     if (transform_class != None and transform_class != "nil"):
         tmpjar = os.path.join(tempfile.gettempdir(), uuid.uuid1().hex+".jar")
         exec_storm_class("org.apache.storm.daemon.ClientJarTransformerRunner", args=[transform_class, jarfile, tmpjar], fork=True, daemon=False)
+        extra_jars = [tmpjar, USER_CONF_DIR, STORM_BIN_DIR]
+        extra_jars.extend(local_jars)
+        extra_jars.extend(artifact_to_package_jars.values())
         topology_runner_exit_code = exec_storm_class(
                 klass,
                 jvmtype="-client",
-                extrajars=[tmpjar, USER_CONF_DIR, STORM_BIN_DIR],
+                extrajars=extra_jars,
                 args=args,
                 daemon=False,
                 fork=True,
-                jvmopts=JAR_JVM_OPTS + ["-Dstorm.jar=" + tmpjar])
+                jvmopts=JAR_JVM_OPTS + ["-Dstorm.jar=" + tmpjar] +
+                        ["-Dstorm.dependency.jars=" + ",".join(local_jars)] +
+                        ["-Dstorm.dependency.packages=" + json.dumps(artifact_to_package_jars)])
         os.remove(tmpjar)
         sys.exit(topology_runner_exit_code)
     else:
+        extra_jars=[jarfile, USER_CONF_DIR, STORM_BIN_DIR]
+        extra_jars.extend(local_jars)
+        extra_jars.extend(artifact_to_package_jars.values())
         exec_storm_class(
             klass,
             jvmtype="-client",
-            extrajars=[jarfile, USER_CONF_DIR, STORM_BIN_DIR],
+            extrajars=extra_jars,
             args=args,
             daemon=False,
-            jvmopts=JAR_JVM_OPTS + ["-Dstorm.jar=" + jarfile])
+            jvmopts=JAR_JVM_OPTS + ["-Dstorm.jar=" + jarfile] +
+                    ["-Dstorm.dependency.jars=" + ",".join(local_jars)] +
+                    ["-Dstorm.dependency.packages=" + json.dumps(artifact_to_package_jars)])
 
 def sql(sql_file, topology_name):
     """Syntax: [storm sql sql-file topology-name]
 
     Compiles the SQL statements into a Trident topology and submits it to Storm.
     """
+    global DEP_JARS_OPTS, DEP_PACKAGES_OPTS
+
+    local_jars = DEP_JARS_OPTS
+    artifact_to_package_jars = resolve_dependencies(DEP_PACKAGES_OPTS)
+
+    sql_core_jars = get_jars_full(STORM_DIR + "/external/sql/storm-sql-core")
+    sql_runtime_jars = get_jars_full(STORM_DIR + "/external/sql/storm-sql-runtime")
+
+    # include storm-sql-runtime jar(s) to local jar list
+    local_jars.extend(sql_runtime_jars)
+
     extrajars=[USER_CONF_DIR, STORM_BIN_DIR]
-    extrajars.extend(get_jars_full(STORM_DIR + "/external/sql/storm-sql-core"))
-    extrajars.extend(get_jars_full(STORM_DIR + "/external/sql/storm-sql-runtime"))
+    extrajars.extend(local_jars)
+    extrajars.extend(artifact_to_package_jars.values())
+
+    # include this for running StormSqlRunner, but not for generated topology
+    extrajars.extend(sql_core_jars)
+
     exec_storm_class(
         "org.apache.storm.sql.StormSqlRunner",
         jvmtype="-client",
         extrajars=extrajars,
         args=[sql_file, topology_name],
-        daemon=False)
+        daemon=False,
+        jvmopts=["-Dstorm.dependency.jars=" + ",".join(local_jars)] +
+                ["-Dstorm.dependency.packages=" + json.dumps(artifact_to_package_jars)])
 
 def kill(*args):
     """Syntax: [storm kill topology-name [-w wait-time-secs]]
@@ -746,6 +814,8 @@ def parse_config_opts(args):
   curr.reverse()
   config_list = []
   args_list = []
+  jars_list = []
+  packages_list = []
 
   while len(curr) > 0:
     token = curr.pop()
@@ -754,18 +824,24 @@ def parse_config_opts(args):
     elif token == "--config":
       global CONFFILE
       CONFFILE = curr.pop()
+    elif token == "--jars":
+      jars_list.extend(curr.pop().split(','))
+    elif token == "--packages":
+      packages_list.extend(curr.pop().split(','))
     else:
       args_list.append(token)
 
-  return config_list, args_list
+  return config_list, jars_list, packages_list, args_list
 
 def main():
     if len(sys.argv) <= 1:
         print_usage()
         sys.exit(-1)
-    global CONFIG_OPTS
-    config_list, args = parse_config_opts(sys.argv[1:])
+    global CONFIG_OPTS, DEP_JARS_OPTS, DEP_PACKAGES_OPTS
+    config_list, jars_list, packages_list, args = parse_config_opts(sys.argv[1:])
     parse_config(config_list)
+    DEP_JARS_OPTS = jars_list
+    DEP_PACKAGES_OPTS = packages_list
     COMMAND = args[0]
     ARGS = args[1:]
     (COMMANDS.get(COMMAND, unknown_command))(*ARGS)

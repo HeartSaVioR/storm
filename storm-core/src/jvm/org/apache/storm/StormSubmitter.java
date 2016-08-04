@@ -19,17 +19,26 @@ package org.apache.storm;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import org.apache.storm.dependency.DependencyPropertiesParser;
+import org.apache.storm.dependency.DependencyUploader;
 import org.apache.storm.hooks.SubmitterHookException;
 import org.apache.storm.scheduler.resource.ResourceUtils;
 import org.apache.storm.validation.ConfigValidation;
 import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.json.simple.JSONValue;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -233,6 +242,12 @@ public class StormSubmitter {
                 if(topologyNameExists(conf, name, asUser)) {
                     throw new RuntimeException("Topology with name `" + name + "` already exists on cluster");
                 }
+
+                // Dependency uploading only makes sense for distributed mode
+                List<String> blobKeys = uploadDependenciesToBlobStore();
+                // FIXME: do we want to keep blob keys and remove them when fail to submit?
+                setDependencyBlobsToTopology(topology, blobKeys);
+
                 String jar = submitJarAs(conf, System.getProperty("storm.jar"), progressListener, asUser);
                 try {
                     LOG.info("Submitting topology " + name + " in distributed mode with conf " + serConf);
@@ -257,6 +272,39 @@ public class StormSubmitter {
         }
         invokeSubmitterHook(name, asUser, conf, topology);
 
+    }
+
+    private static List<String> uploadDependenciesToBlobStore() {
+        LOG.info("Uploading dependencies...");
+
+        DependencyPropertiesParser propertiesParser = new DependencyPropertiesParser();
+
+        String depJarsProp = System.getProperty("storm.dependency.jars", "");
+        String depPackagesProp = System.getProperty("storm.dependency.packages", "{}");
+
+        List<File> depJars = propertiesParser.parseJarsProperties(depJarsProp);
+        Map<String, File> depArtifacts = propertiesParser.parsePackagesProperties(depPackagesProp);
+
+        DependencyUploader uploader = new DependencyUploader();
+        try {
+            uploader.init();
+
+            List<String> blobKeys = new ArrayList<>();
+            try {
+                blobKeys.addAll(uploader.uploadFiles(depJars, true));
+                blobKeys.addAll(uploader.uploadArtifacts(depArtifacts));
+                return blobKeys;
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        } finally {
+            uploader.shutdown();
+        }
+    }
+
+    private static void setDependencyBlobsToTopology(StormTopology topology, List<String> blobKeys) {
+        LOG.info("Dependency Blob keys : {}", blobKeys);
+        topology.set_dependencies(blobKeys);
     }
 
     /**

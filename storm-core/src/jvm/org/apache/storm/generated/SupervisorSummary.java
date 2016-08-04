@@ -1063,15 +1063,15 @@ public class SupervisorSummary implements org.apache.thrift.TBase<SupervisorSumm
           case 7: // TOTAL_RESOURCES
             if (schemeField.type == org.apache.thrift.protocol.TType.MAP) {
               {
-                org.apache.thrift.protocol.TMap _map82 = iprot.readMapBegin();
-                struct.total_resources = new HashMap<String,Double>(2*_map82.size);
-                String _key83;
-                double _val84;
-                for (int _i85 = 0; _i85 < _map82.size; ++_i85)
+                org.apache.thrift.protocol.TMap _map90 = iprot.readMapBegin();
+                struct.total_resources = new HashMap<String,Double>(2*_map90.size);
+                String _key91;
+                double _val92;
+                for (int _i93 = 0; _i93 < _map90.size; ++_i93)
                 {
-                  _key83 = iprot.readString();
-                  _val84 = iprot.readDouble();
-                  struct.total_resources.put(_key83, _val84);
+                  _key91 = iprot.readString();
+                  _val92 = iprot.readDouble();
+                  struct.total_resources.put(_key91, _val92);
                 }
                 iprot.readMapEnd();
               }
@@ -1140,10 +1140,10 @@ public class SupervisorSummary implements org.apache.thrift.TBase<SupervisorSumm
           oprot.writeFieldBegin(TOTAL_RESOURCES_FIELD_DESC);
           {
             oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.DOUBLE, struct.total_resources.size()));
-            for (Map.Entry<String, Double> _iter86 : struct.total_resources.entrySet())
+            for (Map.Entry<String, Double> _iter94 : struct.total_resources.entrySet())
             {
-              oprot.writeString(_iter86.getKey());
-              oprot.writeDouble(_iter86.getValue());
+              oprot.writeString(_iter94.getKey());
+              oprot.writeDouble(_iter94.getValue());
             }
             oprot.writeMapEnd();
           }
@@ -1202,10 +1202,10 @@ public class SupervisorSummary implements org.apache.thrift.TBase<SupervisorSumm
       if (struct.is_set_total_resources()) {
         {
           oprot.writeI32(struct.total_resources.size());
-          for (Map.Entry<String, Double> _iter87 : struct.total_resources.entrySet())
+          for (Map.Entry<String, Double> _iter95 : struct.total_resources.entrySet())
           {
-            oprot.writeString(_iter87.getKey());
-            oprot.writeDouble(_iter87.getValue());
+            oprot.writeString(_iter95.getKey());
+            oprot.writeDouble(_iter95.getValue());
           }
         }
       }
@@ -1237,15 +1237,15 @@ public class SupervisorSummary implements org.apache.thrift.TBase<SupervisorSumm
       }
       if (incoming.get(1)) {
         {
-          org.apache.thrift.protocol.TMap _map88 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.DOUBLE, iprot.readI32());
-          struct.total_resources = new HashMap<String,Double>(2*_map88.size);
-          String _key89;
-          double _val90;
-          for (int _i91 = 0; _i91 < _map88.size; ++_i91)
+          org.apache.thrift.protocol.TMap _map96 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.DOUBLE, iprot.readI32());
+          struct.total_resources = new HashMap<String,Double>(2*_map96.size);
+          String _key97;
+          double _val98;
+          for (int _i99 = 0; _i99 < _map96.size; ++_i99)
           {
-            _key89 = iprot.readString();
-            _val90 = iprot.readDouble();
-            struct.total_resources.put(_key89, _val90);
+            _key97 = iprot.readString();
+            _val98 = iprot.readDouble();
+            struct.total_resources.put(_key97, _val98);
           }
         }
         struct.set_total_resources_isSet(true);

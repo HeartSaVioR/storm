@@ -59,6 +59,7 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
   private static final org.apache.thrift.protocol.TField BOLTS_FIELD_DESC = new org.apache.thrift.protocol.TField("bolts", org.apache.thrift.protocol.TType.MAP, (short)2);
   private static final org.apache.thrift.protocol.TField STATE_SPOUTS_FIELD_DESC = new org.apache.thrift.protocol.TField("state_spouts", org.apache.thrift.protocol.TType.MAP, (short)3);
   private static final org.apache.thrift.protocol.TField WORKER_HOOKS_FIELD_DESC = new org.apache.thrift.protocol.TField("worker_hooks", org.apache.thrift.protocol.TType.LIST, (short)4);
+  private static final org.apache.thrift.protocol.TField DEPENDENCIES_FIELD_DESC = new org.apache.thrift.protocol.TField("dependencies", org.apache.thrift.protocol.TType.LIST, (short)5);
 
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
@@ -70,13 +71,15 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
   private Map<String,Bolt> bolts; // required
   private Map<String,StateSpoutSpec> state_spouts; // required
   private List<ByteBuffer> worker_hooks; // optional
+  private List<String> dependencies; // optional
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
     SPOUTS((short)1, "spouts"),
     BOLTS((short)2, "bolts"),
     STATE_SPOUTS((short)3, "state_spouts"),
-    WORKER_HOOKS((short)4, "worker_hooks");
+    WORKER_HOOKS((short)4, "worker_hooks"),
+    DEPENDENCIES((short)5, "dependencies");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -99,6 +102,8 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
           return STATE_SPOUTS;
         case 4: // WORKER_HOOKS
           return WORKER_HOOKS;
+        case 5: // DEPENDENCIES
+          return DEPENDENCIES;
         default:
           return null;
       }
@@ -139,7 +144,7 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
   }
 
   // isset id assignments
-  private static final _Fields optionals[] = {_Fields.WORKER_HOOKS};
+  private static final _Fields optionals[] = {_Fields.WORKER_HOOKS,_Fields.DEPENDENCIES};
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
@@ -158,6 +163,9 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
     tmpMap.put(_Fields.WORKER_HOOKS, new org.apache.thrift.meta_data.FieldMetaData("worker_hooks", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
             new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING            , true))));
+    tmpMap.put(_Fields.DEPENDENCIES, new org.apache.thrift.meta_data.FieldMetaData("dependencies", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
+            new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(StormTopology.class, metaDataMap);
   }
@@ -229,6 +237,10 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
       List<ByteBuffer> __this__worker_hooks = new ArrayList<ByteBuffer>(other.worker_hooks);
       this.worker_hooks = __this__worker_hooks;
     }
+    if (other.is_set_dependencies()) {
+      List<String> __this__dependencies = new ArrayList<String>(other.dependencies);
+      this.dependencies = __this__dependencies;
+    }
   }
 
   public StormTopology deepCopy() {
@@ -241,6 +253,7 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
     this.bolts = null;
     this.state_spouts = null;
     this.worker_hooks = null;
+    this.dependencies = null;
   }
 
   public int get_spouts_size() {
@@ -383,6 +396,44 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
     }
   }
 
+  public int get_dependencies_size() {
+    return (this.dependencies == null) ? 0 : this.dependencies.size();
+  }
+
+  public java.util.Iterator<String> get_dependencies_iterator() {
+    return (this.dependencies == null) ? null : this.dependencies.iterator();
+  }
+
+  public void add_to_dependencies(String elem) {
+    if (this.dependencies == null) {
+      this.dependencies = new ArrayList<String>();
+    }
+    this.dependencies.add(elem);
+  }
+
+  public List<String> get_dependencies() {
+    return this.dependencies;
+  }
+
+  public void set_dependencies(List<String> dependencies) {
+    this.dependencies = dependencies;
+  }
+
+  public void unset_dependencies() {
+    this.dependencies = null;
+  }
+
+  /** Returns true if field dependencies is set (has been assigned a value) and false otherwise */
+  public boolean is_set_dependencies() {
+    return this.dependencies != null;
+  }
+
+  public void set_dependencies_isSet(boolean value) {
+    if (!value) {
+      this.dependencies = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case SPOUTS:
@@ -417,6 +468,14 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
       }
       break;
 
+    case DEPENDENCIES:
+      if (value == null) {
+        unset_dependencies();
+      } else {
+        set_dependencies((List<String>)value);
+      }
+      break;
+
     }
   }
 
@@ -433,6 +492,9 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
 
     case WORKER_HOOKS:
       return get_worker_hooks();
+
+    case DEPENDENCIES:
+      return get_dependencies();
 
     }
     throw new IllegalStateException();
@@ -453,6 +515,8 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
       return is_set_state_spouts();
     case WORKER_HOOKS:
       return is_set_worker_hooks();
+    case DEPENDENCIES:
+      return is_set_dependencies();
     }
     throw new IllegalStateException();
   }
@@ -506,6 +570,15 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
         return false;
     }
 
+    boolean this_present_dependencies = true && this.is_set_dependencies();
+    boolean that_present_dependencies = true && that.is_set_dependencies();
+    if (this_present_dependencies || that_present_dependencies) {
+      if (!(this_present_dependencies && that_present_dependencies))
+        return false;
+      if (!this.dependencies.equals(that.dependencies))
+        return false;
+    }
+
     return true;
   }
 
@@ -532,6 +605,11 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
     list.add(present_worker_hooks);
     if (present_worker_hooks)
       list.add(worker_hooks);
+
+    boolean present_dependencies = true && (is_set_dependencies());
+    list.add(present_dependencies);
+    if (present_dependencies)
+      list.add(dependencies);
 
     return list.hashCode();
   }
@@ -580,6 +658,16 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
     }
     if (is_set_worker_hooks()) {
       lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.worker_hooks, other.worker_hooks);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(is_set_dependencies()).compareTo(other.is_set_dependencies());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (is_set_dependencies()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.dependencies, other.dependencies);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -634,6 +722,16 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
         sb.append("null");
       } else {
         org.apache.thrift.TBaseHelper.toString(this.worker_hooks, sb);
+      }
+      first = false;
+    }
+    if (is_set_dependencies()) {
+      if (!first) sb.append(", ");
+      sb.append("dependencies:");
+      if (this.dependencies == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.dependencies);
       }
       first = false;
     }
@@ -773,6 +871,24 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
+          case 5: // DEPENDENCIES
+            if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
+              {
+                org.apache.thrift.protocol.TList _list59 = iprot.readListBegin();
+                struct.dependencies = new ArrayList<String>(_list59.size);
+                String _elem60;
+                for (int _i61 = 0; _i61 < _list59.size; ++_i61)
+                {
+                  _elem60 = iprot.readString();
+                  struct.dependencies.add(_elem60);
+                }
+                iprot.readListEnd();
+              }
+              struct.set_dependencies_isSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         }
@@ -790,10 +906,10 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
         oprot.writeFieldBegin(SPOUTS_FIELD_DESC);
         {
           oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRUCT, struct.spouts.size()));
-          for (Map.Entry<String, SpoutSpec> _iter59 : struct.spouts.entrySet())
+          for (Map.Entry<String, SpoutSpec> _iter62 : struct.spouts.entrySet())
           {
-            oprot.writeString(_iter59.getKey());
-            _iter59.getValue().write(oprot);
+            oprot.writeString(_iter62.getKey());
+            _iter62.getValue().write(oprot);
           }
           oprot.writeMapEnd();
         }
@@ -803,10 +919,10 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
         oprot.writeFieldBegin(BOLTS_FIELD_DESC);
         {
           oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRUCT, struct.bolts.size()));
-          for (Map.Entry<String, Bolt> _iter60 : struct.bolts.entrySet())
+          for (Map.Entry<String, Bolt> _iter63 : struct.bolts.entrySet())
           {
-            oprot.writeString(_iter60.getKey());
-            _iter60.getValue().write(oprot);
+            oprot.writeString(_iter63.getKey());
+            _iter63.getValue().write(oprot);
           }
           oprot.writeMapEnd();
         }
@@ -816,10 +932,10 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
         oprot.writeFieldBegin(STATE_SPOUTS_FIELD_DESC);
         {
           oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRUCT, struct.state_spouts.size()));
-          for (Map.Entry<String, StateSpoutSpec> _iter61 : struct.state_spouts.entrySet())
+          for (Map.Entry<String, StateSpoutSpec> _iter64 : struct.state_spouts.entrySet())
           {
-            oprot.writeString(_iter61.getKey());
-            _iter61.getValue().write(oprot);
+            oprot.writeString(_iter64.getKey());
+            _iter64.getValue().write(oprot);
           }
           oprot.writeMapEnd();
         }
@@ -830,9 +946,23 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
           oprot.writeFieldBegin(WORKER_HOOKS_FIELD_DESC);
           {
             oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.worker_hooks.size()));
-            for (ByteBuffer _iter62 : struct.worker_hooks)
+            for (ByteBuffer _iter65 : struct.worker_hooks)
             {
-              oprot.writeBinary(_iter62);
+              oprot.writeBinary(_iter65);
+            }
+            oprot.writeListEnd();
+          }
+          oprot.writeFieldEnd();
+        }
+      }
+      if (struct.dependencies != null) {
+        if (struct.is_set_dependencies()) {
+          oprot.writeFieldBegin(DEPENDENCIES_FIELD_DESC);
+          {
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.dependencies.size()));
+            for (String _iter66 : struct.dependencies)
+            {
+              oprot.writeString(_iter66);
             }
             oprot.writeListEnd();
           }
@@ -858,39 +988,51 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
       TTupleProtocol oprot = (TTupleProtocol) prot;
       {
         oprot.writeI32(struct.spouts.size());
-        for (Map.Entry<String, SpoutSpec> _iter63 : struct.spouts.entrySet())
+        for (Map.Entry<String, SpoutSpec> _iter67 : struct.spouts.entrySet())
         {
-          oprot.writeString(_iter63.getKey());
-          _iter63.getValue().write(oprot);
+          oprot.writeString(_iter67.getKey());
+          _iter67.getValue().write(oprot);
         }
       }
       {
         oprot.writeI32(struct.bolts.size());
-        for (Map.Entry<String, Bolt> _iter64 : struct.bolts.entrySet())
+        for (Map.Entry<String, Bolt> _iter68 : struct.bolts.entrySet())
         {
-          oprot.writeString(_iter64.getKey());
-          _iter64.getValue().write(oprot);
+          oprot.writeString(_iter68.getKey());
+          _iter68.getValue().write(oprot);
         }
       }
       {
         oprot.writeI32(struct.state_spouts.size());
-        for (Map.Entry<String, StateSpoutSpec> _iter65 : struct.state_spouts.entrySet())
+        for (Map.Entry<String, StateSpoutSpec> _iter69 : struct.state_spouts.entrySet())
         {
-          oprot.writeString(_iter65.getKey());
-          _iter65.getValue().write(oprot);
+          oprot.writeString(_iter69.getKey());
+          _iter69.getValue().write(oprot);
         }
       }
       BitSet optionals = new BitSet();
       if (struct.is_set_worker_hooks()) {
         optionals.set(0);
       }
-      oprot.writeBitSet(optionals, 1);
+      if (struct.is_set_dependencies()) {
+        optionals.set(1);
+      }
+      oprot.writeBitSet(optionals, 2);
       if (struct.is_set_worker_hooks()) {
         {
           oprot.writeI32(struct.worker_hooks.size());
-          for (ByteBuffer _iter66 : struct.worker_hooks)
+          for (ByteBuffer _iter70 : struct.worker_hooks)
           {
-            oprot.writeBinary(_iter66);
+            oprot.writeBinary(_iter70);
+          }
+        }
+      }
+      if (struct.is_set_dependencies()) {
+        {
+          oprot.writeI32(struct.dependencies.size());
+          for (String _iter71 : struct.dependencies)
+          {
+            oprot.writeString(_iter71);
           }
         }
       }
@@ -900,60 +1042,73 @@ public class StormTopology implements org.apache.thrift.TBase<StormTopology, Sto
     public void read(org.apache.thrift.protocol.TProtocol prot, StormTopology struct) throws org.apache.thrift.TException {
       TTupleProtocol iprot = (TTupleProtocol) prot;
       {
-        org.apache.thrift.protocol.TMap _map67 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-        struct.spouts = new HashMap<String,SpoutSpec>(2*_map67.size);
-        String _key68;
-        SpoutSpec _val69;
-        for (int _i70 = 0; _i70 < _map67.size; ++_i70)
+        org.apache.thrift.protocol.TMap _map72 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+        struct.spouts = new HashMap<String,SpoutSpec>(2*_map72.size);
+        String _key73;
+        SpoutSpec _val74;
+        for (int _i75 = 0; _i75 < _map72.size; ++_i75)
         {
-          _key68 = iprot.readString();
-          _val69 = new SpoutSpec();
-          _val69.read(iprot);
-          struct.spouts.put(_key68, _val69);
+          _key73 = iprot.readString();
+          _val74 = new SpoutSpec();
+          _val74.read(iprot);
+          struct.spouts.put(_key73, _val74);
         }
       }
       struct.set_spouts_isSet(true);
       {
-        org.apache.thrift.protocol.TMap _map71 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-        struct.bolts = new HashMap<String,Bolt>(2*_map71.size);
-        String _key72;
-        Bolt _val73;
-        for (int _i74 = 0; _i74 < _map71.size; ++_i74)
+        org.apache.thrift.protocol.TMap _map76 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+        struct.bolts = new HashMap<String,Bolt>(2*_map76.size);
+        String _key77;
+        Bolt _val78;
+        for (int _i79 = 0; _i79 < _map76.size; ++_i79)
         {
-          _key72 = iprot.readString();
-          _val73 = new Bolt();
-          _val73.read(iprot);
-          struct.bolts.put(_key72, _val73);
+          _key77 = iprot.readString();
+          _val78 = new Bolt();
+          _val78.read(iprot);
+          struct.bolts.put(_key77, _val78);
         }
       }
       struct.set_bolts_isSet(true);
       {
-        org.apache.thrift.protocol.TMap _map75 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-        struct.state_spouts = new HashMap<String,StateSpoutSpec>(2*_map75.size);
-        String _key76;
-        StateSpoutSpec _val77;
-        for (int _i78 = 0; _i78 < _map75.size; ++_i78)
+        org.apache.thrift.protocol.TMap _map80 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+        struct.state_spouts = new HashMap<String,StateSpoutSpec>(2*_map80.size);
+        String _key81;
+        StateSpoutSpec _val82;
+        for (int _i83 = 0; _i83 < _map80.size; ++_i83)
         {
-          _key76 = iprot.readString();
-          _val77 = new StateSpoutSpec();
-          _val77.read(iprot);
-          struct.state_spouts.put(_key76, _val77);
+          _key81 = iprot.readString();
+          _val82 = new StateSpoutSpec();
+          _val82.read(iprot);
+          struct.state_spouts.put(_key81, _val82);
         }
       }
       struct.set_state_spouts_isSet(true);
-      BitSet incoming = iprot.readBitSet(1);
+      BitSet incoming = iprot.readBitSet(2);
       if (incoming.get(0)) {
         {
-          org.apache.thrift.protocol.TList _list79 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
-          struct.worker_hooks = new ArrayList<ByteBuffer>(_list79.size);
-          ByteBuffer _elem80;
-          for (int _i81 = 0; _i81 < _list79.size; ++_i81)
+          org.apache.thrift.protocol.TList _list84 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+          struct.worker_hooks = new ArrayList<ByteBuffer>(_list84.size);
+          ByteBuffer _elem85;
+          for (int _i86 = 0; _i86 < _list84.size; ++_i86)
           {
-            _elem80 = iprot.readBinary();
-            struct.worker_hooks.add(_elem80);
+            _elem85 = iprot.readBinary();
+            struct.worker_hooks.add(_elem85);
           }
         }
         struct.set_worker_hooks_isSet(true);
+      }
+      if (incoming.get(1)) {
+        {
+          org.apache.thrift.protocol.TList _list87 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+          struct.dependencies = new ArrayList<String>(_list87.size);
+          String _elem88;
+          for (int _i89 = 0; _i89 < _list87.size; ++_i89)
+          {
+            _elem88 = iprot.readString();
+            struct.dependencies.add(_elem88);
+          }
+        }
+        struct.set_dependencies_isSet(true);
       }
     }
   }

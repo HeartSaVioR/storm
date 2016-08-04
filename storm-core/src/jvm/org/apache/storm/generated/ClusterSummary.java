@@ -664,14 +664,14 @@ public class ClusterSummary implements org.apache.thrift.TBase<ClusterSummary, C
           case 1: // SUPERVISORS
             if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
               {
-                org.apache.thrift.protocol.TList _list92 = iprot.readListBegin();
-                struct.supervisors = new ArrayList<SupervisorSummary>(_list92.size);
-                SupervisorSummary _elem93;
-                for (int _i94 = 0; _i94 < _list92.size; ++_i94)
+                org.apache.thrift.protocol.TList _list100 = iprot.readListBegin();
+                struct.supervisors = new ArrayList<SupervisorSummary>(_list100.size);
+                SupervisorSummary _elem101;
+                for (int _i102 = 0; _i102 < _list100.size; ++_i102)
                 {
-                  _elem93 = new SupervisorSummary();
-                  _elem93.read(iprot);
-                  struct.supervisors.add(_elem93);
+                  _elem101 = new SupervisorSummary();
+                  _elem101.read(iprot);
+                  struct.supervisors.add(_elem101);
                 }
                 iprot.readListEnd();
               }
@@ -691,14 +691,14 @@ public class ClusterSummary implements org.apache.thrift.TBase<ClusterSummary, C
           case 3: // TOPOLOGIES
             if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
               {
-                org.apache.thrift.protocol.TList _list95 = iprot.readListBegin();
-                struct.topologies = new ArrayList<TopologySummary>(_list95.size);
-                TopologySummary _elem96;
-                for (int _i97 = 0; _i97 < _list95.size; ++_i97)
+                org.apache.thrift.protocol.TList _list103 = iprot.readListBegin();
+                struct.topologies = new ArrayList<TopologySummary>(_list103.size);
+                TopologySummary _elem104;
+                for (int _i105 = 0; _i105 < _list103.size; ++_i105)
                 {
-                  _elem96 = new TopologySummary();
-                  _elem96.read(iprot);
-                  struct.topologies.add(_elem96);
+                  _elem104 = new TopologySummary();
+                  _elem104.read(iprot);
+                  struct.topologies.add(_elem104);
                 }
                 iprot.readListEnd();
               }
@@ -710,14 +710,14 @@ public class ClusterSummary implements org.apache.thrift.TBase<ClusterSummary, C
           case 4: // NIMBUSES
             if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
               {
-                org.apache.thrift.protocol.TList _list98 = iprot.readListBegin();
-                struct.nimbuses = new ArrayList<NimbusSummary>(_list98.size);
-                NimbusSummary _elem99;
-                for (int _i100 = 0; _i100 < _list98.size; ++_i100)
+                org.apache.thrift.protocol.TList _list106 = iprot.readListBegin();
+                struct.nimbuses = new ArrayList<NimbusSummary>(_list106.size);
+                NimbusSummary _elem107;
+                for (int _i108 = 0; _i108 < _list106.size; ++_i108)
                 {
-                  _elem99 = new NimbusSummary();
-                  _elem99.read(iprot);
-                  struct.nimbuses.add(_elem99);
+                  _elem107 = new NimbusSummary();
+                  _elem107.read(iprot);
+                  struct.nimbuses.add(_elem107);
                 }
                 iprot.readListEnd();
               }
@@ -743,9 +743,9 @@ public class ClusterSummary implements org.apache.thrift.TBase<ClusterSummary, C
         oprot.writeFieldBegin(SUPERVISORS_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.supervisors.size()));
-          for (SupervisorSummary _iter101 : struct.supervisors)
+          for (SupervisorSummary _iter109 : struct.supervisors)
           {
-            _iter101.write(oprot);
+            _iter109.write(oprot);
           }
           oprot.writeListEnd();
         }
@@ -760,9 +760,9 @@ public class ClusterSummary implements org.apache.thrift.TBase<ClusterSummary, C
         oprot.writeFieldBegin(TOPOLOGIES_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.topologies.size()));
-          for (TopologySummary _iter102 : struct.topologies)
+          for (TopologySummary _iter110 : struct.topologies)
           {
-            _iter102.write(oprot);
+            _iter110.write(oprot);
           }
           oprot.writeListEnd();
         }
@@ -772,9 +772,9 @@ public class ClusterSummary implements org.apache.thrift.TBase<ClusterSummary, C
         oprot.writeFieldBegin(NIMBUSES_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.nimbuses.size()));
-          for (NimbusSummary _iter103 : struct.nimbuses)
+          for (NimbusSummary _iter111 : struct.nimbuses)
           {
-            _iter103.write(oprot);
+            _iter111.write(oprot);
           }
           oprot.writeListEnd();
         }
@@ -799,23 +799,23 @@ public class ClusterSummary implements org.apache.thrift.TBase<ClusterSummary, C
       TTupleProtocol oprot = (TTupleProtocol) prot;
       {
         oprot.writeI32(struct.supervisors.size());
-        for (SupervisorSummary _iter104 : struct.supervisors)
+        for (SupervisorSummary _iter112 : struct.supervisors)
         {
-          _iter104.write(oprot);
+          _iter112.write(oprot);
         }
       }
       {
         oprot.writeI32(struct.topologies.size());
-        for (TopologySummary _iter105 : struct.topologies)
+        for (TopologySummary _iter113 : struct.topologies)
         {
-          _iter105.write(oprot);
+          _iter113.write(oprot);
         }
       }
       {
         oprot.writeI32(struct.nimbuses.size());
-        for (NimbusSummary _iter106 : struct.nimbuses)
+        for (NimbusSummary _iter114 : struct.nimbuses)
         {
-          _iter106.write(oprot);
+          _iter114.write(oprot);
         }
       }
       BitSet optionals = new BitSet();
@@ -832,38 +832,38 @@ public class ClusterSummary implements org.apache.thrift.TBase<ClusterSummary, C
     public void read(org.apache.thrift.protocol.TProtocol prot, ClusterSummary struct) throws org.apache.thrift.TException {
       TTupleProtocol iprot = (TTupleProtocol) prot;
       {
-        org.apache.thrift.protocol.TList _list107 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-        struct.supervisors = new ArrayList<SupervisorSummary>(_list107.size);
-        SupervisorSummary _elem108;
-        for (int _i109 = 0; _i109 < _list107.size; ++_i109)
+        org.apache.thrift.protocol.TList _list115 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+        struct.supervisors = new ArrayList<SupervisorSummary>(_list115.size);
+        SupervisorSummary _elem116;
+        for (int _i117 = 0; _i117 < _list115.size; ++_i117)
         {
-          _elem108 = new SupervisorSummary();
-          _elem108.read(iprot);
-          struct.supervisors.add(_elem108);
+          _elem116 = new SupervisorSummary();
+          _elem116.read(iprot);
+          struct.supervisors.add(_elem116);
         }
       }
       struct.set_supervisors_isSet(true);
       {
-        org.apache.thrift.protocol.TList _list110 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-        struct.topologies = new ArrayList<TopologySummary>(_list110.size);
-        TopologySummary _elem111;
-        for (int _i112 = 0; _i112 < _list110.size; ++_i112)
+        org.apache.thrift.protocol.TList _list118 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+        struct.topologies = new ArrayList<TopologySummary>(_list118.size);
+        TopologySummary _elem119;
+        for (int _i120 = 0; _i120 < _list118.size; ++_i120)
         {
-          _elem111 = new TopologySummary();
-          _elem111.read(iprot);
-          struct.topologies.add(_elem111);
+          _elem119 = new TopologySummary();
+          _elem119.read(iprot);
+          struct.topologies.add(_elem119);
         }
       }
       struct.set_topologies_isSet(true);
       {
-        org.apache.thrift.protocol.TList _list113 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-        struct.nimbuses = new ArrayList<NimbusSummary>(_list113.size);
-        NimbusSummary _elem114;
-        for (int _i115 = 0; _i115 < _list113.size; ++_i115)
+        org.apache.thrift.protocol.TList _list121 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+        struct.nimbuses = new ArrayList<NimbusSummary>(_list121.size);
+        NimbusSummary _elem122;
+        for (int _i123 = 0; _i123 < _list121.size; ++_i123)
         {
-          _elem114 = new NimbusSummary();
-          _elem114.read(iprot);
-          struct.nimbuses.add(_elem114);
+          _elem122 = new NimbusSummary();
+          _elem122.read(iprot);
+          struct.nimbuses.add(_elem122);
         }
       }
       struct.set_nimbuses_isSet(true);

@@ -367,14 +367,14 @@ public class HBRecords implements org.apache.thrift.TBase<HBRecords, HBRecords._
           case 1: // PULSES
             if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
               {
-                org.apache.thrift.protocol.TList _list722 = iprot.readListBegin();
-                struct.pulses = new ArrayList<HBPulse>(_list722.size);
-                HBPulse _elem723;
-                for (int _i724 = 0; _i724 < _list722.size; ++_i724)
+                org.apache.thrift.protocol.TList _list730 = iprot.readListBegin();
+                struct.pulses = new ArrayList<HBPulse>(_list730.size);
+                HBPulse _elem731;
+                for (int _i732 = 0; _i732 < _list730.size; ++_i732)
                 {
-                  _elem723 = new HBPulse();
-                  _elem723.read(iprot);
-                  struct.pulses.add(_elem723);
+                  _elem731 = new HBPulse();
+                  _elem731.read(iprot);
+                  struct.pulses.add(_elem731);
                 }
                 iprot.readListEnd();
               }
@@ -400,9 +400,9 @@ public class HBRecords implements org.apache.thrift.TBase<HBRecords, HBRecords._
         oprot.writeFieldBegin(PULSES_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.pulses.size()));
-          for (HBPulse _iter725 : struct.pulses)
+          for (HBPulse _iter733 : struct.pulses)
           {
-            _iter725.write(oprot);
+            _iter733.write(oprot);
           }
           oprot.writeListEnd();
         }
@@ -433,9 +433,9 @@ public class HBRecords implements org.apache.thrift.TBase<HBRecords, HBRecords._
       if (struct.is_set_pulses()) {
         {
           oprot.writeI32(struct.pulses.size());
-          for (HBPulse _iter726 : struct.pulses)
+          for (HBPulse _iter734 : struct.pulses)
           {
-            _iter726.write(oprot);
+            _iter734.write(oprot);
           }
         }
       }
@@ -447,14 +447,14 @@ public class HBRecords implements org.apache.thrift.TBase<HBRecords, HBRecords._
       BitSet incoming = iprot.readBitSet(1);
       if (incoming.get(0)) {
         {
-          org.apache.thrift.protocol.TList _list727 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
-          struct.pulses = new ArrayList<HBPulse>(_list727.size);
-          HBPulse _elem728;
-          for (int _i729 = 0; _i729 < _list727.size; ++_i729)
+          org.apache.thrift.protocol.TList _list735 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+          struct.pulses = new ArrayList<HBPulse>(_list735.size);
+          HBPulse _elem736;
+          for (int _i737 = 0; _i737 < _list735.size; ++_i737)
           {
-            _elem728 = new HBPulse();
-            _elem728.read(iprot);
-            struct.pulses.add(_elem728);
+            _elem736 = new HBPulse();
+            _elem736.read(iprot);
+            struct.pulses.add(_elem736);
           }
         }
         struct.set_pulses_isSet(true);

@@ -158,6 +158,9 @@ def confvalue(name, extrapaths, daemon=True):
     return ""
 
 def resolve_dependencies(packages):
+    if len(packages) == 0:
+        return {}
+
     print("Resolving dependencies on demand: packages (%s)" % packages)
     sys.stdout.flush()
 

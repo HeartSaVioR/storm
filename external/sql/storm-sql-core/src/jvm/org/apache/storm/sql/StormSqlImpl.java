@@ -17,6 +17,8 @@
  */
 package org.apache.storm.sql;
 
+import org.apache.calcite.DataContext;
+import org.apache.calcite.interpreter.StormDataContext;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.schema.Function;
@@ -113,13 +115,14 @@ class StormSqlImpl extends StormSql {
       } else if (node instanceof SqlCreateFunction) {
         handleCreateFunction((SqlCreateFunction) node);
       }  else {
+        DataContext dataContext = new StormDataContext();
         FrameworkConfig config = buildFrameWorkConfig();
         Planner planner = Frameworks.getPlanner(config);
         SqlNode parse = planner.parse(sql);
         SqlNode validate = planner.validate(parse);
         RelNode tree = planner.convert(validate);
         org.apache.storm.sql.compiler.backends.trident.PlanCompiler compiler =
-                new org.apache.storm.sql.compiler.backends.trident.PlanCompiler(dataSources, typeFactory);
+                new org.apache.storm.sql.compiler.backends.trident.PlanCompiler(dataSources, typeFactory, dataContext);
         TridentTopology topo = compiler.compile(tree);
         Path jarPath = null;
         try {

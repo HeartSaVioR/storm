@@ -49,7 +49,13 @@ public class PlanCompiler {
       "import org.apache.storm.sql.runtime.AbstractValuesProcessor;",
       "import com.google.common.collect.ArrayListMultimap;",
       "import com.google.common.collect.Multimap;",
-      "public final class Processor extends AbstractValuesProcessor {", "");
+      "import org.apache.calcite.interpreter.Context;",
+      "import org.apache.calcite.interpreter.StormContext;",
+      "import org.apache.calcite.DataContext;",
+      "import org.apache.calcite.interpreter.StormDataContext;",
+      "public final class Processor extends AbstractValuesProcessor {",
+      "  public final static DataContext dataContext = new StormDataContext();",
+      "");
   private static final String INITIALIZER_PROLOGUE = NEW_LINE_JOINER.join(
       "  @Override",
       "  public void initialize(Map<String, DataSource> data,",

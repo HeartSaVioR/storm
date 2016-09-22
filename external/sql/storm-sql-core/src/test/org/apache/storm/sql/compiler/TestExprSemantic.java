@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TestExprSemantic {
   private final JavaTypeFactory typeFactory = new JavaTypeFactoryImpl(
@@ -139,6 +140,58 @@ public class TestExprSemantic {
             "'ab' || 'cd'"
         ));
     assertEquals(new Values("A", "a", "Foo", "oo", 3, 3, "abcd"), v);
+  }
+
+  @Test
+  public void testDateAndTimestampLiteral() throws Exception {
+    Values v = testExpr(
+            Lists.newArrayList(
+                    "DATE '1970-05-15' AS datefield",
+                    "TIME '00:00:00' AS timefield",
+                    "TIMESTAMP '2016-01-01 00:00:00' as timestampfield"
+            )
+    );
+
+    assertEquals(3, v.size());
+    assertEquals(134, v.get(0));
+    assertEquals(0, v.get(1));
+    assertEquals(1451606400000L, v.get(2));
+  }
+
+  @Test
+  public void testInterval() throws Exception {
+    Values v = testExpr(
+            Lists.newArrayList(
+                    "INTERVAL '1-5' YEAR TO MONTH AS intervalfield",
+                    "(DATE '1970-01-01', DATE '1970-01-15') AS anchoredinterval_field"
+            )
+    );
+
+    assertEquals(3, v.size());
+    assertEquals(17, v.get(0));
+    assertEquals(0, v.get(1));
+    assertEquals(14, v.get(2));
+  }
+
+  @Test
+  public void testDateFunctions() throws Exception {
+    Values v = testExpr(
+            Lists.newArrayList(
+                    "LOCALTIME = CURRENT_TIME, LOCALTIMESTAMP = CURRENT_TIMESTAMP, CURRENT_DATE",
+                    "EXTRACT(MONTH FROM TIMESTAMP '2010-01-23 12:34:56')",
+                    "FLOOR(DATE '2016-01-23' TO MONTH)",
+                    "CEIL(TIME '12:34:56' TO MINUTE)"
+            )
+    );
+
+    assertEquals(6, v.size());
+    assertTrue((boolean) v.get(0));
+    assertTrue((boolean) v.get(1));
+    // skip checking CURRENT_DATE since we don't inject dataContext so don't know about current timestamp
+    // we can do it from trident test
+    assertEquals(1L, v.get(3));
+    assertEquals(0L, v.get(4));
+    assertEquals(45300000, v.get(5));
   }
 
   private Values testExpr(List<String> exprs) throws Exception {

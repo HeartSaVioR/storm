@@ -19,26 +19,22 @@
  */
 package org.apache.storm.sql;
 
-import org.apache.storm.ILocalCluster;
-import org.apache.storm.LocalCluster;
-import org.apache.storm.sql.runtime.SimpleSqlTridentConsumer;
-import org.apache.storm.task.IMetricsContext;
-import org.apache.storm.task.TopologyContext;
-import org.apache.storm.trident.operation.TridentOperationContext;
-import org.apache.storm.trident.state.State;
-import org.apache.storm.trident.state.StateFactory;
-import org.apache.storm.trident.state.StateUpdater;
-import org.apache.storm.tuple.Fields;
-import org.apache.storm.tuple.Values;
 import org.apache.storm.sql.runtime.ChannelContext;
 import org.apache.storm.sql.runtime.ChannelHandler;
 import org.apache.storm.sql.runtime.DataSource;
 import org.apache.storm.sql.runtime.ISqlTridentDataSource;
-import org.apache.storm.trident.operation.BaseFunction;
-import org.apache.storm.trident.operation.Function;
+import org.apache.storm.sql.runtime.SimpleSqlTridentConsumer;
+import org.apache.storm.task.IMetricsContext;
+import org.apache.storm.task.TopologyContext;
 import org.apache.storm.trident.operation.TridentCollector;
+import org.apache.storm.trident.operation.TridentOperationContext;
 import org.apache.storm.trident.spout.IBatchSpout;
+import org.apache.storm.trident.state.State;
+import org.apache.storm.trident.state.StateFactory;
+import org.apache.storm.trident.state.StateUpdater;
 import org.apache.storm.trident.tuple.TridentTuple;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Values;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -497,7 +493,7 @@ public class TestUtils {
 
     @Override
     public SqlTridentConsumer getConsumer() {
-      return new SqlTridentConsumer(new MockStateFactory(), new MockStateUpdater());
+      return new SimpleSqlTridentConsumer(new MockStateFactory(), new MockStateUpdater());
     }
 
     private static class MockSpout implements IBatchSpout {

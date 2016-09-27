@@ -52,7 +52,7 @@ public class PlanCompiler {
       "import org.apache.calcite.interpreter.Context;",
       "import org.apache.calcite.interpreter.StormContext;",
       "import org.apache.calcite.DataContext;",
-      "import org.apache.calcite.interpreter.StormDataContext;",
+      "import org.apache.storm.sql.runtime.calcite.StormDataContext;",
       "public final class Processor extends AbstractValuesProcessor {",
       "  public final static DataContext dataContext = new StormDataContext();",
       "");

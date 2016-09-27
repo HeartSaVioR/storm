@@ -187,13 +187,43 @@ public class TestStormSql {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testExternalNestedInvalidAccess() throws Exception {
+  public void testExternalNestedNonExistKeyAccess() throws Exception {
     List<String> stmt = new ArrayList<>();
     // this triggers java.lang.RuntimeException: Cannot convert null to int
     stmt.add("CREATE EXTERNAL TABLE FOO (ID INT, MAPFIELD ANY, NESTEDMAPFIELD ANY, ARRAYFIELD ANY) LOCATION 'mocknested:///foo'");
     stmt.add("SELECT STREAM ID, MAPFIELD, NESTEDMAPFIELD, ARRAYFIELD " +
              "FROM FOO " +
-             "WHERE CAST(COALESCE(MAPFIELD['a'], -1) AS INTEGER) = 2");
+             "WHERE CAST(MAPFIELD['a'] AS INTEGER) = 2");
+    StormSql sql = StormSql.construct();
+    List<Values> values = new ArrayList<>();
+    ChannelHandler h = new TestUtils.CollectDataChannelHandler(values);
+    sql.execute(stmt, h);
+    Assert.assertEquals(0, values.size());
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testExternalNestedNonExistKeyAccess2() throws Exception {
+    List<String> stmt = new ArrayList<>();
+    // this triggers java.lang.RuntimeException: Cannot convert null to int
+    stmt.add("CREATE EXTERNAL TABLE FOO (ID INT, MAPFIELD ANY, NESTEDMAPFIELD ANY, ARRAYFIELD ANY) LOCATION 'mocknested:///foo'");
+    stmt.add("SELECT STREAM ID, MAPFIELD, NESTEDMAPFIELD, ARRAYFIELD " +
+             "FROM FOO " +
+             "WHERE CAST(NESTEDMAPFIELD['b']['c'] AS INTEGER) = 4");
+    StormSql sql = StormSql.construct();
+    List<Values> values = new ArrayList<>();
+    ChannelHandler h = new TestUtils.CollectDataChannelHandler(values);
+    sql.execute(stmt, h);
+    Assert.assertEquals(0, values.size());
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testExternalNestedInvalidAccessStringIndexOnArray() throws Exception {
+    List<String> stmt = new ArrayList<>();
+    // this triggers java.lang.RuntimeException: Cannot convert null to int
+    stmt.add("CREATE EXTERNAL TABLE FOO (ID INT, MAPFIELD ANY, NESTEDMAPFIELD ANY, ARRAYFIELD ANY) LOCATION 'mocknested:///foo'");
+    stmt.add("SELECT STREAM ID, MAPFIELD, NESTEDMAPFIELD, ARRAYFIELD " +
+             "FROM FOO " +
+             "WHERE CAST(ARRAYFIELD['a'] AS INTEGER) = 200");
     StormSql sql = StormSql.construct();
     List<Values> values = new ArrayList<>();
     ChannelHandler h = new TestUtils.CollectDataChannelHandler(values);

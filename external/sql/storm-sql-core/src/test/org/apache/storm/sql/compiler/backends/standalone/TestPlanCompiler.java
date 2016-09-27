@@ -73,7 +73,7 @@ public class TestPlanCompiler {
   public void testNested() throws Exception {
     String sql = "SELECT ID, MAPFIELD['c'], NESTEDMAPFIELD, ARRAYFIELD " +
             "FROM FOO " +
-            "WHERE CAST(MAPFIELD['b'] AS INTEGER) = 2 AND CAST(ARRAYFIELD[1] AS INTEGER) = 200";
+            "WHERE CAST(NESTEDMAPFIELD['a']['b'] AS INTEGER) = 2 AND CAST(ARRAYFIELD[1] AS INTEGER) = 200";
     TestCompilerUtils.CalciteState state = TestCompilerUtils.sqlOverNestedTable(sql);
     PlanCompiler compiler = new PlanCompiler(typeFactory);
     AbstractValuesProcessor proc = compiler.compile(state.tree());

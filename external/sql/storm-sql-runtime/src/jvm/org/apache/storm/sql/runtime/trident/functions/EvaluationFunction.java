@@ -21,7 +21,6 @@ package org.apache.storm.sql.runtime.trident.functions;
 import org.apache.calcite.DataContext;
 import org.apache.calcite.interpreter.Context;
 import org.apache.calcite.interpreter.StormContext;
-import org.apache.calcite.interpreter.StormDataContext;
 import org.apache.storm.trident.operation.BaseFunction;
 import org.apache.storm.trident.operation.TridentCollector;
 import org.apache.storm.trident.operation.TridentOperationContext;

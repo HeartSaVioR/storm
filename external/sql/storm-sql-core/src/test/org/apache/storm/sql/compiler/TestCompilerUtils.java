@@ -158,29 +158,6 @@ public class TestCompilerUtils {
                 .field("MAPFIELD", SqlTypeName.ANY)
                 .field("NESTEDMAPFIELD", SqlTypeName.ANY)
                 .field("ARRAYFIELD", SqlTypeName.ANY)
-
-                // TODO: replace field definitions with belows while Calcite can handle properly
-                // below definition makes several issues while compiling SQL and also in runtime
-                /*
-                .field("MAPFIELD",
-                        typeFactory.createMapType(
-                                typeFactory.createSqlType(SqlTypeName.VARCHAR),
-                                typeFactory.createTypeWithNullability(
-                                        typeFactory.createSqlType(SqlTypeName.ANY), true)))
-                .field("NESTEDMAPFIELD",
-                        typeFactory.createMapType(
-                                typeFactory.createSqlType(SqlTypeName.VARCHAR),
-                                typeFactory.createTypeWithNullability(
-                                        typeFactory.createMapType(
-                                                typeFactory.createSqlType(SqlTypeName.VARCHAR),
-                                                typeFactory.createTypeWithNullability(
-                                                        typeFactory.createSqlType(SqlTypeName.ANY), true))
-                                        , true)))
-                .field("ARRAYFIELD", typeFactory.createArrayType(
-                        typeFactory.createTypeWithNullability(
-                                typeFactory.createSqlType(SqlTypeName.INTEGER), true), -1L))
-                */
-
                 .build();
         Table table = streamableTable.stream();
         schema.add("FOO", table);

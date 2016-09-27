@@ -155,9 +155,32 @@ public class TestCompilerUtils {
 
         StreamableTable streamableTable = new CompilerUtil.TableBuilderInfo(typeFactory)
                 .field("ID", SqlTypeName.INTEGER)
-                .field("MAPFIELD", SqlTypeName.ANY)
-                .field("NESTEDMAPFIELD", SqlTypeName.ANY)
-                .field("ARRAYFIELD", SqlTypeName.ANY)
+                .field("MAPFIELD",
+                        typeFactory.createTypeWithNullability(
+                                typeFactory.createMapType(
+                                        typeFactory.createTypeWithNullability(
+                                                typeFactory.createSqlType(SqlTypeName.VARCHAR), true),
+                                        typeFactory.createTypeWithNullability(
+                                                typeFactory.createSqlType(SqlTypeName.INTEGER), true))
+                                , true))
+                .field("NESTEDMAPFIELD",
+                        typeFactory.createTypeWithNullability(
+                            typeFactory.createMapType(
+                                    typeFactory.createTypeWithNullability(
+                                            typeFactory.createSqlType(SqlTypeName.VARCHAR), true),
+                                    typeFactory.createTypeWithNullability(
+                                            typeFactory.createMapType(
+                                                    typeFactory.createTypeWithNullability(
+                                                            typeFactory.createSqlType(SqlTypeName.VARCHAR), true),
+                                                    typeFactory.createTypeWithNullability(
+                                                            typeFactory.createSqlType(SqlTypeName.INTEGER), true))
+                                            , true))
+                                        , true))
+                .field("ARRAYFIELD", typeFactory.createTypeWithNullability(
+                        typeFactory.createArrayType(
+                            typeFactory.createTypeWithNullability(
+                                typeFactory.createSqlType(SqlTypeName.INTEGER), true), -1L)
+                        , true))
                 .build();
         Table table = streamableTable.stream();
         schema.add("FOO", table);

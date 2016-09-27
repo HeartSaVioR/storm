@@ -118,6 +118,7 @@ public class PlanCompiler {
 
   public AbstractValuesProcessor compile(RelNode plan) throws Exception {
     String javaCode = generateJavaSource(plan);
+    System.out.println("DEBUG: source code - " + javaCode);
     ClassLoader cl = new CompilingClassLoader(getClass().getClassLoader(),
                                               PACKAGE_NAME + ".Processor",
                                               javaCode, null);

@@ -293,7 +293,7 @@ public class TestPlanCompiler {
     int EXPECTED_VALUE_SIZE = 1;
     String sql = "SELECT ID, MAPFIELD['c'], NESTEDMAPFIELD, ARRAYFIELD " +
             "FROM FOO " +
-            "WHERE CAST(MAPFIELD['b'] AS INTEGER) = 2 AND CAST(ARRAYFIELD[1] AS INTEGER) = 200";
+            "WHERE NESTEDMAPFIELD['a']['b'] = 2 AND ARRAYFIELD[2] = 200";
     TestCompilerUtils.CalciteState state = TestCompilerUtils.sqlOverNestedTable(sql);
 
     final Map<String, ISqlTridentDataSource> data = new HashMap<>();

@@ -175,7 +175,7 @@ public class TestStormSql {
     stmt.add("CREATE EXTERNAL TABLE FOO (ID INT, MAPFIELD ANY, NESTEDMAPFIELD ANY, ARRAYFIELD ANY) LOCATION 'mocknested:///foo'");
     stmt.add("SELECT STREAM ID, MAPFIELD['c'], NESTEDMAPFIELD, ARRAYFIELD " +
                      "FROM FOO " +
-                     "WHERE CAST(MAPFIELD['b'] AS INTEGER) = 2 AND CAST(ARRAYFIELD[1] AS INTEGER) = 200");
+                     "WHERE CAST(MAPFIELD['b'] AS INTEGER) = 2 AND CAST(ARRAYFIELD[2] AS INTEGER) = 200");
     StormSql sql = StormSql.construct();
     List<Values> values = new ArrayList<>();
     ChannelHandler h = new TestUtils.CollectDataChannelHandler(values);
@@ -186,7 +186,7 @@ public class TestStormSql {
     Assert.assertEquals(new Values(2, 4, nestedMap, Arrays.asList(100, 200, 300)), values.get(0));
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testExternalNestedNonExistKeyAccess() throws Exception {
     List<String> stmt = new ArrayList<>();
     // this triggers java.lang.RuntimeException: Cannot convert null to int
@@ -201,7 +201,7 @@ public class TestStormSql {
     Assert.assertEquals(0, values.size());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testExternalNestedNonExistKeyAccess2() throws Exception {
     List<String> stmt = new ArrayList<>();
     // this triggers java.lang.RuntimeException: Cannot convert null to int
@@ -216,10 +216,9 @@ public class TestStormSql {
     Assert.assertEquals(0, values.size());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testExternalNestedInvalidAccessStringIndexOnArray() throws Exception {
     List<String> stmt = new ArrayList<>();
-    // this triggers java.lang.RuntimeException: Cannot convert null to int
     stmt.add("CREATE EXTERNAL TABLE FOO (ID INT, MAPFIELD ANY, NESTEDMAPFIELD ANY, ARRAYFIELD ANY) LOCATION 'mocknested:///foo'");
     stmt.add("SELECT STREAM ID, MAPFIELD, NESTEDMAPFIELD, ARRAYFIELD " +
              "FROM FOO " +
@@ -231,14 +230,13 @@ public class TestStormSql {
     Assert.assertEquals(0, values.size());
   }
 
-  @Test(expected = ArrayIndexOutOfBoundsException.class)
+  @Test
   public void testExternalNestedArrayOutOfBoundAccess() throws Exception {
     List<String> stmt = new ArrayList<>();
-    // this triggers ArrayOutOfBoundException
     stmt.add("CREATE EXTERNAL TABLE FOO (ID INT, MAPFIELD ANY, NESTEDMAPFIELD ANY, ARRAYFIELD ANY) LOCATION 'mocknested:///foo'");
     stmt.add("SELECT STREAM ID, MAPFIELD, NESTEDMAPFIELD, ARRAYFIELD " +
              "FROM FOO " +
-             "WHERE CAST(COALESCE(ARRAYFIELD[10], -1) AS INTEGER) = 200");
+             "WHERE CAST(ARRAYFIELD[10] AS INTEGER) = 200");
     StormSql sql = StormSql.construct();
     List<Values> values = new ArrayList<>();
     ChannelHandler h = new TestUtils.CollectDataChannelHandler(values);

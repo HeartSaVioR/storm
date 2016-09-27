@@ -65,7 +65,7 @@ public class EvaluationFilter extends BaseFilter {
             Context calciteContext = new StormContext(dataContext);
             calciteContext.values = tuple.getValues().toArray();
             evaluator.evaluate(new Object[] {calciteContext, outputValues});
-            return (boolean) outputValues[0];
+            return (outputValues[0] != null && (boolean) outputValues[0]);
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e);
         }

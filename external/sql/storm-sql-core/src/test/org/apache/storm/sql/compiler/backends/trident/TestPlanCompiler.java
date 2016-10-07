@@ -81,6 +81,30 @@ public class TestPlanCompiler {
   }
 
   @Test
+  public void testSubquery() throws Exception {
+    final int EXPECTED_VALUE_SIZE = 1;
+    // FIXME: add visit method with LogicalValues in PostOrderRelNodeVisitor and handle it properly
+    // String sql = "SELECT ID FROM FOO WHERE ID IN (SELECT 2)";
+
+    // FIXME: below subquery doesn't work but below join query with subquery as table works.
+    // They're showing different logical plan (former is more complicated) so there's a room to apply rules to improve.
+    // String sql = "SELECT ID FROM FOO WHERE ID IN (SELECT ID FROM FOO WHERE NAME = 'abc')";
+
+    String sql = "SELECT F.ID FROM FOO AS F JOIN (SELECT ID FROM FOO WHERE NAME = 'abc') AS F2 ON F.ID = F2.ID";
+    TestCompilerUtils.CalciteState state = TestCompilerUtils.sqlOverDummyTable(sql);
+    final Map<String, ISqlTridentDataSource> data = new HashMap<>();
+    data.put("FOO", new TestUtils.MockSqlTridentDataSource());
+    PlanCompiler compiler = new PlanCompiler(data, typeFactory, dataContext);
+    final AbstractTridentProcessor proc = compiler.compileForTest(state.tree());
+    final TridentTopology topo = proc.build(data);
+    Fields f = proc.outputStream().getOutputFields();
+    proc.outputStream().partitionPersist(new TestUtils.MockStateFactory(),
+            f, new TestUtils.MockStateUpdater(), new Fields());
+    runTridentTopology(EXPECTED_VALUE_SIZE, proc, topo);
+    Assert.assertArrayEquals(new Values[] { new Values(2)}, getCollectedValues().toArray());
+  }
+
+  @Test
   public void testCompileGroupByExp() throws Exception {
     final int EXPECTED_VALUE_SIZE = 1;
     final Map<String, ISqlTridentDataSource> data = new HashMap<>();

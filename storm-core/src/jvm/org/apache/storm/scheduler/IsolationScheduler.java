@@ -110,15 +110,12 @@ public class IsolationScheduler implements IScheduler {
         for (Map.Entry<String, Set<Set<ExecutorDetails>>> entry : topologyWorkerSpecs.entrySet()) {
             String topologyId = entry.getKey();
             Set<Set<ExecutorDetails>> executorSet = entry.getValue();
-            if (executorSet != null && executorSet.size() > 0) {
-                failedTopologyIds.add(topologyId);
-            }
             List<Integer> workerNum = distributionToSortedAmounts(topologyMachineDistributions.get(topologyId));
             for (Integer num : workerNum) {
                 HostAssignableSlots hostSlots = hss.peek();
                 List<WorkerSlot> slot = hostSlots != null ? hostSlots.getWorkerSlots() : null;
 
-                if (slot != null && slot.size() >= num.intValue()) {
+                if (slot != null && slot.size() >= num) {
                     hss.poll();
                     cluster.freeSlots(hostUsedSlots.get(hostSlots.getHostName()));
                     for (WorkerSlot tmpSlot : slot.subList(0, num)) {
@@ -127,6 +124,14 @@ public class IsolationScheduler implements IScheduler {
                     }
                     cluster.blacklistHost(hostSlots.getHostName());
                 }
+            }
+        }
+
+        for (Map.Entry<String, Set<Set<ExecutorDetails>>> topoWorkerSpecsEntry : topologyWorkerSpecs
+            .entrySet()) {
+            Set<Set<ExecutorDetails>> workerSpecs = topoWorkerSpecsEntry.getValue();
+            if (workerSpecs != null && !workerSpecs.isEmpty()) {
+                failedTopologyIds.add(topoWorkerSpecsEntry.getKey());
             }
         }
 

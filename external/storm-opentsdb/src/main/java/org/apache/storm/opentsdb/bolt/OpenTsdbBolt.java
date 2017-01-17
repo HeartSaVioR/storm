@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -67,6 +68,11 @@ public class OpenTsdbBolt extends BaseRichBolt {
     private OpenTsdbClient openTsdbClient;
     private Map<OpenTsdbMetricDatapoint, Tuple> metricPointsWithTuple = new HashMap<>();
     private OutputCollector collector;
+
+    public OpenTsdbBolt(OpenTsdbClient.Builder openTsdbClientBuilder, TupleOpenTsdbDatapointMapper tupleOpenTsdbDatapointMapper) {
+        this.openTsdbClientBuilder = openTsdbClientBuilder;
+        this.tupleOpenTsdbDatapointMappers = Collections.singletonList(tupleOpenTsdbDatapointMapper);
+    }
 
     public OpenTsdbBolt(OpenTsdbClient.Builder openTsdbClientBuilder, List<TupleOpenTsdbDatapointMapper> tupleOpenTsdbDatapointMappers) {
         this.openTsdbClientBuilder = openTsdbClientBuilder;

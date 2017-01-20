@@ -156,8 +156,19 @@ public class GrouperFactory {
 
         @Override
         public List<Integer> chooseTasks(int taskId, List<Object> values) {
-            int targetTaskIndex = Math.abs(TupleUtils.listHashCode(outFields.select(groupFields, values))) % numTasks;
+            int targetTaskIndex = calculateTaskIndex(outFields.select(groupFields, values), numTasks);
             return Collections.singletonList(targetTasks.get(targetTaskIndex));
+        }
+
+        /**
+         * This utility method is exposed for other places to calculate task index same as field grouping
+         *
+         * @param groupFieldsValues the values of group fields'
+         * @param numTasks number of tasks
+         * @return the task index
+         */
+        public static int calculateTaskIndex(List<Object> groupFieldsValues, int numTasks) {
+            return Math.abs(TupleUtils.listHashCode(groupFieldsValues)) % numTasks;
         }
     }
 

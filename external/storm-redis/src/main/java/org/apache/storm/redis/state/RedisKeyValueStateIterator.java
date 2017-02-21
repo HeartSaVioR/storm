@@ -17,20 +17,20 @@
  */
 package org.apache.storm.redis.state;
 
-import com.google.common.base.Optional;
-
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.apache.storm.redis.common.container.JedisCommandsInstanceContainer;
+import org.apache.storm.redis.common.commands.RedisCommands;
+import org.apache.storm.redis.common.container.RedisCommandsInstanceContainer;
+import org.apache.storm.redis.utils.ByteArrayWrapper;
 import org.apache.storm.redis.utils.RedisEncoder;
-import org.apache.storm.state.DefaultStateSerializer;
 import org.apache.storm.state.Serializer;
 
-import redis.clients.jedis.JedisCommands;
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
 
@@ -39,25 +39,28 @@ import redis.clients.jedis.ScanResult;
  */
 public class RedisKeyValueStateIterator<K, V> implements Iterator<Map.Entry<K, V>> {
 
-    private final String namespace;
-    private final Iterator<Map.Entry<String, String>> pendingPrepareIterator;
-    private final Iterator<Map.Entry<String, String>> pendingCommitIterator;
+    private final byte[] namespace;
+    private final Iterator<Map.Entry<ByteArrayWrapper, byte[]>> pendingPrepareIterator;
+    private final Iterator<Map.Entry<ByteArrayWrapper, byte[]>> pendingCommitIterator;
     private final RedisEncoder<K, V> decoder;
-    private final JedisCommandsInstanceContainer jedisContainer;
+    private final RedisCommandsInstanceContainer container;
     private final ScanParams scanParams;
-    private Iterator<Map.Entry<String, String>> pendingIterator;
-    private String cursor;
-    private List<Map.Entry<String, String>> cachedResult;
+    private Iterator<Map.Entry<ByteArrayWrapper, byte[]>> pendingIterator;
+    private byte[] cursor;
+    private List<Map.Entry<ByteArrayWrapper, byte[]>> cachedResult;
     private int readPosition;
 
-    public RedisKeyValueStateIterator(String namespace, JedisCommandsInstanceContainer jedisContainer, Iterator<Map.Entry<String, String>> pendingPrepareIterator, Iterator<Map.Entry<String, String>> pendingCommitIterator, int chunkSize, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    public RedisKeyValueStateIterator(byte[] namespace, RedisCommandsInstanceContainer container,
+                                      Iterator<Map.Entry<ByteArrayWrapper, byte[]>> pendingPrepareIterator,
+                                      Iterator<Map.Entry<ByteArrayWrapper, byte[]>> pendingCommitIterator,
+                                      int chunkSize, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
         this.namespace = namespace;
         this.pendingPrepareIterator = pendingPrepareIterator;
         this.pendingCommitIterator = pendingCommitIterator;
-        this.jedisContainer = jedisContainer;
+        this.container = container;
         this.decoder = new RedisEncoder<K, V>(keySerializer, valueSerializer);
         this.scanParams = new ScanParams().count(chunkSize);
-        this.cursor = ScanParams.SCAN_POINTER_START;
+        this.cursor = ScanParams.SCAN_POINTER_START_BINARY;
     }
 
     @Override
@@ -70,7 +73,7 @@ public class RedisKeyValueStateIterator<K, V> implements Iterator<Map.Entry<K, V
             return true;
         } else {
             pendingIterator = null;
-            return !cursor.equals("0");
+            return !Arrays.equals(cursor, ScanParams.SCAN_POINTER_START_BINARY);
         }
     }
 
@@ -79,26 +82,27 @@ public class RedisKeyValueStateIterator<K, V> implements Iterator<Map.Entry<K, V
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
-        Map.Entry<String, String> redisKeyValue = null;
+        Map.Entry<ByteArrayWrapper, byte[]> redisKeyValue = null;
         if (pendingIterator != null) {
             redisKeyValue = pendingIterator.next();
         } else {
             if (cachedResult == null || readPosition >= cachedResult.size()) {
-                JedisCommands commands = null;
+                RedisCommands commands = null;
                 try {
-                    commands = jedisContainer.getInstance();
-                    ScanResult<Map.Entry<String, String>> scanResult = commands.hscan(namespace, cursor, scanParams);
-                    cachedResult = scanResult.getResult();
-                    cursor = scanResult.getStringCursor();
+                    commands = container.getInstance();
+                    ScanResult<Map.Entry<byte[], byte[]>> scanResult = commands.hscan(namespace, cursor, scanParams);
+                    cachedResult = wrapEntries(scanResult.getResult());
+                    cursor = scanResult.getCursorAsBytes();
                     readPosition = 0;
                 } finally {
-                    jedisContainer.returnInstance(commands);
+                    container.returnInstance(commands);
                 }
             }
             redisKeyValue = cachedResult.get(readPosition);
             readPosition += 1;
         }
-        K key = decoder.decodeKey(redisKeyValue.getKey());
+
+        K key = decoder.decodeKey(redisKeyValue.getKey().unwrap());
         V value = decoder.decodeValue(redisKeyValue.getValue());
         return new AbstractMap.SimpleEntry(key, value);
     }
@@ -106,5 +110,15 @@ public class RedisKeyValueStateIterator<K, V> implements Iterator<Map.Entry<K, V
     @Override
     public void remove() {
         throw new UnsupportedOperationException();
+    }
+
+    private List<Map.Entry<ByteArrayWrapper, byte[]>> wrapEntries(List<Map.Entry<byte[], byte[]>> sourceList) {
+        List<Map.Entry<ByteArrayWrapper, byte[]>> entries = new ArrayList<>(sourceList.size());
+
+        for (Map.Entry<byte[], byte[]> entry : sourceList) {
+            entries.add(new AbstractMap.SimpleEntry<>(new ByteArrayWrapper(entry.getKey()), entry.getValue()));
+        }
+
+        return entries;
     }
 }

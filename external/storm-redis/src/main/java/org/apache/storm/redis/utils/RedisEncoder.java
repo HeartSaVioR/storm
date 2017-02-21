@@ -19,7 +19,6 @@ package org.apache.storm.redis.utils;
 
 import com.google.common.base.Optional;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.storm.state.DefaultStateSerializer;
 import org.apache.storm.state.Serializer;
 
@@ -30,7 +29,7 @@ public class RedisEncoder<K, V> {
 
     public static final Serializer<Optional<byte[]>> internalValueSerializer = new DefaultStateSerializer<>();
 
-    public static final String TOMBSTONE = encode(internalValueSerializer.serialize(Optional.<byte[]>absent()));
+    public static final byte[] TOMBSTONE = internalValueSerializer.serialize(Optional.<byte[]>absent());
 
     private final Serializer<K> keySerializer;
     private final Serializer<V> valueSerializer;
@@ -48,32 +47,24 @@ public class RedisEncoder<K, V> {
         return valueSerializer;
     }
 
-    public String encodeKey(K key) {
-        return encode(keySerializer.serialize(key));
+    public byte[] encodeKey(K key) {
+        return keySerializer.serialize(key);
     }
 
-    public String encodeValue(V value) {
-        return encode(internalValueSerializer.serialize(
-                    Optional.of(valueSerializer.serialize(value))));
+    public byte[] encodeValue(V value) {
+        return internalValueSerializer.serialize(
+                    Optional.of(valueSerializer.serialize(value)));
     }
 
-    public K decodeKey(String redisKey) {
-        return keySerializer.deserialize(decode(redisKey));
+    public K decodeKey(byte[] redisKey) {
+        return keySerializer.deserialize(redisKey);
     }
 
-    public V decodeValue(String redisValue) {
-        Optional<byte[]> internalValue = internalValueSerializer.deserialize(decode(redisValue));
+    public V decodeValue(byte[] redisValue) {
+        Optional<byte[]> internalValue = internalValueSerializer.deserialize(redisValue);
         if (internalValue.isPresent()) {
             return valueSerializer.deserialize(internalValue.get());
         }
         return null;
-    }
-
-    private static String encode(byte[] bytes) {
-        return Base64.encodeBase64String(bytes);
-    }
-
-    private static byte[] decode(String s) {
-        return Base64.decodeBase64(s);
     }
 }

@@ -24,7 +24,8 @@ import org.apache.storm.coordination.BatchOutputCollector;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +43,7 @@ public class KeyedCountingBatchBolt extends BaseBatchBolt {
     @Override
     public void execute(Tuple tuple) {
         Object key = tuple.getValue(1);
-        int curr = Utils.get(_counts, key, 0);
+        int curr = ClientUtils.get(_counts, key, 0);
         _counts.put(key, curr + 1);
     }
 

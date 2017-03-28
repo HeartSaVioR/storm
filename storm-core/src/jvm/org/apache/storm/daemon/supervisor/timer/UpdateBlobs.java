@@ -25,9 +25,9 @@ import org.apache.storm.generated.KeyNotFoundException;
 import org.apache.storm.generated.LocalAssignment;
 import org.apache.storm.localizer.LocalResource;
 import org.apache.storm.localizer.Localizer;
-import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.ClientConfigUtils;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.NimbusLeaderNotFoundException;
-import org.apache.storm.utils.Utils;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,18 +65,18 @@ public class UpdateBlobs implements Runnable {
             }
             for (String stormId : downloadedStormIds) {
                 if (assignedStormIds.contains(stormId)) {
-                    String stormRoot = ConfigUtils.supervisorStormDistRoot(conf, stormId);
+                    String stormRoot = ClientConfigUtils.supervisorStormDistRoot(conf, stormId);
                     LOG.debug("Checking Blob updates for storm topology id {} With target_dir: {}", stormId, stormRoot);
                     updateBlobsForTopology(conf, stormId, supervisor.getLocalizer());
                 }
             }
         } catch (Exception e) {
-            if (Utils.exceptionCauseIsInstanceOf(TTransportException.class, e)) {
+            if (ClientUtils.exceptionCauseIsInstanceOf(TTransportException.class, e)) {
                 LOG.error("Network error while updating blobs, will retry again later", e);
-            } else if (Utils.exceptionCauseIsInstanceOf(NimbusLeaderNotFoundException.class, e)) {
+            } else if (ClientUtils.exceptionCauseIsInstanceOf(NimbusLeaderNotFoundException.class, e)) {
                 LOG.error("Nimbus unavailable to update blobs, will retry again later", e);
             } else {
-                throw Utils.wrapInRuntime(e);
+                throw ClientUtils.wrapInRuntime(e);
             }
         }
     }
@@ -90,7 +90,7 @@ public class UpdateBlobs implements Runnable {
      * @throws IOException
      */
     private void updateBlobsForTopology(Map conf, String stormId, Localizer localizer) throws IOException {
-        Map stormConf = ConfigUtils.readSupervisorStormConf(conf, stormId);
+        Map stormConf = ClientConfigUtils.readSupervisorStormConf(conf, stormId);
         Map<String, Map<String, Object>> blobstoreMap = (Map<String, Map<String, Object>>) stormConf.get(Config.TOPOLOGY_BLOBSTORE_MAP);
         String user = (String) stormConf.get(Config.TOPOLOGY_SUBMITTER_USER);
         List<LocalResource> localresources = SupervisorUtils.blobstoreMapToLocalresources(blobstoreMap);

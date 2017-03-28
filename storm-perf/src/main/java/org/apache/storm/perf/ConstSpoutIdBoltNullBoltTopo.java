@@ -26,7 +26,7 @@ import org.apache.storm.perf.bolt.IdBolt;
 import org.apache.storm.perf.spout.ConstSpout;
 import org.apache.storm.perf.utils.Helper;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 import java.util.Map;
 
@@ -92,7 +92,7 @@ public class ConstSpoutIdBoltNullBoltTopo {
                 return;
             }
             Integer durationSec = Integer.parseInt(args[0]);
-            Map topoConf =  (args.length==2) ? Utils.findAndReadConfigFile(args[1])  : new Config();
+            Map topoConf =  (args.length==2) ? ClientUtils.findAndReadConfigFile(args[1])  : new Config();
 
             //  Submit topology to storm cluster
             Helper.runOnClusterAndPrintMetrics(durationSec, TOPOLOGY_NAME, topoConf, getTopology(topoConf));

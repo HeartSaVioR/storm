@@ -41,12 +41,12 @@ public class UtilsTest {
         final int expectedRetries = 10;
         final int expectedCeiling = 3000;
 
-        Map<String, Object> config = Utils.readDefaultConfig();
+        Map<String, Object> config = ClientUtils.readDefaultConfig();
         config.put(Config.STORM_ZOOKEEPER_RETRY_INTERVAL, expectedInterval); 
         config.put(Config.STORM_ZOOKEEPER_RETRY_TIMES, expectedRetries); 
         config.put(Config.STORM_ZOOKEEPER_RETRY_INTERVAL_CEILING, expectedCeiling); 
 
-        CuratorFramework curator = Utils.newCurator(config, Arrays.asList("bogus_server"), 42 /*port*/, "");
+        CuratorFramework curator = CuratorUtils.newCurator(config, Arrays.asList("bogus_server"), 42 /*port*/, "");
         StormBoundedExponentialBackoffRetry policy = 
             (StormBoundedExponentialBackoffRetry) curator.getZookeeperClient().getRetryPolicy();
         Assert.assertEquals(policy.getBaseSleepTimeMs(), expectedInterval);
@@ -55,7 +55,7 @@ public class UtilsTest {
     }
 
     public void getConfiguredClientThrowsRuntimeExceptionOnBadArgsTest () throws TTransportException {
-        Map config = ConfigUtils.readStormConfig();
+        Map config = ClientConfigUtils.readStormConfig();
         config.put(Config.STORM_NIMBUS_RETRY_TIMES, 0);
 
         try {
@@ -64,7 +64,7 @@ public class UtilsTest {
         } catch (RuntimeException e){
             Assert.assertTrue(
                 "Cause is not TTransportException " + e,  
-                Utils.exceptionCauseIsInstanceOf(TTransportException.class, e));
+                ClientUtils.exceptionCauseIsInstanceOf(TTransportException.class, e));
         }
     }
 
@@ -90,19 +90,19 @@ public class UtilsTest {
     public void isZkAuthenticationConfiguredTopologyTest() {
         Assert.assertFalse(
             "Returns null if given null config", 
-            Utils.isZkAuthenticationConfiguredTopology(null));
+            ClientUtils.isZkAuthenticationConfiguredTopology(null));
 
         Assert.assertFalse(
             "Returns false if scheme key is missing", 
-            Utils.isZkAuthenticationConfiguredTopology(emptyMockMap()));
+            ClientUtils.isZkAuthenticationConfiguredTopology(emptyMockMap()));
 
         Assert.assertFalse(
             "Returns false if scheme value is null", 
-            Utils.isZkAuthenticationConfiguredTopology(topologyMockMap(null)));
+            ClientUtils.isZkAuthenticationConfiguredTopology(topologyMockMap(null)));
 
         Assert.assertTrue(
             "Returns true if scheme value is string", 
-            Utils.isZkAuthenticationConfiguredTopology(topologyMockMap("foobar")));
+            ClientUtils.isZkAuthenticationConfiguredTopology(topologyMockMap("foobar")));
     }
 
     @Test
@@ -167,7 +167,7 @@ public class UtilsTest {
         if (withAuth) {
             auth = new ZookeeperAuthInfo("scheme", "abc".getBytes());
         }
-        Utils.testSetupBuilder(builder, zkStr, conf, auth);
+        CuratorUtils.testSetupBuilder(builder, zkStr, conf, auth);
         return builder;
     }
 
@@ -198,22 +198,22 @@ public class UtilsTest {
     public void parseJvmHeapMemByChildOptsTest() {
         Assert.assertEquals(
             "1024K results in 1 MB",
-            Utils.parseJvmHeapMemByChildOpts("Xmx1024K", 0.0).doubleValue(), 1.0, 0); 
+            ClientUtils.parseJvmHeapMemByChildOpts("Xmx1024K", 0.0).doubleValue(), 1.0, 0);
 
         Assert.assertEquals(
             "100M results in 100 MB",
-            Utils.parseJvmHeapMemByChildOpts("Xmx100M", 0.0).doubleValue(), 100.0, 0); 
+            ClientUtils.parseJvmHeapMemByChildOpts("Xmx100M", 0.0).doubleValue(), 100.0, 0);
 
         Assert.assertEquals(
             "1G results in 1024 MB",
-            Utils.parseJvmHeapMemByChildOpts("Xmx1G", 0.0).doubleValue(), 1024.0, 0); 
+            ClientUtils.parseJvmHeapMemByChildOpts("Xmx1G", 0.0).doubleValue(), 1024.0, 0);
 
         Assert.assertEquals(
             "Unmatched value results in default",
-            Utils.parseJvmHeapMemByChildOpts("Xmx1T", 123.0).doubleValue(), 123.0, 0); 
+            ClientUtils.parseJvmHeapMemByChildOpts("Xmx1T", 123.0).doubleValue(), 123.0, 0);
 
         Assert.assertEquals(
             "Null value results in default",
-            Utils.parseJvmHeapMemByChildOpts(null, 123.0).doubleValue(), 123.0, 0); 
+            ClientUtils.parseJvmHeapMemByChildOpts(null, 123.0).doubleValue(), 123.0, 0);
     }
 }

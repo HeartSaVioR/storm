@@ -25,7 +25,7 @@ import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.topology.base.BaseWindowedBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.LocalCluster;
 
 import java.util.concurrent.TimeUnit;
@@ -61,7 +61,7 @@ public class JoinBoltExample {
 
         generateAgeData(ageSpout);
 
-        Utils.sleep(30000);
+        ClientUtils.sleep(30000);
         cluster.shutdown();
     }
 

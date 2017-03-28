@@ -28,7 +28,7 @@ import org.apache.storm.streams.StreamBuilder;
 import org.apache.storm.streams.operations.mappers.TupleValueMappers;
 import org.apache.storm.streams.tuple.Tuple3;
 import org.apache.storm.streams.windowing.TumblingWindows;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 import static org.apache.storm.topology.base.BaseWindowedBolt.Count;
 
@@ -56,7 +56,7 @@ public class TypedTupleExample {
         } else {
             try (LocalCluster cluster = new LocalCluster();
                  LocalCluster.LocalTopology topo = cluster.submitTopology("test", config, builder.build())) {
-                Utils.sleep(60_000);
+                ClientUtils.sleep(60_000);
             }
         }
     }

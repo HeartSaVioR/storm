@@ -21,12 +21,12 @@
   (:import [org.mockito Mockito])
   (:import [org.mockito.exceptions.base MockitoAssertionError])
   (:import [org.apache.curator.framework CuratorFramework CuratorFrameworkFactory CuratorFrameworkFactory$Builder])
-  (:import [org.apache.storm.utils Time Time$SimulatedTime Utils ZookeeperAuthInfo ConfigUtils])
+  (:import [org.apache.storm.utils Time Time$SimulatedTime Utils ZookeeperAuthInfo ConfigUtils ClientConfigUtils ClientUtils CuratorUtils])
   (:import [org.apache.storm.cluster IStateStorage ZKStateStorage ClusterStateContext StormClusterStateImpl ClusterUtils])
-  (:import [org.apache.storm.zookeeper Zookeeper])
+  (:import [org.apache.storm.zookeeper Zookeeper ClientZookeeper])
   (:import [org.apache.storm.callback ZKStateChangedCallback])
   (:import [org.apache.storm.testing InProcessZookeeper])
-  (:import [org.apache.storm.testing.staticmocking MockedZookeeper MockedCluster])
+  (:import [org.apache.storm.testing.staticmocking MockedZookeeper MockedCluster MockedClientZookeeper])
   (:require [conjure.core])
   (:use [conjure core])
   (:use [clojure test])
@@ -34,7 +34,7 @@
   (:use [org.apache.storm.internal thrift]))
 
 (defn mk-config [zk-port]
-  (merge (clojurify-structure (ConfigUtils/readStormConfig))
+  (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
     {STORM-ZOOKEEPER-PORT zk-port
      STORM-ZOOKEEPER-SERVERS ["localhost"]}))
 
@@ -272,17 +272,17 @@
   (with-open [zk (InProcessZookeeper. )]
     (with-open [_ (Time$SimulatedTime. )]
       (let [state (mk-storm-state (.getPort zk))]
-        (.reportError state "a" "1" (Utils/localHostname) 6700  (RuntimeException.))
+        (.reportError state "a" "1" (ClientUtils/localHostname) 6700  (RuntimeException.))
         (validate-errors! state "a" "1" ["RuntimeException"])
         (Time/advanceTimeSecs 1)
-        (.reportError state "a" "1" (Utils/localHostname) 6700 (IllegalArgumentException.))
+        (.reportError state "a" "1" (ClientUtils/localHostname) 6700 (IllegalArgumentException.))
         (validate-errors! state "a" "1" ["IllegalArgumentException" "RuntimeException"])
         (doseq [i (range 10)]
-          (.reportError state "a" "2" (Utils/localHostname) 6700 (RuntimeException.))
+          (.reportError state "a" "2" (ClientUtils/localHostname) 6700 (RuntimeException.))
           (Time/advanceTimeSecs 2))
         (validate-errors! state "a" "2" (repeat 10 "RuntimeException"))
         (doseq [i (range 5)]
-          (.reportError state "a" "2" (Utils/localHostname) 6700 (IllegalArgumentException.))
+          (.reportError state "a" "2" (ClientUtils/localHostname) 6700 (IllegalArgumentException.))
           (Time/advanceTimeSecs 2))
         (validate-errors! state "a" "2" (concat (repeat 5 "IllegalArgumentException")
                                           (repeat 5 "RuntimeException")
@@ -336,7 +336,7 @@
       (. (Mockito/when (.connectString builder (Mockito/anyString))) (thenReturn builder))
       (. (Mockito/when (.connectionTimeoutMs builder (Mockito/anyInt))) (thenReturn builder))
       (. (Mockito/when (.sessionTimeoutMs builder (Mockito/anyInt))) (thenReturn builder))
-      (Utils/testSetupBuilder builder (str (.getPort zk) "/") conf (ZookeeperAuthInfo. conf))
+      (CuratorUtils/testSetupBuilder builder (str (.getPort zk) "/") conf (ZookeeperAuthInfo. conf))
       (is (nil?
             (try
               (. (Mockito/verify builder) (authorization "digest" (.getBytes (conf STORM-ZOOKEEPER-AUTH-PAYLOAD))))
@@ -349,10 +349,10 @@
 
 (deftest test-cluster-state-default-acls
   (testing "The default ACLs are empty."
-    (let [zk-mock (Mockito/mock Zookeeper)
+    (let [zk-mock (Mockito/mock ClientZookeeper)
           curator-frameworke (reify CuratorFramework (^void close [this] nil))]
       ;; No need for when clauses because we just want to return nil
-      (with-open [_ (MockedZookeeper. zk-mock)]
+      (with-open [_ (MockedClientZookeeper. zk-mock)]
         (. (Mockito/when (.mkClientImpl zk-mock (Mockito/anyMap) (Mockito/anyList) (Mockito/any) (Mockito/anyString) (Mockito/any) (Mockito/anyMap))) (thenReturn curator-frameworke))
         (ClusterUtils/mkStateStorage {} nil nil (ClusterStateContext.))
         (.mkdirsImpl (Mockito/verify zk-mock (Mockito/times 1)) (Mockito/any) (Mockito/anyString) (Mockito/eq nil))))

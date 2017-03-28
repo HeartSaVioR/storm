@@ -29,7 +29,7 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -44,7 +44,7 @@ public class TickTupleTest {
             cluster =  new LocalCluster.Builder().withSimulatedTime().withNimbusDaemon(true).build();
             StormTopology topology = createNoOpTopology();
             Config stormConf = new Config();
-            stormConf.putAll(Utils.readDefaultConfig());
+            stormConf.putAll(ClientUtils.readDefaultConfig());
             stormConf.put("storm.cluster.mode", "local");
             stormConf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, 1);
             cluster.submitTopology("test", stormConf,  topology);

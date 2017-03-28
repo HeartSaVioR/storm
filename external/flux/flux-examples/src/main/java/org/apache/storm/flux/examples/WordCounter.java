@@ -19,7 +19,6 @@ package org.apache.storm.flux.examples;
 
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.BasicOutputCollector;
-import org.apache.storm.topology.IBasicBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseBasicBolt;
 import org.apache.storm.tuple.Fields;
@@ -29,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static org.apache.storm.utils.Utils.tuple;
+import static org.apache.storm.utils.ClientUtils.tuple;
 
 /**
  * This bolt is used by the HBase example. It simply emits the first field

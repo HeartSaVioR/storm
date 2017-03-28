@@ -19,7 +19,7 @@ package org.apache.storm.sql;
 
 import org.apache.storm.sql.runtime.serde.json.JsonScheme;
 import org.apache.storm.sql.runtime.serde.json.JsonSerializer;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import com.google.common.collect.Lists;
 import org.junit.Test;
 
@@ -46,7 +46,7 @@ public class TestJsonRepresentation {
     List<Object> o = Lists.<Object> newArrayList(1, "2");
     JsonSerializer s = new JsonSerializer(fields);
     ByteBuffer buf = s.write(o, null);
-    byte[] b = Utils.toByteArray(buf);
+    byte[] b = ClientUtils.toByteArray(buf);
     assertEquals("{\"ID\":1,\"val\":\"2\"}", new String(b));
   }
 }

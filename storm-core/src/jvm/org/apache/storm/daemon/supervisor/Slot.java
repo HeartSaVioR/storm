@@ -38,9 +38,10 @@ import org.apache.storm.generated.ProfileAction;
 import org.apache.storm.generated.ProfileRequest;
 import org.apache.storm.localizer.ILocalizer;
 import org.apache.storm.scheduler.ISupervisor;
+import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.LocalState;
 import org.apache.storm.utils.Time;
-import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -652,10 +653,10 @@ public class Slot extends Thread implements AutoCloseable {
         
         dynamicState = new DynamicState(currentAssignment, container, newAssignment);
         staticState = new StaticState(localizer, 
-                Utils.getInt(conf.get(Config.SUPERVISOR_WORKER_TIMEOUT_SECS)) * 1000,
-                Utils.getInt(conf.get(Config.SUPERVISOR_WORKER_START_TIMEOUT_SECS)) * 1000,
-                Utils.getInt(conf.get(Config.SUPERVISOR_WORKER_SHUTDOWN_SLEEP_SECS)) * 1000,
-                Utils.getInt(conf.get(Config.SUPERVISOR_MONITOR_FREQUENCY_SECS)) * 1000,
+                ObjectReader.getInt(conf.get(Config.SUPERVISOR_WORKER_TIMEOUT_SECS)) * 1000,
+                ObjectReader.getInt(conf.get(Config.SUPERVISOR_WORKER_START_TIMEOUT_SECS)) * 1000,
+                ObjectReader.getInt(conf.get(Config.SUPERVISOR_WORKER_SHUTDOWN_SLEEP_SECS)) * 1000,
+                ObjectReader.getInt(conf.get(Config.SUPERVISOR_MONITOR_FREQUENCY_SECS)) * 1000,
                 containerLauncher,
                 host,
                 port,
@@ -769,9 +770,9 @@ public class Slot extends Thread implements AutoCloseable {
                 dynamicState = nextState;
             }
         } catch (Throwable e) {
-            if (!Utils.exceptionCauseIsInstanceOf(InterruptedException.class, e)) {
+            if (!ClientUtils.exceptionCauseIsInstanceOf(InterruptedException.class, e)) {
                 LOG.error("Error when processing event", e);
-                Utils.exitProcess(20, "Error when processing an event");
+                ClientUtils.exitProcess(20, "Error when processing an event");
             }
         }
     }

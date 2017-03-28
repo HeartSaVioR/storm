@@ -22,6 +22,7 @@ import org.apache.storm.blobstore.ClientBlobStore;
 import org.apache.storm.blobstore.InputStreamWithMeta;
 import org.apache.storm.generated.AuthorizationException;
 import org.apache.storm.generated.KeyNotFoundException;
+import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.ShellUtils.ExitCodeException;
 import org.apache.storm.utils.ShellUtils.ShellCommandExecutor;
 import org.apache.storm.utils.Utils;
@@ -97,15 +98,15 @@ public class Localizer {
     _conf = conf;
     _localBaseDir = baseDir;
     // default cache size 10GB, converted to Bytes
-    _cacheTargetSize = Utils.getInt(_conf.get(Config.SUPERVISOR_LOCALIZER_CACHE_TARGET_SIZE_MB),
+    _cacheTargetSize = ObjectReader.getInt(_conf.get(Config.SUPERVISOR_LOCALIZER_CACHE_TARGET_SIZE_MB),
             10 * 1024).longValue() << 20;
     // default 10 minutes.
-    _cacheCleanupPeriod = Utils.getInt(_conf.get(
+    _cacheCleanupPeriod = ObjectReader.getInt(_conf.get(
             Config.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS), 10 * 60 * 1000).longValue();
 
     // if we needed we could make config for update thread pool size
-    _threadPoolSize = Utils.getInt(_conf.get(Config.SUPERVISOR_BLOBSTORE_DOWNLOAD_THREAD_COUNT), 5);
-    _blobDownloadRetries = Utils.getInt(_conf.get(
+    _threadPoolSize = ObjectReader.getInt(_conf.get(Config.SUPERVISOR_BLOBSTORE_DOWNLOAD_THREAD_COUNT), 5);
+    _blobDownloadRetries = ObjectReader.getInt(_conf.get(
             Config.SUPERVISOR_BLOBSTORE_DOWNLOAD_MAX_RETRIES), 3);
 
     _execService = Executors.newFixedThreadPool(_threadPoolSize);
@@ -646,10 +647,10 @@ public class Localizer {
   public void setBlobPermissions(Map conf, String user, String path)
       throws IOException {
 
-    if (!Utils.getBoolean(conf.get(Config.SUPERVISOR_RUN_WORKER_AS_USER), false)) {
+    if (!ObjectReader.getBoolean(conf.get(Config.SUPERVISOR_RUN_WORKER_AS_USER), false)) {
       return;
     }
-    String wlCommand = Utils.getString(conf.get(Config.SUPERVISOR_WORKER_LAUNCHER), "");
+    String wlCommand = ObjectReader.getString(conf.get(Config.SUPERVISOR_WORKER_LAUNCHER), "");
     if (wlCommand.isEmpty()) {
       String stormHome = System.getProperty("storm.home");
       wlCommand = stormHome + "/bin/worker-launcher";

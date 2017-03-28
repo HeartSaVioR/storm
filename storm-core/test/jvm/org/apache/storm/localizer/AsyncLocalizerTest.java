@@ -29,7 +29,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.storm.daemon.supervisor.AdvancedFSOps;
+import org.apache.storm.utils.ClientConfigUtils;
 import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.ReflectionUtils;
 import org.junit.Test;
 
 import org.apache.storm.Config;
@@ -37,8 +39,6 @@ import org.apache.storm.blobstore.ClientBlobStore;
 import org.apache.storm.generated.ExecutorInfo;
 import org.apache.storm.generated.LocalAssignment;
 import org.apache.storm.generated.StormTopology;
-import org.apache.storm.localizer.LocalizedResource;
-import org.apache.storm.localizer.Localizer;
 import org.apache.storm.security.auth.DefaultPrincipalToLocal;
 import org.apache.storm.utils.Utils;
 
@@ -68,18 +68,20 @@ public class AsyncLocalizerTest {
         conf.put(Config.STORM_LOCAL_DIR, stormLocal);
         Localizer localizer = mock(Localizer.class);
         AdvancedFSOps ops = mock(AdvancedFSOps.class);
-        ConfigUtils mockedCU = mock(ConfigUtils.class);
+        ClientConfigUtils mockedCU = mock(ClientConfigUtils.class);
+        ReflectionUtils mockedRU = mock(ReflectionUtils.class);
         Utils mockedU = mock(Utils.class);
         
         Map<String, Object> topoConf = new HashMap<>(conf);
         
         AsyncLocalizer al = new AsyncLocalizer(conf, localizer, ops);
-        ConfigUtils orig = ConfigUtils.setInstance(mockedCU);
+        ClientConfigUtils orig = ClientConfigUtils.setInstance(mockedCU);
+        ReflectionUtils origRU = ReflectionUtils.setInstance(mockedRU);
         Utils origUtils = Utils.setInstance(mockedU);
         try {
             when(mockedCU.supervisorStormDistRootImpl(conf, topoId)).thenReturn(stormRoot);
             when(mockedCU.supervisorLocalDirImpl(conf)).thenReturn(stormLocal);
-            when(mockedU.newInstanceImpl(ClientBlobStore.class)).thenReturn(blobStore);
+            when(mockedRU.newInstanceImpl(ClientBlobStore.class)).thenReturn(blobStore);
             when(mockedCU.readSupervisorStormConfImpl(conf, topoId)).thenReturn(topoConf);
 
             Future<Void> f = al.requestDownloadBaseTopologyBlobs(la, port);
@@ -99,7 +101,8 @@ public class AsyncLocalizerTest {
             verify(ops, never()).deleteIfExists(any(File.class));
         } finally {
             al.shutdown();
-            ConfigUtils.setInstance(orig);
+            ClientConfigUtils.setInstance(orig);
+            ReflectionUtils.setInstance(origRU);
             Utils.setInstance(origUtils);
         }
     }
@@ -142,7 +145,7 @@ public class AsyncLocalizerTest {
         conf.put(Config.STORM_LOCAL_DIR, stormLocal);
         Localizer localizer = mock(Localizer.class);
         AdvancedFSOps ops = mock(AdvancedFSOps.class);
-        ConfigUtils mockedCU = mock(ConfigUtils.class);
+        ClientConfigUtils mockedCU = mock(ClientConfigUtils.class);
         Utils mockedU = mock(Utils.class);
         
         Map<String, Object> topoConf = new HashMap<>(conf);
@@ -155,7 +158,7 @@ public class AsyncLocalizerTest {
         localizedList.add(simpleLocal);
         
         AsyncLocalizer al = new AsyncLocalizer(conf, localizer, ops);
-        ConfigUtils orig = ConfigUtils.setInstance(mockedCU);
+        ClientConfigUtils orig = ClientConfigUtils.setInstance(mockedCU);
         Utils origUtils = Utils.setInstance(mockedU);
         try {
             when(mockedCU.supervisorStormDistRootImpl(conf, topoId)).thenReturn(stormRoot);
@@ -179,7 +182,7 @@ public class AsyncLocalizerTest {
             verify(ops).createSymlink(new File(stormRoot, simpleLocalName), new File(simpleCurrentLocalFile));
         } finally {
             al.shutdown();
-            ConfigUtils.setInstance(orig);
+            ClientConfigUtils.setInstance(orig);
             Utils.setInstance(origUtils);
         }
     }

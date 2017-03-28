@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.storm.task.TopologyContext;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -57,7 +57,7 @@ public class TestSimpleFileNameFormat {
         String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now);
         String host = null;
         try {
-            host = Utils.localHostname();
+            host = ClientUtils.localHostname();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }

@@ -21,6 +21,7 @@ package org.apache.storm;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.storm.generated.InvalidTopologyException;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.Utils;
 import org.apache.storm.validation.ConfigValidation;
 import org.apache.storm.validation.ConfigValidation.*;
@@ -101,7 +102,7 @@ public class TestConfigValidate {
 
     @Test
     public void defaultYamlTest() throws InvocationTargetException, NoSuchMethodException, NoSuchFieldException, InstantiationException, IllegalAccessException {
-        Map conf = Utils.readStormConfig();
+        Map conf = ClientUtils.readStormConfig();
         ConfigValidation.validateFields(conf);
     }
 

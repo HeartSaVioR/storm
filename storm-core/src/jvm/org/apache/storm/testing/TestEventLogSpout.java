@@ -17,13 +17,12 @@
  */
 package org.apache.storm.testing;
 
-import static org.apache.storm.utils.Utils.get;
+import static org.apache.storm.utils.ClientUtils.get;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

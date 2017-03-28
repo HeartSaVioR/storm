@@ -21,15 +21,12 @@ import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.metric.HttpForwardingMetricsServer;
-import org.apache.storm.metric.HttpForwardingMetricsConsumer;
-import org.apache.storm.metric.api.IMetric;
 import org.apache.storm.metric.api.IMetricsConsumer.TaskInfo;
 import org.apache.storm.metric.api.IMetricsConsumer.DataPoint;
 import org.apache.storm.generated.*;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.BasicOutputCollector;
-import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.topology.base.BaseBasicBolt;
@@ -37,9 +34,8 @@ import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.NimbusClient;
-import org.apache.storm.utils.Utils;
-import org.apache.storm.StormSubmitter;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -72,7 +68,7 @@ public class ThroughputVsLatency {
     Nimbus.Client _client = null;
 
     public C(Map conf) throws Exception {
-      Map clusterConf = Utils.readStormConfig();
+      Map clusterConf = ClientUtils.readStormConfig();
       if (conf != null) {
         clusterConf.putAll(conf);
       }

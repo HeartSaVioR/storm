@@ -17,8 +17,8 @@
  */
 package org.apache.storm.event;
 
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.Time;
-import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,15 +55,15 @@ public class EventManagerImp implements EventManager {
                         r.run();
                         proccessInc();
                     } catch (Throwable t) {
-                        if (Utils.exceptionCauseIsInstanceOf(InterruptedIOException.class, t) ) {
+                        if (ClientUtils.exceptionCauseIsInstanceOf(InterruptedIOException.class, t) ) {
                             LOG.info("Event manager interrupted while doing IO");
-                        } else if (Utils.exceptionCauseIsInstanceOf(ClosedByInterruptException.class, t)) {
+                        } else if (ClientUtils.exceptionCauseIsInstanceOf(ClosedByInterruptException.class, t)) {
                             LOG.info("Event manager interrupted while doing NIO");
-                        } else if (Utils.exceptionCauseIsInstanceOf(InterruptedException.class, t)) {
+                        } else if (ClientUtils.exceptionCauseIsInstanceOf(InterruptedException.class, t)) {
                             LOG.info("Event manager interrupted");
                         } else {
                             LOG.error("{} Error when processing event", t);
-                            Utils.exitProcess(20, "Error when processing an event");
+                            ClientUtils.exitProcess(20, "Error when processing an event");
                         }
                     }
                 }

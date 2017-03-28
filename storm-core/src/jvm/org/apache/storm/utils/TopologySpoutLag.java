@@ -68,7 +68,7 @@ public class TopologySpoutLag {
 
     private static String getClassNameFromComponentObject(ComponentObject componentObject) {
         try {
-            Object object = Utils.getSetComponentObject(componentObject);
+            Object object = ClientUtils.getSetComponentObject(componentObject);
             return object.getClass().getCanonicalName();
         } catch (RuntimeException e) {
 

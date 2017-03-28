@@ -17,7 +17,7 @@
  */
 package org.apache.storm.kafka;
 
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.nio.ByteBuffer;
@@ -36,6 +36,6 @@ public class ByteBufferSerializer implements Serializer<ByteBuffer> {
 
   @Override
   public byte[] serialize(String s, ByteBuffer b) {
-    return Utils.toByteArray(b);
+    return ClientUtils.toByteArray(b);
   }
 }

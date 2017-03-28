@@ -23,7 +23,7 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ public class RandomSentenceSpout extends BaseRichSpout {
 
   @Override
   public void nextTuple() {
-    Utils.sleep(100);
+    ClientUtils.sleep(100);
     String[] sentences = new String[]{sentence("the cow jumped over the moon"), sentence("an apple a day keeps the doctor away"),
             sentence("four score and seven years ago"), sentence("snow white and the seven dwarfs"), sentence("i am at two with nature")};
     final String sentence = sentences[_rand.nextInt(sentences.length)];

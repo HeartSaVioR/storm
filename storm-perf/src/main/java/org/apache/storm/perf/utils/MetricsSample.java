@@ -27,7 +27,7 @@ import org.apache.storm.generated.Nimbus;
 import org.apache.storm.generated.SpoutStats;
 import org.apache.storm.generated.TopologyInfo;
 import org.apache.storm.generated.TopologySummary;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -115,7 +115,7 @@ public class MetricsSample {
             }
             for(String key : txMap.keySet()){
                 // todo, ignore the master batch coordinator ?
-                if(!Utils.isSystemId(key)){
+                if(!ClientUtils.isSystemId(key)){
                     Long count = txMap.get(key);
                     totalTransferred += count;
                     if(executorSpecificStats.is_set_spout()){

@@ -32,7 +32,7 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 import java.util.Map;
 
@@ -86,7 +86,7 @@ public class StateQueryExample {
         } else {
             try (LocalCluster cluster = new LocalCluster();
                  LocalCluster.LocalTopology topo = cluster.submitTopology("test", config, builder.build())) {
-                Utils.sleep(60_000);
+                ClientUtils.sleep(60_000);
             }
         }
     }
@@ -102,7 +102,7 @@ public class StateQueryExample {
 
         @Override
         public void nextTuple() {
-            Utils.sleep(2000);
+            ClientUtils.sleep(2000);
             for (String word : words) {
                 collector.emit(new Values(word));
             }

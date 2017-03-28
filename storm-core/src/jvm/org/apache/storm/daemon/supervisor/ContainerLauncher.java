@@ -24,9 +24,10 @@ import org.apache.storm.Config;
 import org.apache.storm.container.ResourceIsolationInterface;
 import org.apache.storm.generated.LocalAssignment;
 import org.apache.storm.messaging.IContext;
-import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.ClientConfigUtils;
+import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.LocalState;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,18 +47,18 @@ public abstract class ContainerLauncher {
      * @throws IOException on any error
      */
     public static ContainerLauncher make(Map<String, Object> conf, String supervisorId, IContext sharedContext) throws IOException {
-        if (ConfigUtils.isLocalMode(conf)) {
+        if (ClientConfigUtils.isLocalMode(conf)) {
             return new LocalContainerLauncher(conf, supervisorId, sharedContext);
         }
         
         ResourceIsolationInterface resourceIsolationManager = null;
-        if (Utils.getBoolean(conf.get(Config.STORM_RESOURCE_ISOLATION_PLUGIN_ENABLE), false)) {
-            resourceIsolationManager = Utils.newInstance((String) conf.get(Config.STORM_RESOURCE_ISOLATION_PLUGIN));
+        if (ObjectReader.getBoolean(conf.get(Config.STORM_RESOURCE_ISOLATION_PLUGIN_ENABLE), false)) {
+            resourceIsolationManager = ReflectionUtils.newInstance((String) conf.get(Config.STORM_RESOURCE_ISOLATION_PLUGIN));
             resourceIsolationManager.prepare(conf);
             LOG.info("Using resource isolation plugin {} {}", conf.get(Config.STORM_RESOURCE_ISOLATION_PLUGIN), resourceIsolationManager);
         }
 
-        if (Utils.getBoolean(conf.get(Config.SUPERVISOR_RUN_WORKER_AS_USER), false)) {
+        if (ObjectReader.getBoolean(conf.get(Config.SUPERVISOR_RUN_WORKER_AS_USER), false)) {
             return new RunAsUserContainerLauncher(conf, supervisorId, resourceIsolationManager);
         }
         return new BasicContainerLauncher(conf, supervisorId, resourceIsolationManager);

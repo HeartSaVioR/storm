@@ -21,7 +21,7 @@ import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
 import org.apache.storm.Config;
 import org.apache.storm.daemon.metrics.MetricsUtils;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ObjectReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public class JmxPreparableReporter implements PreparableReporter<JmxReporter> {
     public void prepare(MetricRegistry metricsRegistry, Map stormConf) {
         LOG.info("Preparing...");
         JmxReporter.Builder builder = JmxReporter.forRegistry(metricsRegistry);
-        String domain = Utils.getString(stormConf.get(Config.STORM_DAEMON_METRICS_REPORTER_PLUGIN_DOMAIN), null);
+        String domain = ObjectReader.getString(stormConf.get(Config.STORM_DAEMON_METRICS_REPORTER_PLUGIN_DOMAIN), null);
         if (domain != null) {
             builder.inDomain(domain);
         }

@@ -22,7 +22,7 @@ import org.apache.storm.state.KeyValueState;
 import org.apache.storm.state.StateFactory;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -117,25 +117,25 @@ public class CheckpointSpoutTest {
 
         spout.nextTuple();
         spout.ack(-1L);
-        Utils.sleep(10);
+        ClientUtils.sleep(10);
         spout.nextTuple();
         spout.ack(0L);
-        Utils.sleep(10);
+        ClientUtils.sleep(10);
         spout.nextTuple();
         spout.ack(0L);
-        Utils.sleep(10);
+        ClientUtils.sleep(10);
         spout.nextTuple();
         spout.fail(1L);
-        Utils.sleep(10);
+        ClientUtils.sleep(10);
         spout.nextTuple();
         spout.fail(1L);
-        Utils.sleep(10);
+        ClientUtils.sleep(10);
         spout.nextTuple();
         spout.ack(1L);
-        Utils.sleep(10);
+        ClientUtils.sleep(10);
         spout.nextTuple();
         spout.ack(0L);
-        Utils.sleep(10);
+        ClientUtils.sleep(10);
         spout.nextTuple();
         Mockito.verify(mockOutputCollector, Mockito.times(8)).emit(stream.capture(),
                                                                    values.capture(),
@@ -161,10 +161,10 @@ public class CheckpointSpoutTest {
         spout.ack(-1L);
         spout.nextTuple();
         spout.ack(0L);
-        Utils.sleep(10);
+        ClientUtils.sleep(10);
         spout.nextTuple();
         spout.fail(0L);
-        Utils.sleep(10);
+        ClientUtils.sleep(10);
         spout.nextTuple();
         Mockito.verify(mockOutputCollector, Mockito.times(4)).emit(stream.capture(),
                                                                    values.capture(),

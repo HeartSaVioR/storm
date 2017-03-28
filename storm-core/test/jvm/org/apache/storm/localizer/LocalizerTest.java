@@ -28,6 +28,7 @@ import org.apache.storm.generated.AuthorizationException;
 import org.apache.storm.generated.KeyNotFoundException;
 import org.apache.storm.generated.ReadableBlobMeta;
 import org.apache.storm.generated.SettableBlobMeta;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -259,7 +260,7 @@ public class LocalizerTest {
 
   // archive passed in must contain symlink named tmptestsymlink if not a zip file
   public void testArchives(String archivePath, boolean supportSymlinks, int size) throws Exception {
-    if (Utils.isOnWindows()) {
+    if (ClientUtils.isOnWindows()) {
       // Windows should set this to false cause symlink in compressed file doesn't work properly.
       supportSymlinks = false;
     }
@@ -521,7 +522,7 @@ public class LocalizerTest {
 
   @Test(expected = KeyNotFoundException.class)
   public void testKeyNotFoundException() throws Exception {
-    Map conf = Utils.readStormConfig();
+    Map conf = ClientUtils.readStormConfig();
     String key1 = "key1";
     conf.put(Config.STORM_LOCAL_DIR, "target");
     LocalFsBlobStore bs = new LocalFsBlobStore();

@@ -20,8 +20,8 @@ package org.apache.storm.scheduler.resource;
 
 import org.apache.storm.Config;
 import org.apache.storm.scheduler.TopologyDetails;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.Time;
-import org.apache.storm.utils.Utils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public class TestUser {
     public void testAddTopologyToPendingQueue() {
 
         Config config = new Config();
-        config.putAll(Utils.readDefaultConfig());
+        config.putAll(ClientUtils.readDefaultConfig());
 
         List<TopologyDetails> topos = TestUtilsForResourceAwareScheduler.getListOfTopologies(config);
         User user1 = new User("user1");
@@ -62,7 +62,7 @@ public class TestUser {
     public void testMoveTopoFromPendingToRunning() {
 
         Config config = new Config();
-        config.putAll(Utils.readDefaultConfig());
+        config.putAll(ClientUtils.readDefaultConfig());
 
         List<TopologyDetails> topos = TestUtilsForResourceAwareScheduler.getListOfTopologies(config);
         User user1 = new User("user1");
@@ -90,7 +90,7 @@ public class TestUser {
         resourceGuaranteeMap.put("memory", memoryGuarantee);
 
         Config config = new Config();
-        config.putAll(Utils.readDefaultConfig());
+        config.putAll(ClientUtils.readDefaultConfig());
         config.put(Config.TOPOLOGY_COMPONENT_CPU_PCORE_PERCENT, 100);
         config.put(Config.TOPOLOGY_COMPONENT_RESOURCES_OFFHEAP_MEMORY_MB, 200);
         config.put(Config.TOPOLOGY_COMPONENT_RESOURCES_ONHEAP_MEMORY_MB, 200);

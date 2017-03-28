@@ -33,7 +33,7 @@ import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.topology.base.BaseWindowedBolt.Count;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -78,7 +78,7 @@ public class GroupByKeyAndWindowExample {
         } else {
             try (LocalCluster cluster = new LocalCluster();
                  LocalCluster.LocalTopology topo = cluster.submitTopology("test", config, builder.build())) {
-                Utils.sleep(60_000);
+                ClientUtils.sleep(60_000);
             }
         }
     }
@@ -99,7 +99,7 @@ public class GroupByKeyAndWindowExample {
 
         @Override
         public void nextTuple() {
-            Utils.sleep(5000);
+            ClientUtils.sleep(5000);
             for (Values v : values.get(index)) {
                 collector.emit(v);
             }

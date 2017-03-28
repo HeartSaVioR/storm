@@ -40,8 +40,8 @@
   (:import [java.util HashMap HashSet Optional])
   (:import [java.io File])
   (:import [javax.security.auth Subject])
-  (:import [org.apache.storm.utils Time Time$SimulatedTime Utils Utils$UptimeComputer ConfigUtils IPredicate StormCommonInstaller]
-           [org.apache.storm.utils.staticmocking ConfigUtilsInstaller UtilsInstaller])
+  (:import [org.apache.storm.utils Time Time$SimulatedTime Utils ConfigUtils IPredicate StormCommonInstaller ClientUtils$UptimeComputer ReflectionUtils ClientUtils ClientConfigUtils]
+           [org.apache.storm.utils.staticmocking ConfigUtilsInstaller UtilsInstaller ReflectionUtilsInstaller ClientUtilsInstaller])
   (:import [org.apache.storm.zookeeper Zookeeper])
   (:import [org.apache.commons.io FileUtils])
   (:import [org.json.simple JSONValue])
@@ -68,7 +68,7 @@
         nimbus (.getNimbus cluster)]
     (-> (.getUserTopology nimbus storm-id)
         (#(StormCommon/stormTaskInfo % (from-json (.getTopologyConf nimbus storm-id))))
-        (Utils/reverseMap)
+        (ClientUtils/reverseMap)
         clojurify-structure)))
 
 (defn getCredentials [cluster storm-name]
@@ -90,13 +90,13 @@
          clojurify-structure
          (map (fn [e] {e (get-component e)}))
          (apply merge)
-         (Utils/reverseMap)
+         (ClientUtils/reverseMap)
          clojurify-structure)))
 
 (defn storm-num-workers [state storm-name]
   (let [storm-id (StormCommon/getStormId state storm-name)
         assignment (.assignmentInfo state storm-id nil)]
-    (.size (Utils/reverseMap (.get_executor_node_port assignment)))))
+    (.size (ClientUtils/reverseMap (.get_executor_node_port assignment)))))
 
 (defn topology-nodes [state storm-name]
   (let [storm-id (StormCommon/getStormId state storm-name)
@@ -167,7 +167,7 @@
 (defn slot-assignments [cluster storm-id]
   (let [state (.getClusterState cluster)
         assignment (.assignmentInfo state storm-id nil)]
-        (clojurify-structure (Utils/reverseMap (.get_executor_node_port assignment)))))
+        (clojurify-structure (ClientUtils/reverseMap (.get_executor_node_port assignment)))))
 
 (defn task-ids [cluster storm-id]
   (let [nimbus (.getNimbus cluster)]
@@ -240,28 +240,28 @@
                      {"1" (Thrift/prepareSpoutDetails
                             (TestPlannerSpout. false) (Integer. 3))}
                      {"2" (Thrift/prepareBoltDetails
-                            {(Utils/getGlobalStreamId "1" nil)
+                            {(ClientUtils/getGlobalStreamId "1" nil)
                              (Thrift/prepareNoneGrouping)}
                             (TestPlannerBolt.) (Integer. 4))
                       "3" (Thrift/prepareBoltDetails
-                            {(Utils/getGlobalStreamId "2" nil)
+                            {(ClientUtils/getGlobalStreamId "2" nil)
                              (Thrift/prepareNoneGrouping)}
                             (TestPlannerBolt.))})
           topology2 (Thrift/buildTopology
                       {"1" (Thrift/prepareSpoutDetails
                              (TestPlannerSpout. true) (Integer. 12))}
                       {"2" (Thrift/prepareBoltDetails
-                             {(Utils/getGlobalStreamId "1" nil)
+                             {(ClientUtils/getGlobalStreamId "1" nil)
                               (Thrift/prepareNoneGrouping)}
                              (TestPlannerBolt.) (Integer. 6))
                        "3" (Thrift/prepareBoltDetails
-                             {(Utils/getGlobalStreamId "1" nil)
+                             {(ClientUtils/getGlobalStreamId "1" nil)
                               (Thrift/prepareGlobalGrouping)}
                              (TestPlannerBolt.) (Integer. 8))
                        "4" (Thrift/prepareBoltDetails
-                             {(Utils/getGlobalStreamId "1" nil)
+                             {(ClientUtils/getGlobalStreamId "1" nil)
                               (Thrift/prepareGlobalGrouping)
-                              (Utils/getGlobalStreamId "2" nil)
+                              (ClientUtils/getGlobalStreamId "2" nil)
                               (Thrift/prepareNoneGrouping)}
                              (TestPlannerBolt.) (Integer. 4))})
           _ (.submitTopology cluster "mystorm" {TOPOLOGY-WORKERS 4} topology)
@@ -325,11 +325,11 @@
                      {"1" (Thrift/prepareSpoutDetails
                             (TestPlannerSpout. false) (Integer. 3))}
                      {"2" (Thrift/prepareBoltDetails
-                            {(Utils/getGlobalStreamId "1" nil)
+                            {(ClientUtils/getGlobalStreamId "1" nil)
                              (Thrift/prepareNoneGrouping)}
                             (TestPlannerBolt.) (Integer. 4))
                       "3" (Thrift/prepareBoltDetails
-                            {(Utils/getGlobalStreamId "2" nil)
+                            {(ClientUtils/getGlobalStreamId "2" nil)
                              (Thrift/prepareNoneGrouping)}
                             (TestPlannerBolt.))})
           _ (.submitTopologyWithOpts cluster topology-name {TOPOLOGY-WORKERS 4
@@ -374,11 +374,11 @@
                       {"1" (Thrift/prepareSpoutDetails
                              (TestPlannerSpout. false) (Integer. 3))}
                       {"2" (Thrift/prepareBoltDetails
-                             {(Utils/getGlobalStreamId "1" nil)
+                             {(ClientUtils/getGlobalStreamId "1" nil)
                               (Thrift/prepareNoneGrouping)}
                              (TestPlannerBolt.) (Integer. 5))
                        "3" (Thrift/prepareBoltDetails
-                             {(Utils/getGlobalStreamId "2" nil)
+                             {(ClientUtils/getGlobalStreamId "2" nil)
                               (Thrift/prepareNoneGrouping)}
                              (TestPlannerBolt.))}))
 
@@ -429,12 +429,12 @@
                            (TestPlannerSpout. false) (Integer. 3)
                            {TOPOLOGY-TASKS 0})}
                     {"2" (Thrift/prepareBoltDetails
-                           {(Utils/getGlobalStreamId "1" nil)
+                           {(ClientUtils/getGlobalStreamId "1" nil)
                             (Thrift/prepareNoneGrouping)}
                            (TestPlannerBolt.) (Integer. 1)
                            {TOPOLOGY-TASKS 2})
                      "3" (Thrift/prepareBoltDetails
-                           {(Utils/getGlobalStreamId "2" nil)
+                           {(ClientUtils/getGlobalStreamId "2" nil)
                             (Thrift/prepareNoneGrouping)}
                            (TestPlannerBolt.) nil
                            {TOPOLOGY-TASKS 5})})
@@ -458,12 +458,12 @@
                            (TestPlannerSpout. true) (Integer. 3)
                            {TOPOLOGY-TASKS 5})}
                     {"2" (Thrift/prepareBoltDetails
-                           {(Utils/getGlobalStreamId "1" nil)
+                           {(ClientUtils/getGlobalStreamId "1" nil)
                             (Thrift/prepareNoneGrouping)}
                            (TestPlannerBolt.) (Integer. 8)
                            {TOPOLOGY-TASKS 2})
                      "3" (Thrift/prepareBoltDetails
-                           {(Utils/getGlobalStreamId "2" nil)
+                           {(ClientUtils/getGlobalStreamId "2" nil)
                             (Thrift/prepareNoneGrouping)}
                            (TestPlannerBolt.) (Integer. 3))})
           _ (.submitTopology cluster "mystorm" {TOPOLOGY-WORKERS 4} topology)
@@ -493,15 +493,15 @@
                      {"1" (Thrift/prepareSpoutDetails
                             (TestPlannerSpout. true) (Integer. 21))}
                      {"2" (Thrift/prepareBoltDetails
-                            {(Utils/getGlobalStreamId "1" nil)
+                            {(ClientUtils/getGlobalStreamId "1" nil)
                              (Thrift/prepareNoneGrouping)}
                             (TestPlannerBolt.) (Integer. 9))
                       "3" (Thrift/prepareBoltDetails
-                            {(Utils/getGlobalStreamId "1" nil)
+                            {(ClientUtils/getGlobalStreamId "1" nil)
                              (Thrift/prepareNoneGrouping)}
                             (TestPlannerBolt.) (Integer. 2))
                       "4" (Thrift/prepareBoltDetails
-                            {(Utils/getGlobalStreamId "1" nil)
+                            {(ClientUtils/getGlobalStreamId "1" nil)
                              (Thrift/prepareNoneGrouping)}
                             (TestPlannerBolt.) (Integer. 10))})
           _ (.submitTopology cluster "test" {TOPOLOGY-WORKERS 7} topology)
@@ -1225,7 +1225,7 @@
                       (zkLeaderElectorImpl [conf blob-store] (MockLeaderElector. ))))]
       (let [nimbus-dir (.getPath tmp-nimbus-dir)]
         (letlocals
-          (bind conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+          (bind conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                        {STORM-ZOOKEEPER-SERVERS ["localhost"]
                         STORM-CLUSTER-MODE "local"
                         STORM-ZOOKEEPER-PORT (.getPort zk)
@@ -1517,7 +1517,7 @@
   (testing "nimbus-data uses correct ACLs"
     (let [scheme "digest"
           digest "storm:thisisapoorpassword"
-          auth-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+          auth-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                     {STORM-ZOOKEEPER-AUTH-SCHEME scheme
                      STORM-ZOOKEEPER-AUTH-PAYLOAD digest
                      STORM-PRINCIPAL-TO-LOCAL-PLUGIN "org.apache.storm.security.auth.DefaultPrincipalToLocal"
@@ -1526,15 +1526,17 @@
           fake-inimbus (reify INimbus (getForcedScheduler [this] nil) (prepare [this conf dir] nil))
           fake-cu (proxy [ConfigUtils] []
                     (nimbusTopoHistoryStateImpl [conf] nil))
-          fake-utils (proxy [Utils] []
-                       (newInstanceImpl [_])
-                       (makeUptimeComputer [] (proxy [Utils$UptimeComputer] []
+          fake-ru (proxy [ReflectionUtils] []
+                    (newInstanceImpl [_]))
+          fake-utils (proxy [ClientUtils] []
+                       (makeUptimeComputer [] (proxy [ClientUtils$UptimeComputer] []
                                                 (upTime [] 0))))
           cluster-utils (Mockito/mock ClusterUtils)
 	  fake-common (proxy [StormCommon] []
                              (mkAuthorizationHandler [_] nil))]
       (with-open [_ (ConfigUtilsInstaller. fake-cu)
-                  _ (UtilsInstaller. fake-utils)
+                  _ (ReflectionUtilsInstaller. fake-ru)
+                  _ (ClientUtilsInstaller. fake-utils)
                   - (StormCommonInstaller. fake-common)
                   zk-le (MockedZookeeper. (proxy [Zookeeper] []
                           (zkLeaderElectorImpl [conf blob-store] nil)))
@@ -1574,7 +1576,7 @@
     (with-open [tmp-nimbus-dir (TmpPath. )]
       (let [nimbus-dir (.getPath tmp-nimbus-dir)]
       (letlocals
-        (bind conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+        (bind conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                      {STORM-ZOOKEEPER-SERVERS ["localhost"]
                       STORM-CLUSTER-MODE "local"
                       STORM-ZOOKEEPER-PORT (.getPort zk)
@@ -1609,7 +1611,7 @@
                     (zkLeaderElectorImpl [conf blob-store] (MockLeaderElector. ))))]
       (let [nimbus-dir (.getPath tmp-nimbus-dir)]
         (letlocals
-          (bind conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+          (bind conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                        {STORM-ZOOKEEPER-SERVERS ["localhost"]
                         STORM-CLUSTER-MODE "local"
                         STORM-ZOOKEEPER-PORT (.getPort zk)

@@ -30,7 +30,7 @@ public class ThrowableNestedCauseMatcher extends BaseMatcher<Throwable> {
 
     @Override
     public boolean matches(Object throwable) {
-        return Utils.exceptionCauseIsInstanceOf(exceptionCause, (Throwable) throwable);
+        return ClientUtils.exceptionCauseIsInstanceOf(exceptionCause, (Throwable) throwable);
     }
 
     @Override

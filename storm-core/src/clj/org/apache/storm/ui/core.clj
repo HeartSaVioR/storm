@@ -43,7 +43,7 @@
   (:import [org.apache.storm.security.auth AuthUtils ReqContext])
   (:import [org.apache.storm.generated AuthorizationException ProfileRequest ProfileAction NodeInfo])
   (:import [org.apache.storm.security.auth AuthUtils])
-  (:import [org.apache.storm.utils Utils VersionInfo ConfigUtils])
+  (:import [org.apache.storm.utils Utils VersionInfo ConfigUtils ClientConfigUtils ClientUtils])
   (:import [org.apache.storm Config])
   (:import [java.io File])
   (:import [java.net URLEncoder URLDecoder])
@@ -58,7 +58,7 @@
   (:import [org.eclipse.jetty.server Server])
   (:gen-class))
 
-(def ^:dynamic *STORM-CONF* (clojurify-structure (ConfigUtils/readStormConfig)))
+(def ^:dynamic *STORM-CONF* (clojurify-structure (ClientConfigUtils/readStormConfig)))
 (def ^:dynamic *UI-ACL-HANDLER* (StormCommon/mkAuthorizationHandler (*STORM-CONF* NIMBUS-AUTHORIZER) *STORM-CONF*))
 (def ^:dynamic *UI-IMPERSONATION-HANDLER* (StormCommon/mkAuthorizationHandler (*STORM-CONF* NIMBUS-IMPERSONATION-AUTHORIZER) *STORM-CONF*))
 (def http-creds-handler (AuthUtils/GetUiHttpCredentialsPlugin *STORM-CONF*))
@@ -269,7 +269,7 @@
   [include-sys?]
   (if include-sys?
     (fn [_] true)
-    (fn [stream] (and (string? stream) (not (Utils/isSystemId stream))))))
+    (fn [stream] (and (string? stream) (not (ClientUtils/isSystemId stream))))))
 
 (defn stream-boxes [datmap]
   (let [filter-fn (mk-include-sys-fn true)
@@ -281,7 +281,7 @@
                                 {:stream (get m :stream)
                                  :sani-stream (get m :sani-stream)
                                  :checked (not
-                                            (Utils/isSystemId
+                                            (ClientUtils/isSystemId
                                               (get m :stream)))}))))))]
     (map (fn [row]
            {:row row}) (partition 4 4 nil streams))))
@@ -1064,7 +1064,7 @@
                                       (.get_eventlog_host comp-page-info)
                                       (.get_eventlog_port comp-page-info)
                                       secure?)
-       "profilingAndDebuggingCapable" (not (Utils/isOnWindows))
+       "profilingAndDebuggingCapable" (not (ClientUtils/isOnWindows))
        "profileActionEnabled" (*STORM-CONF* WORKER-PROFILER-ENABLED)
        "profilerActive" (if (*STORM-CONF* WORKER-PROFILER-ENABLED)
                           (get-active-profile-actions nimbus topology-id component)

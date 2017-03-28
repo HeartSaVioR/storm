@@ -17,22 +17,22 @@
  */
 package org.apache.storm.security.auth;
 
+import org.apache.storm.utils.ClientUtils;
 import org.junit.Assert;
 
-import org.apache.storm.utils.Utils;
 import org.junit.Test;
 
 public class ThriftServerTest {
 
     @Test
     public void testStopChecksForNull() {
-        ThriftServer server = new ThriftServer(Utils.readDefaultConfig(), null, ThriftConnectionType.DRPC);
+        ThriftServer server = new ThriftServer(ClientUtils.readDefaultConfig(), null, ThriftConnectionType.DRPC);
         server.stop();
     }
 
     @Test
     public void testIsServingChecksForNull() {
-        ThriftServer server = new ThriftServer(Utils.readDefaultConfig(), null, ThriftConnectionType.DRPC);
+        ThriftServer server = new ThriftServer(ClientUtils.readDefaultConfig(), null, ThriftConnectionType.DRPC);
         Assert.assertFalse(server.isServing());
     }
 }

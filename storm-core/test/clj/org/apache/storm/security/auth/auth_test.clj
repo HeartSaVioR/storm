@@ -43,7 +43,7 @@
   (:import [org.apache.storm.generated Nimbus Nimbus$Client Nimbus$Iface StormTopology SubmitOptions
             KillOptions RebalanceOptions ClusterSummary TopologyInfo Nimbus$Processor]
            (org.json.simple JSONValue))
-  (:import [org.apache.storm.utils Utils]))
+  (:import [org.apache.storm.utils Utils ClientConfigUtils]))
 
 (defn mk-principal [name]
   (reify Principal
@@ -121,7 +121,7 @@
 
 
 (defn launch-server [server-port login-cfg aznClass transportPluginClass serverConf]
-  (let [conf1 (merge (clojurify-structure (ConfigUtils/readStormConfig))
+  (let [conf1 (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                      {NIMBUS-AUTHORIZER aznClass
                       NIMBUS-THRIFT-PORT server-port
                       STORM-THRIFT-TRANSPORT-PLUGIN transportPluginClass})
@@ -154,14 +154,14 @@
 (deftest Simple-authentication-test
   (let [a-port (Utils/getAvailablePort)]
     (with-server [a-port nil nil "org.apache.storm.security.auth.SimpleTransportPlugin" nil]
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.SimpleTransportPlugin"})
             client (NimbusClient. storm-conf "localhost" a-port nimbus-timeout)
             nimbus_client (.getClient client)]
         (.activate nimbus_client "security_auth_test_topology")
         (.close client))
 
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.digest.DigestSaslTransportPlugin"
                                "java.security.auth.login.config" "test/clj/org/apache/storm/security/auth/jaas_digest.conf"
                                STORM-NIMBUS-RETRY-TIMES 0})]
@@ -174,7 +174,7 @@
     (with-server [a-port nil
                   "org.apache.storm.security.auth.authorizer.SimpleWhitelistAuthorizer"
                   "org.apache.storm.testing.SingleUserSimpleTransport" nil]
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.testing.SingleUserSimpleTransport"})
             client (NimbusClient. storm-conf "localhost" a-port nimbus-timeout)
             nimbus_client (.getClient client)]
@@ -188,7 +188,7 @@
       (with-server [a-port nil
                     "org.apache.storm.security.auth.authorizer.SimpleWhitelistAuthorizer"
                     "org.apache.storm.testing.SingleUserSimpleTransport" {SimpleWhitelistAuthorizer/WHITELIST_USERS_CONF ["user"]}]
-        (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+        (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                                 {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.testing.SingleUserSimpleTransport"})
               client (NimbusClient. storm-conf "localhost" a-port nimbus-timeout)
               nimbus_client (.getClient client)]
@@ -197,7 +197,7 @@
           (.close client)))))
 
 (deftest simple-acl-user-auth-test
-  (let [cluster-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+  (let [cluster-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                        {NIMBUS-ADMINS ["admin"]
                         NIMBUS-SUPERVISOR-USERS ["supervisor"]})
         authorizer (SimpleACLAuthorizer. )
@@ -278,7 +278,7 @@
 ))
 
 (deftest simple-acl-nimbus-users-auth-test
-  (let [cluster-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+  (let [cluster-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                             {NIMBUS-ADMINS ["admin"]
                              NIMBUS-SUPERVISOR-USERS ["supervisor"]
                              NIMBUS-USERS ["user-a"]})
@@ -294,7 +294,7 @@
     (is (= true (.permit authorizer (ReqContext. supervisor-user) "fileDownload" nil)))))
 
 (deftest shell-based-groups-mapping-test
-  (let [cluster-conf (clojurify-structure (ConfigUtils/readStormConfig))
+  (let [cluster-conf (clojurify-structure (ClientConfigUtils/readStormConfig))
         groups (ShellBasedGroupsMapping. )
         user-name (System/getProperty "user.name")]
     (.prepare groups cluster-conf)
@@ -303,7 +303,7 @@
     (is (= 0 (.size (.getGroups groups nil))))))
 
 (deftest simple-acl-same-user-auth-test
-  (let [cluster-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+  (let [cluster-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                        {NIMBUS-ADMINS ["admin"]
                         NIMBUS-SUPERVISOR-USERS ["admin"]})
         authorizer (SimpleACLAuthorizer. )
@@ -331,7 +331,7 @@
     (with-server [a-port nil
                   "org.apache.storm.security.auth.authorizer.NoopAuthorizer"
                   "org.apache.storm.security.auth.SimpleTransportPlugin" nil]
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.SimpleTransportPlugin"})
             client (NimbusClient. storm-conf "localhost" a-port nimbus-timeout)
             nimbus_client (.getClient client)]
@@ -344,7 +344,7 @@
     (with-server [a-port nil
                   "org.apache.storm.security.auth.authorizer.DenyAuthorizer"
                   "org.apache.storm.security.auth.SimpleTransportPlugin" nil]
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.SimpleTransportPlugin"
                                Config/NIMBUS_THRIFT_PORT a-port
                                Config/NIMBUS_TASK_TIMEOUT_SECS nimbus-timeout})
@@ -361,7 +361,7 @@
                   "test/clj/org/apache/storm/security/auth/jaas_digest.conf"
                   nil
                   "org.apache.storm.security.auth.digest.DigestSaslTransportPlugin" nil]
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.digest.DigestSaslTransportPlugin"
                                "java.security.auth.login.config" "test/clj/org/apache/storm/security/auth/jaas_digest.conf"
                                STORM-NIMBUS-RETRY-TIMES 0})
@@ -371,7 +371,7 @@
           (.activate nimbus_client "security_auth_test_topology"))
         (.close client))
 
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.SimpleTransportPlugin"
                                STORM-NIMBUS-RETRY-TIMES 0})
             client (NimbusClient. storm-conf "localhost" a-port nimbus-timeout)
@@ -381,7 +381,7 @@
                              (.activate nimbus_client "security_auth_test_topology"))))
         (.close client))
 
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.digest.DigestSaslTransportPlugin"
                                "java.security.auth.login.config" "test/clj/org/apache/storm/security/auth/jaas_digest_bad_password.conf"
                                STORM-NIMBUS-RETRY-TIMES 0})]
@@ -389,7 +389,7 @@
           (is (thrown-cause? TTransportException
                              (NimbusClient. storm-conf "localhost" a-port nimbus-timeout)))))
 
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.digest.DigestSaslTransportPlugin"
                                "java.security.auth.login.config" "test/clj/org/apache/storm/security/auth/jaas_digest_unknown_user.conf"
                                STORM-NIMBUS-RETRY-TIMES 0})]
@@ -397,7 +397,7 @@
           (is (thrown-cause? TTransportException
                              (NimbusClient. storm-conf "localhost" a-port nimbus-timeout)))))
 
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.digest.DigestSaslTransportPlugin"
                                "java.security.auth.login.config" "test/clj/org/apache/storm/security/auth/nonexistent.conf"
                                STORM-NIMBUS-RETRY-TIMES 0})]
@@ -405,7 +405,7 @@
           (is (thrown-cause? RuntimeException
                              (NimbusClient. storm-conf "localhost" a-port nimbus-timeout)))))
 
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.digest.DigestSaslTransportPlugin"
                                "java.security.auth.login.config" "test/clj/org/apache/storm/security/auth/jaas_digest_missing_client.conf"
                                STORM-NIMBUS-RETRY-TIMES 0})]
@@ -414,7 +414,7 @@
                              (NimbusClient. storm-conf "localhost" a-port nimbus-timeout))))))))
 
 (deftest test-GetTransportPlugin-throws-RuntimeException
-  (let [conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+  (let [conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                     {Config/STORM_THRIFT_TRANSPORT_PLUGIN "null.invalid"})]
     (is (thrown-cause? RuntimeException (AuthUtils/GetTransportPlugin conf nil nil)))))
 
@@ -431,9 +431,9 @@
   (let [impersonating-user "admin"
         user-being-impersonated (System/getProperty "user.name")
         groups (ShellBasedGroupsMapping.)
-        _ (.prepare groups (clojurify-structure (ConfigUtils/readStormConfig)))
+        _ (.prepare groups (clojurify-structure (ClientConfigUtils/readStormConfig)))
         groups (.getGroups groups user-being-impersonated)
-        cluster-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+        cluster-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                        {Config/NIMBUS_IMPERSONATION_ACL {impersonating-user {"hosts" [ (.getHostName (InetAddress/getLocalHost))]
                                                                             "groups" groups}}})
         authorizer (ImpersonationAuthorizer. )

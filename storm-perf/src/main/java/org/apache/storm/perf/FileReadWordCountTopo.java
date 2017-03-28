@@ -27,7 +27,7 @@ import org.apache.storm.perf.spout.FileReadSpout;
 import org.apache.storm.perf.utils.Helper;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 
 import java.util.Map;
@@ -87,7 +87,7 @@ public class FileReadWordCountTopo {
                 return;
             }
             Integer durationSec = Integer.parseInt(args[0]);
-            Map topoConf = Utils.findAndReadConfigFile(args[1]);
+            Map topoConf = ClientUtils.findAndReadConfigFile(args[1]);
 
             Helper.runOnClusterAndPrintMetrics(durationSec, TOPOLOGY_NAME, topoConf, getTopology(topoConf));
 

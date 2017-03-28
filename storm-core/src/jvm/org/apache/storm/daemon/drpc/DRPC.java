@@ -38,7 +38,7 @@ import org.apache.storm.metric.StormMetricsRegistry;
 import org.apache.storm.security.auth.IAuthorizer;
 import org.apache.storm.security.auth.ReqContext;
 import org.apache.storm.security.auth.authorizer.DRPCAuthorizerBase;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ObjectReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +98,7 @@ public class DRPC implements AutoCloseable {
     
     public DRPC(Map<String, Object> conf) {
         this(mkAuthorizationHandler((String)conf.get(Config.DRPC_AUTHORIZER), conf),
-                Utils.getInt(conf.get(Config.DRPC_REQUEST_TIMEOUT_SECS), 600) * 1000);
+                ObjectReader.getInt(conf.get(Config.DRPC_REQUEST_TIMEOUT_SECS), 600) * 1000);
     }
     
     public DRPC(IAuthorizer auth, long timeoutMs) {

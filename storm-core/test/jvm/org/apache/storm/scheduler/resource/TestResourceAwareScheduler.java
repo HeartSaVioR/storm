@@ -35,7 +35,7 @@ import org.apache.storm.testing.TestWordSpout;
 import org.apache.storm.topology.BoltDeclarer;
 import org.apache.storm.topology.SpoutDeclarer;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.validation.ConfigValidation;
 
 import org.junit.Assert;
@@ -740,7 +740,7 @@ public class TestResourceAwareScheduler {
 
     @Test
     public void TestReadInResourceAwareSchedulerUserPools() {
-        Map fromFile = Utils.findAndReadConfigFile("user-resource-pools.yaml", false);
+        Map fromFile = ClientUtils.findAndReadConfigFile("user-resource-pools.yaml", false);
         LOG.info("fromFile: {}", fromFile);
         ConfigValidation.validateFields(fromFile);
     }
@@ -753,7 +753,7 @@ public class TestResourceAwareScheduler {
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1000.0);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(4, 4, resourceMap);
         Config config = new Config();
-        config.putAll(Utils.readDefaultConfig());
+        config.putAll(ClientUtils.readDefaultConfig());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());
@@ -819,7 +819,7 @@ public class TestResourceAwareScheduler {
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1024.0);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(20, 4, resourceMap);
         Config config = new Config();
-        config.putAll(Utils.readDefaultConfig());
+        config.putAll(ClientUtils.readDefaultConfig());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());
@@ -934,7 +934,7 @@ public class TestResourceAwareScheduler {
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1024.0 * 10);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(20, 4, resourceMap);
         Config config = new Config();
-        config.putAll(Utils.readDefaultConfig());
+        config.putAll(ClientUtils.readDefaultConfig());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());
@@ -1020,7 +1020,7 @@ public class TestResourceAwareScheduler {
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1024.0 * 10);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(1, 4, resourceMap);
         Config config = new Config();
-        config.putAll(Utils.readDefaultConfig());
+        config.putAll(ClientUtils.readDefaultConfig());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());
@@ -1080,7 +1080,7 @@ public class TestResourceAwareScheduler {
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1000.0);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(6, 4, resourceMap);
         Config config = new Config();
-        config.putAll(Utils.readDefaultConfig());
+        config.putAll(ClientUtils.readDefaultConfig());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());
@@ -1219,7 +1219,7 @@ public class TestResourceAwareScheduler {
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1000.0);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(4, 4, resourceMap);
         Config config = new Config();
-        config.putAll(Utils.readDefaultConfig());
+        config.putAll(ClientUtils.readDefaultConfig());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());
@@ -1273,7 +1273,7 @@ public class TestResourceAwareScheduler {
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1000.0);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(8, 4, resourceMap);
         Config config = new Config();
-        config.putAll(Utils.readDefaultConfig());
+        config.putAll(ClientUtils.readDefaultConfig());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());
@@ -1332,7 +1332,7 @@ public class TestResourceAwareScheduler {
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1000.0);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(25, 1, resourceMap);
         Config config = new Config();
-        config.putAll(Utils.readDefaultConfig());
+        config.putAll(ClientUtils.readDefaultConfig());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(Config.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());

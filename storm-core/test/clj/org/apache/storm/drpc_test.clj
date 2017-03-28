@@ -17,7 +17,7 @@
   (:use [clojure test])
   (:import [org.apache.storm.drpc ReturnResults DRPCSpout
             LinearDRPCTopologyBuilder DRPCInvocationsClient]
-           [org.apache.storm.utils ConfigUtils Utils ServiceRegistry])
+           [org.apache.storm.utils ConfigUtils Utils ServiceRegistry ClientUtils])
   (:import [org.apache.storm.topology FailedException])
   (:import [org.apache.storm.coordination CoordinatedBolt$FinishedCallback])
   (:import [org.apache.storm ILocalDRPC LocalDRPC LocalCluster])
@@ -46,15 +46,15 @@
         spout (DRPCSpout. "test" drpc)
         cluster (LocalCluster.)
         topology (Thrift/buildTopology
-                  {"1" (Thrift/prepareSpoutDetails spout)}
-                  {"2" (Thrift/prepareBoltDetails
-                         {(Utils/getGlobalStreamId "1" nil)
-                          (Thrift/prepareShuffleGrouping)}
-                         exclamation-bolt)
-                   "3" (Thrift/prepareBoltDetails
-                         {(Utils/getGlobalStreamId "2" nil)
-                          (Thrift/prepareGlobalGrouping)}
-                         (ReturnResults.))})]
+                   {"1" (Thrift/prepareSpoutDetails spout)}
+                   {"2" (Thrift/prepareBoltDetails
+                          {(ClientUtils/getGlobalStreamId "1" nil)
+                           (Thrift/prepareShuffleGrouping)}
+                          exclamation-bolt)
+                    "3" (Thrift/prepareBoltDetails
+                          {(ClientUtils/getGlobalStreamId "2" nil)
+                           (Thrift/prepareGlobalGrouping)}
+                          (ReturnResults.))})]
     (.submitTopology cluster "test" {} topology)
 
     (is (= "aaa!!!" (.execute drpc "test" "aaa")))

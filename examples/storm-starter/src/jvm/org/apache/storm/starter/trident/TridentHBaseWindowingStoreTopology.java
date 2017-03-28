@@ -35,7 +35,7 @@ import org.apache.storm.trident.windowing.WindowsStoreFactory;
 import org.apache.storm.trident.windowing.config.TumblingCountWindow;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +80,7 @@ public class TridentHBaseWindowingStoreTopology {
         if (args.length == 0) {
             try (LocalCluster cluster = new LocalCluster();
                  LocalTopology topo = cluster.submitTopology("wordCounterWithWindowing", conf, buildTopology(windowStoreFactory));) {
-                Utils.sleep(120 * 1000);
+                ClientUtils.sleep(120 * 1000);
             }
             System.exit(0);
         } else {

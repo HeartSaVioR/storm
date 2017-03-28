@@ -29,7 +29,7 @@ import org.apache.storm.trident.testing.FixedBatchSpout;
 import org.apache.storm.trident.tuple.TridentTuple;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -97,7 +97,7 @@ public class TridentMinMaxOfVehiclesTopology {
         if (args.length == 0) {
             try (LocalCluster cluster = new LocalCluster();
                  LocalTopology topo = cluster.submitTopology("vehicles-topology", conf, topology);) {
-                Utils.sleep(60 * 1000);
+                ClientUtils.sleep(60 * 1000);
             }
             System.exit(0);
         } else {

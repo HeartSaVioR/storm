@@ -23,7 +23,7 @@ import org.apache.storm.LocalCluster.LocalTopology;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.topology.base.BaseWindowedBolt;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.starter.bolt.PrinterBolt;
 import org.apache.storm.starter.bolt.SlidingWindowSumBolt;
 import org.apache.storm.starter.spout.RandomIntegerSpout;
@@ -55,7 +55,7 @@ public class SlidingTupleTsTopology {
         } else {
             try (LocalCluster cluster = new LocalCluster();
                  LocalTopology topo = cluster.submitTopology("test", conf, builder.createTopology());) {
-                Utils.sleep(40000);
+                ClientUtils.sleep(40000);
             }
         }
     }

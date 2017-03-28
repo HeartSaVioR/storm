@@ -37,6 +37,7 @@ import org.apache.storm.container.ResourceIsolationInterface;
 import org.apache.storm.generated.LSWorkerHeartbeat;
 import org.apache.storm.generated.LocalAssignment;
 import org.apache.storm.generated.ProfileRequest;
+import org.apache.storm.utils.ClientConfigUtils;
 import org.apache.storm.utils.ConfigUtils;
 import org.apache.storm.utils.LocalState;
 import org.apache.storm.utils.Utils;
@@ -156,7 +157,7 @@ public abstract class Container implements Killable {
     
     protected Map<String, Object> readTopoConf() throws IOException {
         assert(_topologyId != null);
-        return ConfigUtils.readSupervisorStormConf(_conf, _topologyId);
+        return ClientConfigUtils.readSupervisorStormConf(_conf, _topologyId);
     }
     
     /**
@@ -203,7 +204,7 @@ public abstract class Container implements Killable {
      * @throws IOException on any error
      */
     public LSWorkerHeartbeat readHeartbeat() throws IOException {
-        LocalState localState = ConfigUtils.workerState(_conf, _workerId);
+        LocalState localState = ClientConfigUtils.workerState(_conf, _workerId);
         LSWorkerHeartbeat hb = localState.getWorkerHeartBeat();
         LOG.trace("{}: Reading heartbeat {}", _workerId, hb);
         return hb;
@@ -312,11 +313,11 @@ public abstract class Container implements Killable {
         } 
         LOG.info("Setting up {}:{}", _supervisorId, _workerId);
 
-        _ops.forceMkdir(new File(ConfigUtils.workerPidsRoot(_conf, _workerId)));
+        _ops.forceMkdir(new File(ClientConfigUtils.workerPidsRoot(_conf, _workerId)));
         _ops.forceMkdir(new File(ConfigUtils.workerTmpRoot(_conf, _workerId)));
-        _ops.forceMkdir(new File(ConfigUtils.workerHeartbeatsRoot(_conf, _workerId)));
+        _ops.forceMkdir(new File(ClientConfigUtils.workerHeartbeatsRoot(_conf, _workerId)));
         
-        File workerArtifacts = new File(ConfigUtils.workerArtifactsRoot(_conf, _topologyId, _port));
+        File workerArtifacts = new File(ClientConfigUtils.workerArtifactsRoot(_conf, _topologyId, _port));
         if (!_ops.fileExists(workerArtifacts)) {
             _ops.forceMkdir(workerArtifacts);
             _ops.setupWorkerArtifactsDir(_topoConf, workerArtifacts);
@@ -384,8 +385,8 @@ public abstract class Container implements Killable {
     protected void createArtifactsLink() throws IOException {
         _type.assertFull();
         if (!_symlinksDisabled) {
-            File workerDir = new File(ConfigUtils.workerRoot(_conf, _workerId));
-            File topoDir = new File(ConfigUtils.workerArtifactsRoot(_conf, _topologyId, _port));
+            File workerDir = new File(ClientConfigUtils.workerRoot(_conf, _workerId));
+            File topoDir = new File(ClientConfigUtils.workerArtifactsRoot(_conf, _topologyId, _port));
             if (_ops.fileExists(workerDir)) {
                 LOG.debug("Creating symlinks for worker-id: {} topology-id: {} to its port artifacts directory", _workerId, _topologyId);
                 _ops.createSymlink(new File(workerDir, "artifacts"), topoDir);
@@ -400,8 +401,8 @@ public abstract class Container implements Killable {
      */
     protected void createBlobstoreLinks() throws IOException {
         _type.assertFull();
-        String stormRoot = ConfigUtils.supervisorStormDistRoot(_conf, _topologyId);
-        String workerRoot = ConfigUtils.workerRoot(_conf, _workerId);
+        String stormRoot = ClientConfigUtils.supervisorStormDistRoot(_conf, _topologyId);
+        String workerRoot = ClientConfigUtils.workerRoot(_conf, _workerId);
         
         @SuppressWarnings("unchecked")
         Map<String, Map<String, Object>> blobstoreMap = (Map<String, Map<String, Object>>) _topoConf.get(Config.TOPOLOGY_BLOBSTORE_MAP);
@@ -447,7 +448,7 @@ public abstract class Container implements Killable {
      */
     protected Set<Long> getAllPids() throws IOException {
         Set<Long> ret = new HashSet<>();
-        for (String listing: Utils.readDirContents(ConfigUtils.workerPidsRoot(_conf, _workerId))) {
+        for (String listing: Utils.readDirContents(ClientConfigUtils.workerPidsRoot(_conf, _workerId))) {
             ret.add(Long.valueOf(listing));
         }
         
@@ -473,10 +474,10 @@ public abstract class Container implements Killable {
         } else if (_topoConf != null) { 
             return (String) _topoConf.get(Config.TOPOLOGY_SUBMITTER_USER);
         }
-        if (ConfigUtils.isLocalMode(_conf)) {
+        if (ClientConfigUtils.isLocalMode(_conf)) {
             return System.getProperty("user.name");
         } else {
-            File f = new File(ConfigUtils.workerArtifactsRoot(_conf));
+            File f = new File(ClientConfigUtils.workerArtifactsRoot(_conf));
             if (f.exists()) {
                 return Files.getOwner(f.toPath()).getName();
             }
@@ -519,10 +520,10 @@ public abstract class Container implements Killable {
         
         //Always make sure to clean up everything else before worker directory
         //is removed since that is what is going to trigger the retry for cleanup
-        _ops.deleteIfExists(new File(ConfigUtils.workerHeartbeatsRoot(_conf, _workerId)), user, _workerId);
-        _ops.deleteIfExists(new File(ConfigUtils.workerPidsRoot(_conf, _workerId)), user, _workerId);
+        _ops.deleteIfExists(new File(ClientConfigUtils.workerHeartbeatsRoot(_conf, _workerId)), user, _workerId);
+        _ops.deleteIfExists(new File(ClientConfigUtils.workerPidsRoot(_conf, _workerId)), user, _workerId);
         _ops.deleteIfExists(new File(ConfigUtils.workerTmpRoot(_conf, _workerId)), user, _workerId);
-        _ops.deleteIfExists(new File(ConfigUtils.workerRoot(_conf, _workerId)), user, _workerId);
+        _ops.deleteIfExists(new File(ClientConfigUtils.workerRoot(_conf, _workerId)), user, _workerId);
         deleteSavedWorkerUser();
         _workerId = null;
     }

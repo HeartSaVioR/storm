@@ -20,7 +20,7 @@ package org.apache.storm.hdfs.trident.format;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -54,7 +54,7 @@ public class TestSimpleFileNameFormat {
         String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now);
         String host = null;
         try {
-            host = Utils.localHostname();
+            host = ClientUtils.localHostname();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }

@@ -23,7 +23,7 @@
   (:import [org.apache.storm StormTimer]
            [org.apache.storm.daemon.supervisor SupervisorUtils]
            [org.apache.storm.metric StormMetricsRegistry])
-  (:import [org.apache.storm.utils Utils Time VersionInfo ConfigUtils])
+  (:import [org.apache.storm.utils Utils Time VersionInfo ConfigUtils ClientConfigUtils ClientUtils])
   (:import [org.slf4j LoggerFactory])
   (:import [java.util Arrays ArrayList HashSet])
   (:import [java.util.zip GZIPInputStream])
@@ -48,7 +48,7 @@
             [clojure.string :as string])
   (:gen-class))
 
-(def ^:dynamic *STORM-CONF* (clojurify-structure (ConfigUtils/readStormConfig)))
+(def ^:dynamic *STORM-CONF* (clojurify-structure (ClientConfigUtils/readStormConfig)))
 (def STORM-VERSION (VersionInfo/getVersion))
 
 (def worker-log-filename-pattern  #"^worker.log(.*)")
@@ -230,7 +230,7 @@
   [^File dir]
   (let [topodir (.getParentFile dir)]
     (if (empty? (.listFiles topodir))
-      (Utils/forceDelete (.getCanonicalPath topodir)))))
+      (ClientUtils/forceDelete (.getCanonicalPath topodir)))))
 
 (defn cleanup-fn!
   "Delete old log dirs for which the workers are no longer alive"
@@ -253,7 +253,7 @@
     (dofor [dir dead-worker-dirs]
            (let [path (.getCanonicalPath dir)]
              (log-message "Cleaning up: Removing " path)
-             (try (Utils/forceDelete path)
+             (try (ClientUtils/forceDelete path)
                   (cleanup-empty-topodir! dir)
                   (catch Exception ex (log-error ex)))))
     (per-workerdir-cleanup! (File. log-root-dir) (* per-dir-size (* 1024 1024)) cleaner)
@@ -270,7 +270,7 @@
                       (^void uncaughtException
                         [this ^Thread t ^Throwable e]
                         (log-error t "Error when doing logs cleanup")
-                        (Utils/exitProcess 20 "Error when doing log cleanup"))))]
+                        (ClientUtils/exitProcess 20 "Error when doing log cleanup"))))]
         (.scheduleRecurring timer 0 interval-secs
           (fn [] (cleanup-fn! log-root-dir)))))))
 
@@ -529,7 +529,7 @@
 
 (defn url-to-match-centered-in-log-page
   [needle fname offset port]
-  (let [host (Utils/hostname)
+  (let [host (ClientUtils/hostname)
         port (logviewer-port)
         fname (clojure.string/join Utils/FILE_PATH_SEPARATOR (take-last 3 (split fname (re-pattern Utils/FILE_PATH_SEPARATOR))))]
     (url (str "http://" host ":" port "/log")
@@ -542,7 +542,7 @@
 
 (defn url-to-match-centered-in-log-page-daemon-file
   [needle fname offset port]
-  (let [host (Utils/hostname)
+  (let [host (ClientUtils/hostname)
         port (logviewer-port)
         fname (clojure.string/join Utils/FILE_PATH_SEPARATOR (take-last 1 (split fname (re-pattern Utils/FILE_PATH_SEPARATOR))))]
     (url (str "http://" host ":" port "/daemonlog")
@@ -1230,10 +1230,10 @@
     (log-error ex))))
 
 (defn -main []
-  (let [conf (clojurify-structure (ConfigUtils/readStormConfig))
-        log-root (ConfigUtils/workerArtifactsRoot conf)
+  (let [conf (clojurify-structure (ClientConfigUtils/readStormConfig))
+        log-root (ClientConfigUtils/workerArtifactsRoot conf)
         daemonlog-root (log-root-dir (conf LOGVIEWER-APPENDER-NAME))]
-    (Utils/setupDefaultUncaughtExceptionHandler)
+    (ClientUtils/setupDefaultUncaughtExceptionHandler)
     (start-log-cleaner! conf log-root)
     (log-message "Starting logviewer server for storm version '"
                  STORM-VERSION

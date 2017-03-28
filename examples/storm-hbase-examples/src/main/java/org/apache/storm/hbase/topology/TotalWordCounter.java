@@ -30,7 +30,7 @@ import java.math.BigInteger;
 import java.util.Map;
 import java.util.Random;
 
-import static org.apache.storm.utils.Utils.tuple;
+import static org.apache.storm.utils.ClientUtils.tuple;
 
 public class TotalWordCounter implements IBasicBolt {
 

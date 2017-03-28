@@ -21,6 +21,7 @@ package org.apache.storm.pmml.runner.jpmml;
 import org.apache.storm.pmml.model.ModelOutputs;
 import org.apache.storm.pmml.runner.ModelRunner;
 import org.apache.storm.pmml.runner.ModelRunnerFactory;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.Utils;
 import org.dmg.pmml.IOUtil;
 import org.dmg.pmml.PMML;
@@ -64,7 +65,7 @@ public class JpmmlFactory {
      * Uses Storm config as returned by {@code Utils.readStormConfig()} to get the Blobstore client
      */
     public static PMML newPmml(String blobKey) throws JAXBException, SAXException, IOException {
-        return newPmml(blobKey, Utils.readStormConfig());
+        return newPmml(blobKey, ClientUtils.readStormConfig());
     }
 
     /**
@@ -84,7 +85,7 @@ public class JpmmlFactory {
      * @param blobKey key of PMML model in Blobstore
      */
     public static InputStream getPmmlModelBlob(String blobKey) {
-        return getPmmlModelBlob(blobKey, Utils.readStormConfig());
+        return getPmmlModelBlob(blobKey, ClientUtils.readStormConfig());
     }
 
     /**
@@ -135,7 +136,7 @@ public class JpmmlFactory {
      */
     public static Evaluator newEvaluator(String blobKey) throws IOException, JAXBException, SAXException {
         Objects.requireNonNull(blobKey);
-        return newEvaluator(blobKey, Utils.readStormConfig());
+        return newEvaluator(blobKey, ClientUtils.readStormConfig());
     }
 
     /**
@@ -188,7 +189,7 @@ public class JpmmlFactory {
          * @param blobKey key of PMML model in Blobstore
          */
         public ModelRunnerFromBlobStore(String blobKey, ModelOutputs modelOutputs) {
-            this(blobKey, modelOutputs, Utils.readStormConfig());
+            this(blobKey, modelOutputs, ClientUtils.readStormConfig());
         }
 
         /**

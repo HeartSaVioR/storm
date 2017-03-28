@@ -20,7 +20,7 @@ package org.apache.storm.sql.runtime.serde.tsv;
 import com.google.common.base.Preconditions;
 import org.apache.storm.spout.Scheme;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -42,7 +42,7 @@ public class TsvScheme implements Scheme {
 
   @Override
   public List<Object> deserialize(ByteBuffer ser) {
-    String data = new String(Utils.toByteArray(ser), StandardCharsets.UTF_8);
+    String data = new String(ClientUtils.toByteArray(ser), StandardCharsets.UTF_8);
     List<String> parts = org.apache.storm.sql.runtime.utils.Utils.split(data, delimiter);
     Preconditions.checkArgument(parts.size() == fieldNames.size(), "Invalid schema");
 

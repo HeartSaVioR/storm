@@ -67,7 +67,9 @@ import org.apache.storm.testing.InProcessZookeeper;
 import org.apache.storm.testing.NonRichBoltTracker;
 import org.apache.storm.testing.TmpPath;
 import org.apache.storm.testing.TrackedTopology;
-import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.ClientConfigUtils;
+import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.RegisteredGlobalState;
 import org.apache.storm.utils.StormCommonInstaller;
 import org.apache.storm.utils.Time;
@@ -288,7 +290,7 @@ public class LocalCluster implements ILocalCluster {
          * on tracked topologies.
          */
         public Builder withTracked() {
-            this.trackId = Utils.uuid();
+            this.trackId = ClientUtils.uuid();
             return this;
         }
         
@@ -376,7 +378,7 @@ public class LocalCluster implements ILocalCluster {
             this.supervisors = new ArrayList<>();
             TmpPath nimbusTmp = new TmpPath();
             this.tmpDirs.add(nimbusTmp);
-            Map<String, Object> conf = ConfigUtils.readStormConfig();
+            Map<String, Object> conf = ClientConfigUtils.readStormConfig();
             conf.put(Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS, true);
             conf.put(Config.ZMQ_LINGER_MILLIS, 0);
             conf.put(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS, false);
@@ -413,7 +415,7 @@ public class LocalCluster implements ILocalCluster {
             this.nimbus = nimbus;
             this.nimbus.launchServer();
             IContext context = null;
-            if (!Utils.getBoolean(this.daemonConf.get(Config.STORM_LOCAL_MODE_ZMQ), false)) {
+            if (!ObjectReader.getBoolean(this.daemonConf.get(Config.STORM_LOCAL_MODE_ZMQ), false)) {
                 context = new Context();
                 context.prepare(this.daemonConf);
             }
@@ -738,14 +740,14 @@ public class LocalCluster implements ILocalCluster {
         superConf.put(Config.STORM_LOCAL_DIR, tmpDir.getPath());
         superConf.put(Config.SUPERVISOR_SLOTS_PORTS, portNumbers);
         
-        final String superId = id == null ? Utils.uuid() : id;
+        final String superId = id == null ? ClientUtils.uuid() : id;
         ISupervisor isuper = new StandaloneSupervisor() {
             @Override
             public String generateSupervisorId() {
                 return superId;
             }
         };
-        if (!ConfigUtils.isLocalMode(superConf)) {
+        if (!ClientConfigUtils.isLocalMode(superConf)) {
             throw new IllegalArgumentException("Cannot start server in distrubuted mode!");
         }
         

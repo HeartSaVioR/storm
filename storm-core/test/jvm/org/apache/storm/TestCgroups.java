@@ -18,10 +18,10 @@
 
 package org.apache.storm;
 
+import org.apache.storm.utils.ClientUtils;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.apache.storm.container.cgroup.CgroupManager;
-import org.apache.storm.utils.Utils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class TestCgroups {
     @Test
     public void testSetupAndTearDown() throws IOException {
         Config config = new Config();
-        config.putAll(Utils.readDefaultConfig());
+        config.putAll(ClientUtils.readDefaultConfig());
         //We don't want to run the test is CGroups are not setup
         Assume.assumeTrue("Check if CGroups are setup", ((boolean) config.get(Config.STORM_RESOURCE_ISOLATION_PLUGIN_ENABLE)) == true);
 

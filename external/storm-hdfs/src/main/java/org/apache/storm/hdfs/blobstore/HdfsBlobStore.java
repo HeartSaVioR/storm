@@ -29,7 +29,7 @@ import org.apache.storm.generated.KeyAlreadyExistsException;
 import org.apache.storm.generated.ReadableBlobMeta;
 import org.apache.storm.generated.SettableBlobMeta;
 import org.apache.storm.nimbus.NimbusInfo;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.UserGroupInformation;
@@ -184,7 +184,7 @@ public class HdfsBlobStore extends BlobStore {
             BlobStoreFile metaFile = _hbs.write(META_PREFIX + key, true);
             metaFile.setMetadata(meta);
             mOut = new BlobStoreFileOutputStream(metaFile);
-            mOut.write(Utils.thriftSerialize(meta));
+            mOut.write(ClientUtils.thriftSerialize(meta));
             mOut.close();
             mOut = null;
             BlobStoreFile dataFile = _hbs.write(DATA_PREFIX + key, true);
@@ -236,7 +236,7 @@ public class HdfsBlobStore extends BlobStore {
             }
             in.close();
             in = null;
-            return Utils.thriftDeserialize(SettableBlobMeta.class, out.toByteArray());
+            return ClientUtils.thriftDeserialize(SettableBlobMeta.class, out.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -362,7 +362,7 @@ public class HdfsBlobStore extends BlobStore {
             BlobStoreFile hdfsFile = _hbs.write(META_PREFIX + key, false);
             hdfsFile.setMetadata(meta);
             mOut = new BlobStoreFileOutputStream(hdfsFile);
-            mOut.write(Utils.thriftSerialize(meta));
+            mOut.write(ClientUtils.thriftSerialize(meta));
             mOut.close();
             mOut = null;
         } catch (IOException exp) {

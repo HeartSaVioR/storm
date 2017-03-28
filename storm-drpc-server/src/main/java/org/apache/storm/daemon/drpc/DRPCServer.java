@@ -33,8 +33,9 @@ import org.apache.storm.security.auth.ThriftConnectionType;
 import org.apache.storm.security.auth.ThriftServer;
 import org.apache.storm.ui.FilterConfiguration;
 import org.apache.storm.ui.UIHelpers;
-import org.apache.storm.utils.ConfigUtils;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientConfigUtils;
+import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.shade.org.eclipse.jetty.server.Server;
 import org.apache.storm.shade.org.eclipse.jetty.servlet.FilterHolder;
 import org.apache.storm.shade.org.eclipse.jetty.servlet.FilterMapping;
@@ -82,7 +83,7 @@ public class DRPCServer implements AutoCloseable {
             Map<String, String> filterParams = (Map<String, String>) (conf.get(Config.DRPC_HTTP_FILTER_PARAMS));
             FilterConfiguration filterConfiguration = new FilterConfiguration(filterClass, filterParams);
             final List<FilterConfiguration> filterConfigurations = Arrays.asList(filterConfiguration);
-            final Integer httpsPort = Utils.getInt(conf.get(Config.DRPC_HTTPS_PORT), 0);
+            final Integer httpsPort = ObjectReader.getInt(conf.get(Config.DRPC_HTTPS_PORT), 0);
             final String httpsKsPath = (String) (conf.get(Config.DRPC_HTTPS_KEYSTORE_PATH));
             final String httpsKsPassword = (String) (conf.get(Config.DRPC_HTTPS_KEYSTORE_PASSWORD));
             final String httpsKsType = (String) (conf.get(Config.DRPC_HTTPS_KEYSTORE_TYPE));
@@ -123,8 +124,8 @@ public class DRPCServer implements AutoCloseable {
     public DRPCServer(Map<String, Object> conf) {
         _drpc = new DRPC(conf);
         DRPCThrift thrift = new DRPCThrift(_drpc);
-        _handlerServer = mkHandlerServer(thrift, Utils.getInt(conf.get(Config.DRPC_PORT), null), conf);
-        _invokeServer = mkInvokeServer(thrift, Utils.getInt(conf.get(Config.DRPC_INVOCATIONS_PORT), 3773), conf);
+        _handlerServer = mkHandlerServer(thrift, ObjectReader.getInt(conf.get(Config.DRPC_PORT), null), conf);
+        _invokeServer = mkInvokeServer(thrift, ObjectReader.getInt(conf.get(Config.DRPC_INVOCATIONS_PORT), 3773), conf);
         _httpServer = mkHttpServer(conf, _drpc);
     }
 
@@ -169,10 +170,10 @@ public class DRPCServer implements AutoCloseable {
     }
     
     public static void main(String [] args) throws Exception {
-        Utils.setupDefaultUncaughtExceptionHandler();
-        Map<String, Object> conf = ConfigUtils.readStormConfig();
+        ClientUtils.setupDefaultUncaughtExceptionHandler();
+        Map<String, Object> conf = ClientConfigUtils.readStormConfig();
         try (DRPCServer server = new DRPCServer(conf)) {
-            Utils.addShutdownHookWithForceKillIn1Sec(() -> server.close());
+            ClientUtils.addShutdownHookWithForceKillIn1Sec(() -> server.close());
             StormMetricsRegistry.startMetricsReporters(conf);
             server.start();
         }

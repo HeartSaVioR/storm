@@ -24,7 +24,6 @@ import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.BasicOutputCollector;
 import org.apache.storm.topology.FailedException;
-import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.topology.base.BaseBasicBolt;
@@ -32,12 +31,11 @@ import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.NimbusClient;
-import org.apache.storm.utils.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 public class InOrderDeliveryTest {
   public static class InOrderSpout extends BaseRichSpout {
@@ -161,8 +159,8 @@ public class InOrderDeliveryTest {
     conf.setNumWorkers(1);
     StormSubmitter.submitTopologyWithProgressBar(name, conf, builder.createTopology());
 
-    Map clusterConf = Utils.readStormConfig();
-    clusterConf.putAll(Utils.readCommandLineOpts());
+    Map clusterConf = ClientUtils.readStormConfig();
+    clusterConf.putAll(ClientUtils.readCommandLineOpts());
     Nimbus.Client client = NimbusClient.getConfiguredClient(clusterConf).getClient();
 
     //Sleep for 50 mins

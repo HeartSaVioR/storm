@@ -25,8 +25,8 @@ import org.apache.storm.generated.ReadableBlobMeta;
 import org.apache.storm.generated.SettableBlobMeta;
 import org.apache.storm.generated.KeyAlreadyExistsException;
 import org.apache.storm.generated.KeyNotFoundException;
+import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.NimbusClient;
-import org.apache.storm.utils.Utils;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -267,7 +267,7 @@ public class NimbusBlobStore extends ClientBlobStore implements AutoCloseable {
     public void prepare(Map conf) {
         this.client = NimbusClient.getConfiguredClient(conf);
         if (conf != null) {
-            this.bufferSize = Utils.getInt(conf.get(Config.STORM_BLOBSTORE_INPUTSTREAM_BUFFER_SIZE_BYTES), bufferSize);
+            this.bufferSize = ObjectReader.getInt(conf.get(Config.STORM_BLOBSTORE_INPUTSTREAM_BUFFER_SIZE_BYTES), bufferSize);
         }
     }
 
@@ -403,7 +403,7 @@ public class NimbusBlobStore extends ClientBlobStore implements AutoCloseable {
         }
         this.client = client;
         if (conf != null) {
-            this.bufferSize = Utils.getInt(conf.get(Config.STORM_BLOBSTORE_INPUTSTREAM_BUFFER_SIZE_BYTES), bufferSize);
+            this.bufferSize = ObjectReader.getInt(conf.get(Config.STORM_BLOBSTORE_INPUTSTREAM_BUFFER_SIZE_BYTES), bufferSize);
         }
         return true;
     }

@@ -98,7 +98,7 @@ public class ThriftTopologyUtilsTest extends TestCase {
 
         if(withWorkerHook) {
             BaseWorkerHook workerHook = new BaseWorkerHook();
-            stormTopology.add_to_worker_hooks(ByteBuffer.wrap(Utils.javaSerialize(workerHook)));
+            stormTopology.add_to_worker_hooks(ByteBuffer.wrap(ClientUtils.javaSerialize(workerHook)));
         }
 
         return stormTopology;

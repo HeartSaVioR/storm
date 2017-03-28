@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.Map;
 
 import org.apache.storm.task.TopologyContext;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 public class SimpleFileNameFormat implements FileNameFormat {
 
@@ -60,7 +60,7 @@ public class SimpleFileNameFormat implements FileNameFormat {
         this.componentId = topologyContext.getThisComponentId();
         this.taskId = topologyContext.getThisTaskId();
         try {
-            this.host = Utils.localHostname();
+            this.host = ClientUtils.localHostname();
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }

@@ -26,7 +26,7 @@ import org.apache.storm.tuple.Tuple;
 
 import java.util.Map;
 
-import static org.apache.storm.utils.Utils.tuple;
+import static org.apache.storm.utils.ClientUtils.tuple;
 
 public class WordCounter implements IBasicBolt {
 

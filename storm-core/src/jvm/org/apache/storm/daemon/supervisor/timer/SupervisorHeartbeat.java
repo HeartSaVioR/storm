@@ -21,8 +21,8 @@ import org.apache.storm.Config;
 import org.apache.storm.cluster.IStormClusterState;
 import org.apache.storm.daemon.supervisor.Supervisor;
 import org.apache.storm.generated.SupervisorInfo;
+import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.Time;
-import org.apache.storm.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,7 +56,7 @@ public class SupervisorHeartbeat implements Runnable {
         List<Long> portList = new ArrayList<>();
         if (metaDatas != null){
             for (Object data : metaDatas){
-                Integer port = Utils.getInt(data);
+                Integer port = ObjectReader.getInt(data);
                 if (port != null)
                     portList.add(port.longValue());
             }
@@ -72,9 +72,9 @@ public class SupervisorHeartbeat implements Runnable {
 
     private Map<String, Double> mkSupervisorCapacities(Map conf) {
         Map<String, Double> ret = new HashMap<String, Double>();
-        Double mem = Utils.getDouble(conf.get(Config.SUPERVISOR_MEMORY_CAPACITY_MB), 4096.0);
+        Double mem = ObjectReader.getDouble(conf.get(Config.SUPERVISOR_MEMORY_CAPACITY_MB), 4096.0);
         ret.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, mem);
-        Double cpu = Utils.getDouble(conf.get(Config.SUPERVISOR_CPU_CAPACITY), 400.0);
+        Double cpu = ObjectReader.getDouble(conf.get(Config.SUPERVISOR_CPU_CAPACITY), 400.0);
         ret.put(Config.SUPERVISOR_CPU_CAPACITY, cpu);
         return ret;
     }

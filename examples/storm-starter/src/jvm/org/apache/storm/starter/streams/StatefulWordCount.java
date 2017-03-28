@@ -28,7 +28,7 @@ import org.apache.storm.streams.operations.mappers.ValueMapper;
 import org.apache.storm.streams.windowing.TumblingWindows;
 import org.apache.storm.testing.TestWordSpout;
 import org.apache.storm.topology.base.BaseWindowedBolt;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 /**
  * A stateful word count that uses {@link PairStream#updateStateByKey(StateUpdater)} to
@@ -81,7 +81,7 @@ public class StatefulWordCount {
         } else {
             try (LocalCluster cluster = new LocalCluster();
                  LocalCluster.LocalTopology topo = cluster.submitTopology("test", config, builder.build())) {
-                Utils.sleep(60_000);
+                ClientUtils.sleep(60_000);
             }
         }
     }

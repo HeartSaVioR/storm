@@ -21,7 +21,6 @@ import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.LocalCluster.LocalTopology;
 import org.apache.storm.StormSubmitter;
-import org.apache.storm.generated.StormTopology;
 import org.apache.storm.starter.spout.RandomIntegerSpout;
 import org.apache.storm.state.KeyValueState;
 import org.apache.storm.task.OutputCollector;
@@ -34,7 +33,7 @@ import org.apache.storm.topology.base.BaseStatefulBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,7 +136,7 @@ public class StatefulTopology {
         } else {
             try (LocalCluster cluster = new LocalCluster();
                  LocalTopology topology = cluster.submitTopology("test", conf, builder.createTopology());) {
-                Utils.sleep(40000);
+                ClientUtils.sleep(40000);
             }
         }
     }

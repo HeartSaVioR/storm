@@ -25,7 +25,7 @@ import org.apache.storm.daemon.worker.Worker;
 import org.apache.storm.generated.LocalAssignment;
 import org.apache.storm.generated.ProfileRequest;
 import org.apache.storm.messaging.IContext;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ public class LocalContainer extends Container {
     public LocalContainer(Map<String, Object> conf, String supervisorId, int port, LocalAssignment assignment, IContext sharedContext) throws IOException {
         super(ContainerType.LAUNCH, conf, supervisorId, port, assignment, null, null, null, null);
         _sharedContext = sharedContext;
-        _workerId = Utils.uuid();
+        _workerId = ClientUtils.uuid();
     }
 
     @Override

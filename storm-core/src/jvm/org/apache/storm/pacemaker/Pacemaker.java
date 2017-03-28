@@ -18,7 +18,6 @@
 package org.apache.storm.pacemaker;
 
 import com.codahale.metrics.ExponentiallyDecayingReservoir;
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import org.apache.storm.generated.HBMessage;
@@ -27,7 +26,7 @@ import org.apache.storm.generated.HBPulse;
 import org.apache.storm.generated.HBNodes;
 import org.apache.storm.generated.HBServerMessageType;
 import org.apache.storm.metric.StormMetricsRegistry;
-import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.ClientConfigUtils;
 import org.apache.storm.utils.VersionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,7 +209,7 @@ public class Pacemaker implements IServerMessageHandler {
 
     public static void main(String[] args) {
         SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
-        Map conf = ConfigUtils.overrideLoginConfigWithSystemProperty(ConfigUtils.readStormConfig());
+        Map conf = ClientConfigUtils.overrideLoginConfigWithSystemProperty(ClientConfigUtils.readStormConfig());
         final Pacemaker serverHandler = new Pacemaker(conf);
         serverHandler.launchServer();
     }

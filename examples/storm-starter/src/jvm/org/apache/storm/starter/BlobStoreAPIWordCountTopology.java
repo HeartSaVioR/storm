@@ -21,11 +21,8 @@ import org.apache.storm.Config;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.blobstore.AtomicOutputStream;
 import org.apache.storm.blobstore.ClientBlobStore;
-import org.apache.storm.blobstore.InputStreamWithMeta;
-import org.apache.storm.blobstore.NimbusBlobStore;
 
 import org.apache.storm.generated.AccessControl;
-import org.apache.storm.generated.AccessControlType;
 import org.apache.storm.generated.AlreadyAliveException;
 import org.apache.storm.generated.AuthorizationException;
 import org.apache.storm.generated.InvalidTopologyException;
@@ -45,6 +42,7 @@ import org.apache.storm.blobstore.BlobStoreAclHandler;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +70,7 @@ public class BlobStoreAPIWordCountTopology {
 
     public static void prepare() {
         Config conf = new Config();
-        conf.putAll(Utils.readStormConfig());
+        conf.putAll(ClientUtils.readStormConfig());
         store = Utils.getClientBlobStore(conf);
     }
 
@@ -87,7 +85,7 @@ public class BlobStoreAPIWordCountTopology {
 
         @Override
         public void nextTuple() {
-            Utils.sleep(100);
+            ClientUtils.sleep(100);
             _collector.emit(new Values(getRandomSentence()));
         }
 
@@ -291,7 +289,7 @@ public class BlobStoreAPIWordCountTopology {
             // Updating file few times every 5 seconds
             for(int i=0; i<10; i++) {
                 updateBlobWithContent(key, store, updateFile(file));
-                Utils.sleep(5000);
+                ClientUtils.sleep(5000);
             }
         } catch (KeyAlreadyExistsException kae) {
             LOG.info("Key already exists {}", kae);

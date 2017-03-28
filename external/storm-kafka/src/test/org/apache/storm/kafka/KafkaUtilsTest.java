@@ -33,6 +33,7 @@ import kafka.message.MessageAndOffset;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.storm.utils.ClientUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -43,7 +44,6 @@ import org.slf4j.LoggerFactory;
 
 import org.apache.storm.kafka.trident.GlobalPartitionInformation;
 import org.apache.storm.spout.SchemeAsMultiScheme;
-import org.apache.storm.utils.Utils;
 
 import com.google.common.collect.ImmutableMap;
 public class KafkaUtilsTest {
@@ -95,7 +95,7 @@ public class KafkaUtilsTest {
         long offset = KafkaUtils.getOffset(simpleConsumer, config.topic, 0, OffsetRequest.LatestTime()) - 1;
         ByteBufferMessageSet messageAndOffsets = KafkaUtils.fetchMessages(config, simpleConsumer,
                 new Partition(Broker.fromString(broker.getBrokerConnectionString()), TEST_TOPIC, 0), offset);
-        String message = new String(Utils.toByteArray(messageAndOffsets.iterator().next().message().payload()));
+        String message = new String(ClientUtils.toByteArray(messageAndOffsets.iterator().next().message().payload()));
         assertThat(message, is(equalTo(value)));
     }
 

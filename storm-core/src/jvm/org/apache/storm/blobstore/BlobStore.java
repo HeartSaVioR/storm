@@ -31,8 +31,8 @@ import java.util.regex.Pattern;
 import javax.security.auth.Subject;
 
 import org.apache.storm.nimbus.NimbusInfo;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.ConfigUtils;
-import org.apache.storm.utils.Utils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -316,7 +316,7 @@ public abstract class BlobStore implements Shutdownable {
      * @throws KeyNotFoundException if the blob could not be found
      */
     public StormTopology readTopology(String topoId, Subject who) throws KeyNotFoundException, AuthorizationException, IOException {
-        return Utils.deserialize(readBlob(ConfigUtils.masterStormCodeKey(topoId), who), StormTopology.class);
+        return ClientUtils.deserialize(readBlob(ConfigUtils.masterStormCodeKey(topoId), who), StormTopology.class);
     }
     
     /**
@@ -329,7 +329,7 @@ public abstract class BlobStore implements Shutdownable {
      * @throws IOException on any error while reading the blob.
      */
     public Map<String, Object> readTopologyConf(String topoId, Subject who) throws KeyNotFoundException, AuthorizationException, IOException {
-        return Utils.fromCompressedJsonConf(readBlob(ConfigUtils.masterStormConfKey(topoId), who));
+        return ClientUtils.fromCompressedJsonConf(readBlob(ConfigUtils.masterStormConfKey(topoId), who));
     }
     
     private static final KeyFilter<String> TO_TOPO_ID = (key) -> ConfigUtils.getIdFromBlobKey(key);

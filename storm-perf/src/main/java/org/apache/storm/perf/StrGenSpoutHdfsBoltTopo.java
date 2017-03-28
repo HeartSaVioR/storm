@@ -33,7 +33,7 @@ import org.apache.storm.perf.spout.StringGenSpout;
 import org.apache.storm.perf.utils.Helper;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 import java.util.Map;
 
@@ -106,7 +106,7 @@ public class StrGenSpoutHdfsBoltTopo {
     public static void main(String[] args) throws Exception {
         if(args.length <= 0) {
             // submit to local cluster
-            Map topoConf = Utils.findAndReadConfigFile("conf/HdfsSpoutTopo.yaml");
+            Map topoConf = ClientUtils.findAndReadConfigFile("conf/HdfsSpoutTopo.yaml");
             LocalCluster cluster = Helper.runOnLocalCluster(TOPOLOGY_NAME, getTopology(topoConf));
 
             Helper.setupShutdownHook(cluster, TOPOLOGY_NAME);
@@ -120,7 +120,7 @@ public class StrGenSpoutHdfsBoltTopo {
                 return;
             }
             Integer durationSec = Integer.parseInt(args[0]);
-            Map topoConf = Utils.findAndReadConfigFile(args[1]);
+            Map topoConf = ClientUtils.findAndReadConfigFile(args[1]);
 
             Helper.runOnClusterAndPrintMetrics(durationSec, TOPOLOGY_NAME, topoConf, getTopology(topoConf));
         }

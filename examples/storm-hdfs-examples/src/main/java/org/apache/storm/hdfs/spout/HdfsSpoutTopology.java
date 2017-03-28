@@ -29,8 +29,8 @@ import org.apache.storm.generated.SpoutStats;
 import org.apache.storm.generated.ClusterSummary;
 import org.apache.storm.metric.LoggingMetricsConsumer;
 import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.NimbusClient;
-import org.apache.storm.utils.Utils;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Fields;
@@ -132,7 +132,7 @@ public class HdfsSpoutTopology {
     builder.setBolt(BOLT_ID, bolt, 1).shuffleGrouping(SPOUT_ID);
 
     // 4 - submit topology, wait for a few min and terminate it
-    Map clusterConf = Utils.readStormConfig();
+    Map clusterConf = ClientUtils.readStormConfig();
     StormSubmitter.submitTopologyWithProgressBar(topologyName, conf, builder.createTopology());
     Nimbus.Client client = NimbusClient.getConfiguredClient(clusterConf).getClient();
 

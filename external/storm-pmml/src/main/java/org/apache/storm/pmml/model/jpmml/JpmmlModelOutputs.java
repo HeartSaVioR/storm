@@ -21,7 +21,7 @@ package org.apache.storm.pmml.model.jpmml;
 import org.apache.storm.pmml.model.ModelOutputs;
 import org.apache.storm.pmml.runner.jpmml.JpmmlFactory;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.Evaluator;
@@ -64,7 +64,7 @@ public class JpmmlModelOutputs implements ModelOutputs {
      */
     public static ModelOutputs toDefaultStream(PMML pmmlModel) {
         Objects.requireNonNull(pmmlModel);
-        return create(pmmlModel, Collections.singletonList(Utils.DEFAULT_STREAM_ID));
+        return create(pmmlModel, Collections.singletonList(ClientUtils.DEFAULT_STREAM_ID));
     }
 
     public static ModelOutputs toDefaultStream(File pmmlModel) {
@@ -84,7 +84,7 @@ public class JpmmlModelOutputs implements ModelOutputs {
     }
 
     public static ModelOutputs toDefaultStream(String blobKey) {
-        return toDefaultStream(blobKey, Utils.readStormConfig());
+        return toDefaultStream(blobKey, ClientUtils.readStormConfig());
     }
 
     public static ModelOutputs toDefaultStream(String blobKey, Map config) {
@@ -123,7 +123,7 @@ public class JpmmlModelOutputs implements ModelOutputs {
     }
 
     public static ModelOutputs toStreams(String blobKey, List<String> streams) {
-        return toStreams(blobKey, Utils.readStormConfig(), streams);
+        return toStreams(blobKey, ClientUtils.readStormConfig(), streams);
     }
 
     public static ModelOutputs toStreams(String blobKey, Map config, List<String> streams) {

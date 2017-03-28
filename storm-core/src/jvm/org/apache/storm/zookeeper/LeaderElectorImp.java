@@ -24,11 +24,10 @@ import org.apache.curator.framework.recipes.leader.Participant;
 import org.apache.storm.blobstore.BlobStore;
 import org.apache.storm.nimbus.ILeaderElector;
 import org.apache.storm.nimbus.NimbusInfo;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -102,7 +101,7 @@ public class LeaderElectorImp implements ILeaderElector {
         try {
             return Zookeeper.toNimbusInfo(leaderLatch.get().getLeader());
         } catch (Exception e) {
-            throw Utils.wrapInRuntime(e);
+            throw ClientUtils.wrapInRuntime(e);
         }
     }
 

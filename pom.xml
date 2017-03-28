@@ -316,6 +316,7 @@
         <module>storm-multilang/ruby</module>
         <module>storm-buildtools/maven-shade-clojure-transformer</module>
         <module>storm-buildtools/storm-maven-plugins</module>
+        <module>storm-client</module>
         <module>storm-core</module>
         <module>storm-drpc-server</module>
         <module>storm-rename-hack</module>

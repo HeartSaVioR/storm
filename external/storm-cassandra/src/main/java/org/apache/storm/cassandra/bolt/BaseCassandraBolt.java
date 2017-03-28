@@ -35,12 +35,10 @@ import org.apache.storm.cassandra.query.CQLStatementTupleMapper;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
-import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.topology.base.BaseTickTupleAwareRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.TupleUtils;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,13 +111,13 @@ public abstract class BaseCassandraBolt<T> extends BaseTickTupleAwareRichBolt {
     }
 
     /**
-     * Configures this bolt with the given {@code fields} as outputfields with stream id as {@link Utils#DEFAULT_STREAM_ID}
+     * Configures this bolt with the given {@code fields} as outputfields with stream id as {@link ClientUtils#DEFAULT_STREAM_ID}
      *
      * @param fields outputfields
      */
     public BaseCassandraBolt withOutputFields(Fields fields) {
         Preconditions.checkNotNull(fields, "fields should not be null.");
-        this.outputsFields.put(Utils.DEFAULT_STREAM_ID, fields);
+        this.outputsFields.put(ClientUtils.DEFAULT_STREAM_ID, fields);
         return this;
     }
 
@@ -182,7 +180,7 @@ public abstract class BaseCassandraBolt<T> extends BaseTickTupleAwareRichBolt {
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
         // outputsFields can be empty if this bolt acts like a sink in topology.
         if (!outputsFields.isEmpty()) {
-            Fields fields = outputsFields.remove(Utils.DEFAULT_STREAM_ID);
+            Fields fields = outputsFields.remove(ClientUtils.DEFAULT_STREAM_ID);
             if( fields != null) declarer.declare(fields);
             for(Map.Entry<String, Fields> entry : outputsFields.entrySet()) {
                 declarer.declareStream(entry.getKey(), entry.getValue());

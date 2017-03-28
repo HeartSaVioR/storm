@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,31 +21,19 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
-import java.io.Serializable;
-import java.lang.management.ManagementFactory;
-import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -61,11 +49,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
@@ -80,15 +65,8 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.ClassLoaderObjectInputStream;
 import org.apache.commons.lang.StringUtils;
-import org.apache.curator.ensemble.exhibitor.DefaultExhibitorRestClient;
-import org.apache.curator.ensemble.exhibitor.ExhibitorEnsembleProvider;
-import org.apache.curator.ensemble.exhibitor.Exhibitors;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.storm.Config;
 import org.apache.storm.blobstore.BlobStore;
 import org.apache.storm.blobstore.BlobStoreAclHandler;
@@ -100,39 +78,23 @@ import org.apache.storm.generated.AccessControl;
 import org.apache.storm.generated.AccessControlType;
 import org.apache.storm.generated.AuthorizationException;
 import org.apache.storm.generated.ClusterSummary;
-import org.apache.storm.generated.ComponentCommon;
-import org.apache.storm.generated.ComponentObject;
-import org.apache.storm.generated.GlobalStreamId;
 import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.generated.KeyNotFoundException;
 import org.apache.storm.generated.Nimbus;
 import org.apache.storm.generated.ReadableBlobMeta;
 import org.apache.storm.generated.SettableBlobMeta;
-import org.apache.storm.generated.StormTopology;
 import org.apache.storm.generated.TopologyInfo;
 import org.apache.storm.generated.TopologySummary;
 import org.apache.storm.localizer.Localizer;
 import org.apache.storm.nimbus.NimbusInfo;
-import org.apache.storm.serialization.DefaultSerializationDelegate;
-import org.apache.storm.serialization.SerializationDelegate;
-import org.apache.thrift.TBase;
-import org.apache.thrift.TDeserializer;
 import org.apache.thrift.TException;
-import org.apache.thrift.TSerializer;
-import org.apache.zookeeper.ZooDefs;
-import org.apache.zookeeper.data.ACL;
-import org.apache.zookeeper.data.Id;
 import org.json.simple.JSONValue;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import clojure.lang.Keyword;
-import clojure.lang.RT;
 
 public class Utils {
     // A singleton instance allows us to mock delegated static methods in our
@@ -153,16 +115,9 @@ public class Utils {
     }
 
     public static final Logger LOG = LoggerFactory.getLogger(Utils.class);
-    public static final String DEFAULT_STREAM_ID = "default";
     public static final String DEFAULT_BLOB_VERSION_SUFFIX = ".version";
     public static final String CURRENT_BLOB_SUFFIX_ID = "current";
     public static final String DEFAULT_CURRENT_BLOB_SUFFIX = "." + CURRENT_BLOB_SUFFIX_ID;
-    private static ThreadLocal<TSerializer> threadSer = new ThreadLocal<TSerializer>();
-    private static ThreadLocal<TDeserializer> threadDes = new ThreadLocal<TDeserializer>();
-
-    private static SerializationDelegate serializationDelegate;
-    private static ClassLoader cl = null;
-    private static Map<String, Object> localConf;
 
     public static final boolean IS_ON_WINDOWS = "Windows_NT".equals(System.getenv("OS"));
     public static final String FILE_PATH_SEPARATOR = System.getProperty("file.separator");
@@ -171,141 +126,12 @@ public class Utils {
     public static final int SIGKILL = 9;
     public static final int SIGTERM = 15;
 
-    static {
-        localConf = readStormConfig();
-        serializationDelegate = getSerializationDelegate(localConf);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T newInstance(String klass) {
-        try {
-            return newInstance((Class<T>)Class.forName(klass));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T newInstance(Class<T> klass) {
-        return _instance.newInstanceImpl(klass);
-    }
-
-    // Non-static impl methods exist for mocking purposes.
-    public <T> T newInstanceImpl(Class<T> klass) {
-        try {
-            return klass.newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-    
-    @SuppressWarnings("unchecked")
-    public static <T> T newInstance(String klass, Map<String, Object> conf) {
-        try {
-            return newInstance((Class<T>)Class.forName(klass), conf);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T newInstance(Class<T> klass, Map<String, Object> conf) {
-        try {
-            try {
-                return klass.getConstructor(Map.class).newInstance(conf);
-            } catch (Exception e) {
-                return klass.newInstance();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static JarTransformer jarTransformer(String klass) {
         JarTransformer ret = null;
         if (klass != null) {
-            ret = (JarTransformer)newInstance(klass);
+            ret = (JarTransformer) ReflectionUtils.newInstance(klass);
         }
         return ret;
-    }
-
-    public static byte[] serialize(Object obj) {
-        return serializationDelegate.serialize(obj);
-    }
-
-    public static <T> T deserialize(byte[] serialized, Class<T> clazz) {
-        return serializationDelegate.deserialize(serialized, clazz);
-    }
-
-    public static <T> T thriftDeserialize(Class<T> c, byte[] b, int offset, int length) {
-        try {
-            T ret = c.newInstance();
-            TDeserializer des = getDes();
-            des.deserialize((TBase) ret, b, offset, length);
-            return ret;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static byte[] javaSerialize(Object obj) {
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(bos);
-            oos.writeObject(obj);
-            oos.close();
-            return bos.toByteArray();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T javaDeserialize(byte[] serialized, Class<T> clazz) {
-        try {
-            ByteArrayInputStream bis = new ByteArrayInputStream(serialized);
-            ObjectInputStream ois = null;
-            if (null == cl) {
-                ois = new ObjectInputStream(bis);
-            } else {
-                // Use custom class loader set in testing environment
-                ois = new ClassLoaderObjectInputStream(cl, bis);
-            }
-            Object ret = ois.readObject();
-            ois.close();
-            return (T)ret;
-        } catch (IOException ioe) {
-            throw new RuntimeException(ioe);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static byte[] gzip(byte[] data) {
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            GZIPOutputStream out = new GZIPOutputStream(bos);
-            out.write(data);
-            out.close();
-            return bos.toByteArray();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static byte[] gunzip(byte[] data) {
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ByteArrayInputStream bis = new ByteArrayInputStream(data);
-            GZIPInputStream in = new GZIPInputStream(bis);
-            byte[] buffer = new byte[1024];
-            int len = 0;
-            while ((len = in.read(buffer)) >= 0) {
-                bos.write(buffer, 0, len);
-            }
-            in.close();
-            bos.close();
-            return bos.toByteArray();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static byte[] toCompressedJsonConf(Map<String, Object> stormConf) {
@@ -320,177 +146,6 @@ public class Utils {
         }
     }
 
-    public static Map<String, Object> fromCompressedJsonConf(byte[] serialized) {
-        try {
-            ByteArrayInputStream bis = new ByteArrayInputStream(serialized);
-            InputStreamReader in = new InputStreamReader(new GZIPInputStream(bis));
-            Object ret = JSONValue.parseWithException(in);
-            in.close();
-            return (Map<String,Object>)ret;
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> String join(Iterable<T> coll, String sep) {
-        Iterator<T> it = coll.iterator();
-        StringBuilder ret = new StringBuilder();
-        while(it.hasNext()) {
-            ret.append(it.next());
-            if(it.hasNext()) {
-                ret.append(sep);
-            }
-        }
-        return ret.toString();
-    }
-
-    public static long bitXorVals(List<Long> coll) {
-        long result = 0;
-        for (Long val : coll) {
-            result ^= val;
-        }
-        return result;
-    }
-
-    public static void sleep(long millis) {
-        try {
-            Time.sleep(millis);
-        } catch(InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static List<URL> findResources(String name) {
-        try {
-            Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(name);
-            List<URL> ret = new ArrayList<URL>();
-            while (resources.hasMoreElements()) {
-                ret.add(resources.nextElement());
-            }
-            return ret;
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Map<String, Object> findAndReadConfigFile(String name, boolean mustExist) {
-        InputStream in = null;
-        boolean confFileEmpty = false;
-        try {
-            in = getConfigFileInputStream(name);
-            if (null != in) {
-                Yaml yaml = new Yaml(new SafeConstructor());
-                @SuppressWarnings("unchecked")
-                Map<String, Object> ret = (Map<String, Object>) yaml.load(new InputStreamReader(in));
-                if (null != ret) {
-                    return new HashMap<>(ret);
-                } else {
-                    confFileEmpty = true;
-                }
-            }
-
-            if (mustExist) {
-                if(confFileEmpty)
-                    throw new RuntimeException("Config file " + name + " doesn't have any valid storm configs");
-                else
-                    throw new RuntimeException("Could not find config file on classpath " + name);
-            } else {
-                return new HashMap<>();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (null != in) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    }
-
-    private static InputStream getConfigFileInputStream(String configFilePath)
-            throws IOException {
-        if (null == configFilePath) {
-            throw new IOException(
-                    "Could not find config file, name not specified");
-        }
-
-        HashSet<URL> resources = new HashSet<URL>(findResources(configFilePath));
-        if (resources.isEmpty()) {
-            File configFile = new File(configFilePath);
-            if (configFile.exists()) {
-                return new FileInputStream(configFile);
-            }
-        } else if (resources.size() > 1) {
-            throw new IOException(
-                    "Found multiple " + configFilePath
-                            + " resources. You're probably bundling the Storm jars with your topology jar. "
-                            + resources);
-        } else {
-            LOG.debug("Using "+configFilePath+" from resources");
-            URL resource = resources.iterator().next();
-            return resource.openStream();
-        }
-        return null;
-    }
-
-
-    public static Map<String, Object> findAndReadConfigFile(String name) {
-        return findAndReadConfigFile(name, true);
-    }
-
-    public static Map<String, Object> readDefaultConfig() {
-        return findAndReadConfigFile("defaults.yaml", true);
-    }
-
-    public static Map<String, Object> readCommandLineOpts() {
-        Map<String, Object> ret = new HashMap<>();
-        String commandOptions = System.getProperty("storm.options");
-        if (commandOptions != null) {
-            /*
-             Below regex uses negative lookahead to not split in the middle of json objects '{}'
-             or json arrays '[]'. This is needed to parse valid json object/arrays passed as options
-             via 'storm.cmd' in windows. This is not an issue while using 'storm.py' since it url-encodes
-             the options and the below regex just does a split on the commas that separates each option.
-
-             Note:- This regex handles only valid json strings and could produce invalid results
-             if the options contain un-encoded invalid json or strings with unmatched '[, ], { or }'. We can
-             replace below code with split(",") once 'storm.cmd' is fixed to send url-encoded options.
-              */
-            String[] configs = commandOptions.split(",(?![^\\[\\]{}]*(]|}))");
-            for (String config : configs) {
-                config = URLDecoder.decode(config);
-                String[] options = config.split("=", 2);
-                if (options.length == 2) {
-                    Object val = options[1];
-                    try {
-                        val = JSONValue.parseWithException(options[1]);
-                    } catch (ParseException ignored) {
-                        //fall back to string, which is already set
-                    }
-                    ret.put(options[0], val);
-                }
-            }
-        }
-        return ret;
-    }
-
-    public static Map<String, Object> readStormConfig() {
-        Map<String, Object> ret = readDefaultConfig();
-        String confFile = System.getProperty("storm.conf.file");
-        Map<String, Object> storm;
-        if (confFile == null || confFile.equals("")) {
-            storm = findAndReadConfigFile("storm.yaml", false);
-        } else {
-            storm = findAndReadConfigFile(confFile, true);
-        }
-        ret.putAll(storm);
-        ret.putAll(readCommandLineOpts());
-        return ret;
-    }
 
     private static Object normalizeConf(Object conf) {
         if (conf == null) return new HashMap();
@@ -520,39 +175,13 @@ public class Utils {
         return normalizeConf(stormConf).equals(normalizeConf((Map) JSONValue.parse(JSONValue.toJSONString(stormConf))));
     }
 
-    public static Object getSetComponentObject(ComponentObject obj) {
-        if (obj.getSetField() == ComponentObject._Fields.SERIALIZED_JAVA) {
-            return Utils.javaDeserialize(obj.get_serialized_java(), Serializable.class);
-        } else if (obj.getSetField() == ComponentObject._Fields.JAVA_OBJECT) {
-            return obj.get_java_object();
-        } else {
-            return obj.get_shell();
-        }
-    }
-
-    public static <S, T> T get(Map<S, T> m, S key, T def) {
-        T ret = m.get(key);
-        if (ret == null) {
-            ret = def;
-        }
-        return ret;
-    }
-
-    public static List<Object> tuple(Object... values) {
-        List<Object> ret = new ArrayList<Object>();
-        for (Object v : values) {
-            ret.add(v);
-        }
-        return ret;
-    }
-
 
     public static Localizer createLocalizer(Map conf, String baseDir) {
         return new Localizer(conf, baseDir);
     }
 
     public static ClientBlobStore getClientBlobStoreForSupervisor(Map conf) {
-        ClientBlobStore store = (ClientBlobStore) newInstance(
+        ClientBlobStore store = (ClientBlobStore) ReflectionUtils.newInstance(
                 (String) conf.get(Config.SUPERVISOR_BLOBSTORE));
         store.prepare(conf);
         return store;
@@ -567,7 +196,7 @@ public class Utils {
         if (type == null) {
             type = LocalFsBlobStore.class.getName();
         }
-        BlobStore store = (BlobStore) newInstance(type);
+        BlobStore store = (BlobStore) ReflectionUtils.newInstance(type);
         HashMap nconf = new HashMap(conf);
         // only enable cleanup of blobstore on nimbus
         nconf.put(Config.BLOBSTORE_CLEANUP_ENABLE, Boolean.TRUE);
@@ -593,6 +222,14 @@ public class Utils {
         _instance.downloadResourcesAsSupervisorImpl(key, localFile, cb);
     }
 
+    public static boolean checkFileExists(File path) {
+        return Files.exists(path.toPath());
+    }
+
+    public static boolean checkFileExists(String dir, String file) {
+        return ClientUtils.checkFileExists(dir + ClientUtils.FILE_PATH_SEPARATOR + file);
+    }
+
     public void downloadResourcesAsSupervisorImpl(String key, String localFile,
             ClientBlobStore cb) throws AuthorizationException, KeyNotFoundException, IOException {
         final int MAX_RETRY_ATTEMPTS = 2;
@@ -601,12 +238,12 @@ public class Utils {
             if (downloadResourcesAsSupervisorAttempt(cb, key, localFile)) {
                 break;
             }
-            Utils.sleep(ATTEMPTS_INTERVAL_TIME);
+            ClientUtils.sleep(ATTEMPTS_INTERVAL_TIME);
         }
     }
 
     public static ClientBlobStore getClientBlobStore(Map conf) {
-        ClientBlobStore store = (ClientBlobStore) Utils.newInstance((String) conf.get(Config.CLIENT_BLOBSTORE));
+        ClientBlobStore store = (ClientBlobStore) ReflectionUtils.newInstance((String) conf.get(Config.CLIENT_BLOBSTORE));
         store.prepare(conf);
         return store;
     }
@@ -637,18 +274,6 @@ public class Utils {
             }
         }
         return isSuccess;
-    }
-
-    public static boolean checkFileExists(File path) {
-        return Files.exists(path.toPath());
-    }
-    
-    public static boolean checkFileExists(String path) {
-        return Files.exists(new File(path).toPath());
-    }
-
-    public static boolean checkFileExists(String dir, String file) {
-        return checkFileExists(dir + FILE_PATH_SEPARATOR + file);
     }
 
     public static boolean CheckDirExists(String dir) {
@@ -717,160 +342,6 @@ public class Utils {
         }
     }
 
-
-    public static synchronized clojure.lang.IFn loadClojureFn(String namespace, String name) {
-        try {
-            clojure.lang.Compiler.eval(RT.readString("(require '" + namespace + ")"));
-        } catch (Exception e) {
-            //if playing from the repl and defining functions, file won't exist
-        }
-        return (clojure.lang.IFn) RT.var(namespace, name).deref();
-    }
-
-    public static boolean isSystemId(String id) {
-        return id.startsWith("__");
-    }
-
-    public static ComponentCommon getComponentCommon(StormTopology topology, String id) {
-        if (topology.get_spouts().containsKey(id)) {
-            return topology.get_spouts().get(id).get_common();
-        }
-        if (topology.get_bolts().containsKey(id)) {
-            return topology.get_bolts().get(id).get_common();
-        }
-        if (topology.get_state_spouts().containsKey(id)) {
-            return topology.get_state_spouts().get(id).get_common();
-        }
-        throw new IllegalArgumentException("Could not find component with id " + id);
-    }
-
-    public static List<String> getStrings(final Object o) {
-        if (o == null) {
-            return new ArrayList<String>();
-        } else if (o instanceof String) {
-            return new ArrayList<String>() {{ add((String) o); }};
-        } else if (o instanceof Collection) {
-            List<String> answer = new ArrayList<String>();
-            for (Object v : (Collection) o) {
-                answer.add(v.toString());
-            }
-            return answer;
-        } else {
-            throw new IllegalArgumentException("Don't know how to convert to string list");
-        }
-    }
-
-    public static String getString(Object o) {
-        if (null == o) {
-            throw new IllegalArgumentException("Don't know how to convert null to String");
-        }
-        return o.toString();
-    }
-
-    public static Integer getInt(Object o) {
-        Integer result = getInt(o, null);
-        if (null == result) {
-            throw new IllegalArgumentException("Don't know how to convert null to int");
-        }
-        return result;
-    }
-
-    private static TDeserializer getDes() {
-        TDeserializer des = threadDes.get();
-        if(des == null) {
-            des = new TDeserializer();
-            threadDes.set(des);
-        }
-        return des;
-    }
-
-    public static byte[] thriftSerialize(TBase t) {
-        try {
-            TSerializer ser = threadSer.get();
-            if (ser == null) {
-                ser = new TSerializer();
-                threadSer.set(ser);
-            }
-            return ser.serialize(t);
-        } catch (TException e) {
-            LOG.error("Failed to serialize to thrift: ", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T thriftDeserialize(Class<T> c, byte[] b) {
-        try {
-            return Utils.thriftDeserialize(c, b, 0, b.length);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Integer getInt(Object o, Integer defaultValue) {
-        if (null == o) {
-            return defaultValue;
-        }
-
-        if (o instanceof Integer ||
-                o instanceof Short ||
-                o instanceof Byte) {
-            return ((Number) o).intValue();
-        } else if (o instanceof Long) {
-            final long l = (Long) o;
-            if (l <= Integer.MAX_VALUE && l >= Integer.MIN_VALUE) {
-                return (int) l;
-            }
-        } else if (o instanceof String) {
-            return Integer.parseInt((String) o);
-        }
-
-        throw new IllegalArgumentException("Don't know how to convert " + o + " to int");
-    }
-
-    public static Double getDouble(Object o) {
-        Double result = getDouble(o, null);
-        if (null == result) {
-            throw new IllegalArgumentException("Don't know how to convert null to double");
-        }
-        return result;
-    }
-
-    public static Double getDouble(Object o, Double defaultValue) {
-        if (null == o) {
-            return defaultValue;
-        }
-        if (o instanceof Number) {
-            return ((Number) o).doubleValue();
-        } else {
-            throw new IllegalArgumentException("Don't know how to convert " + o + " + to double");
-        }
-    }
-
-    public static boolean getBoolean(Object o, boolean defaultValue) {
-        if (null == o) {
-            return defaultValue;
-        }
-        if (o instanceof Boolean) {
-            return (Boolean) o;
-        } else {
-            throw new IllegalArgumentException("Don't know how to convert " + o + " + to boolean");
-        }
-    }
-
-    public static String getString(Object o, String defaultValue) {
-        if (null == o) {
-            return defaultValue;
-        }
-        if (o instanceof String) {
-            return (String) o;
-        } else {
-            throw new IllegalArgumentException("Don't know how to convert " + o + " + to String");
-        }
-    }
-
-    public static long secureRandomLong() {
-        return UUID.randomUUID().getLeastSignificantBits();
-    }
 
     /**
      * Unpack matching files from a jar. Entries inside the jar that do
@@ -958,7 +429,7 @@ public class Utils {
         }
 
         boolean gzipped = inFile.toString().endsWith("gz");
-        if (isOnWindows()) {
+        if (ClientUtils.isOnWindows()) {
             // Tar is not native to Windows. Use simple Java based implementation for
             // tests and simple tar archives
             unTarUsingJava(inFile, untarDir, gzipped);
@@ -1052,13 +523,6 @@ public class Utils {
         outputStream.close();
     }
 
-    public static boolean isOnWindows() {
-        if (System.getenv("OS") != null) {
-            return System.getenv("OS").equals("Windows_NT");
-        }
-        return false;
-    }
-
     public static boolean isAbsolutePath(String path) {
         return Paths.get(path).isAbsolute();
     }
@@ -1098,83 +562,6 @@ public class Utils {
         return false;
     }
 
-    public static CuratorFramework newCurator(Map conf, List<String> servers, Object port, String root) {
-        return newCurator(conf, servers, port, root, null);
-    }
-
-    public static CuratorFramework newCurator(Map conf, List<String> servers, Object port, ZookeeperAuthInfo auth) {
-        return newCurator(conf, servers, port, "", auth);
-    }
-
-    public static CuratorFramework newCurator(Map conf, List<String> servers, Object port, String root, ZookeeperAuthInfo auth) {
-        List<String> serverPorts = new ArrayList<String>();
-        for (String zkServer : servers) {
-            serverPorts.add(zkServer + ":" + Utils.getInt(port));
-        }
-        String zkStr = StringUtils.join(serverPorts, ",") + root;
-        CuratorFrameworkFactory.Builder builder = CuratorFrameworkFactory.builder();
-
-        setupBuilder(builder, zkStr, conf, auth);
-
-        return builder.build();
-    }
-
-    protected static void setupBuilder(CuratorFrameworkFactory.Builder builder, final String zkStr, Map conf, ZookeeperAuthInfo auth)
-    {
-        List<String> exhibitorServers = getStrings(conf.get(Config.STORM_EXHIBITOR_SERVERS));
-        if (!exhibitorServers.isEmpty()) {
-            // use exhibitor servers
-            builder.ensembleProvider(new ExhibitorEnsembleProvider(
-                new Exhibitors(exhibitorServers, Utils.getInt(conf.get(Config.STORM_EXHIBITOR_PORT)),
-                    new Exhibitors.BackupConnectionStringProvider() {
-                        @Override
-                        public String getBackupConnectionString() throws Exception {
-                            // use zk servers as backup if they exist
-                            return zkStr;
-                        }}),
-                new DefaultExhibitorRestClient(),
-                Utils.getString(conf.get(Config.STORM_EXHIBITOR_URIPATH)),
-                Utils.getInt(conf.get(Config.STORM_EXHIBITOR_POLL)),
-                new StormBoundedExponentialBackoffRetry(
-                    Utils.getInt(conf.get(Config.STORM_EXHIBITOR_RETRY_INTERVAL)),
-                    Utils.getInt(conf.get(Config.STORM_EXHIBITOR_RETRY_INTERVAL_CEILING)),
-                    Utils.getInt(conf.get(Config.STORM_EXHIBITOR_RETRY_TIMES)))));
-        } else {
-            builder.connectString(zkStr);
-        }
-        builder
-            .connectionTimeoutMs(Utils.getInt(conf.get(Config.STORM_ZOOKEEPER_CONNECTION_TIMEOUT)))
-            .sessionTimeoutMs(Utils.getInt(conf.get(Config.STORM_ZOOKEEPER_SESSION_TIMEOUT)))
-            .retryPolicy(new StormBoundedExponentialBackoffRetry(
-                    Utils.getInt(conf.get(Config.STORM_ZOOKEEPER_RETRY_INTERVAL)),
-                    Utils.getInt(conf.get(Config.STORM_ZOOKEEPER_RETRY_INTERVAL_CEILING)),
-                    Utils.getInt(conf.get(Config.STORM_ZOOKEEPER_RETRY_TIMES))));
-
-        if (auth != null && auth.scheme != null && auth.payload != null) {
-            builder.authorization(auth.scheme, auth.payload);
-        }
-    }
-
-    public static void testSetupBuilder(CuratorFrameworkFactory.Builder
-                                                builder, String zkStr, Map conf, ZookeeperAuthInfo auth)
-    {
-        setupBuilder(builder, zkStr, conf, auth);
-    }
-
-    public static CuratorFramework newCuratorStarted(Map conf, List<String> servers, Object port, String root, ZookeeperAuthInfo auth) {
-        CuratorFramework ret = newCurator(conf, servers, port, root, auth);
-        LOG.info("Starting Utils Curator...");
-        ret.start();
-        return ret;
-    }
-
-    public static CuratorFramework newCuratorStarted(Map conf, List<String> servers, Object port, ZookeeperAuthInfo auth) {
-        CuratorFramework ret = newCurator(conf, servers, port, auth);
-        LOG.info("Starting Utils Curator (2)...");
-        ret.start();
-        return ret;
-    }
-
     public static TreeMap<Integer, Integer> integerDivided(int sum, int numPieces) {
         int base = sum / numPieces;
         int numInc = sum % numPieces;
@@ -1185,41 +572,6 @@ public class Utils {
             ret.put(base+1, numInc);
         }
         return ret;
-    }
-
-    public static byte[] toByteArray(ByteBuffer buffer) {
-        byte[] ret = new byte[buffer.remaining()];
-        buffer.get(ret, 0, ret.length);
-        return ret;
-    }
-
-    public static void readAndLogStream(String prefix, InputStream in) {
-        try {
-            BufferedReader r = new BufferedReader(new InputStreamReader(in));
-            String line = null;
-            while ((line = r.readLine()) != null) {
-                LOG.info("{}:{}", prefix, line);
-            }
-        } catch (IOException e) {
-            LOG.warn("Error while trying to log stream", e);
-        }
-    }
-
-    /**
-     * Checks if a throwable is an instance of a particular class
-     * @param klass The class you're expecting
-     * @param throwable The throwable you expect to be an instance of klass
-     * @return true if throwable is instance of klass, false otherwise.
-     */
-    public static boolean exceptionCauseIsInstanceOf(Class klass, Throwable throwable) {
-        Throwable t = throwable;
-        while (t != null) {
-            if (klass.isInstance(t)) {
-                return true;
-            }
-            t = t.getCause();
-        }
-        return false;
     }
 
     /**
@@ -1233,36 +585,6 @@ public class Utils {
                 || (conf != null
                 && conf.get(Config.STORM_ZOOKEEPER_AUTH_SCHEME) != null
                 && !((String)conf.get(Config.STORM_ZOOKEEPER_AUTH_SCHEME)).isEmpty());
-    }
-
-    /**
-     * Is the topology configured to have ZooKeeper authentication.
-     * @param conf the topology configuration
-     * @return true if ZK is configured else false
-     */
-    public static boolean isZkAuthenticationConfiguredTopology(Map conf) {
-        return (conf != null
-                && conf.get(Config.STORM_ZOOKEEPER_TOPOLOGY_AUTH_SCHEME) != null
-                && !((String)conf.get(Config.STORM_ZOOKEEPER_TOPOLOGY_AUTH_SCHEME)).isEmpty());
-    }
-
-
-    public static List<ACL> getWorkerACL(Map conf) {
-        //This is a work around to an issue with ZK where a sasl super user is not super unless there is an open SASL ACL so we are trying to give the correct perms
-        if (!isZkAuthenticationConfiguredTopology(conf)) {
-            return null;
-        }
-        String stormZKUser = (String)conf.get(Config.STORM_ZOOKEEPER_SUPERACL);
-        if (stormZKUser == null) {
-            throw new IllegalArgumentException("Authentication is enabled but " + Config.STORM_ZOOKEEPER_SUPERACL + " is not set");
-        }
-        String[] split = stormZKUser.split(":", 2);
-        if (split.length != 2) {
-            throw new IllegalArgumentException(Config.STORM_ZOOKEEPER_SUPERACL + " does not appear to be in the form scheme:acl, i.e. sasl:storm-user");
-        }
-        ArrayList<ACL> ret = new ArrayList<ACL>(ZooDefs.Ids.CREATOR_ALL_ACL);
-        ret.add(new ACL(ZooDefs.Perms.ALL, new Id(split[0], split[1])));
-        return ret;
     }
 
     /**
@@ -1324,42 +646,6 @@ public class Utils {
             dump.append("\n\n");
         }
         return dump.toString();
-    }
-
-    /**
-     * Creates an instance of the pluggable SerializationDelegate or falls back to
-     * DefaultSerializationDelegate if something goes wrong.
-     * @param stormConf The config from which to pull the name of the pluggable class.
-     * @return an instance of the class specified by storm.meta.serialization.delegate
-     */
-    private static SerializationDelegate getSerializationDelegate(Map stormConf) {
-        String delegateClassName = (String)stormConf.get(Config.STORM_META_SERIALIZATION_DELEGATE);
-        SerializationDelegate delegate;
-        try {
-            Class delegateClass = Class.forName(delegateClassName);
-            delegate = (SerializationDelegate) delegateClass.newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            LOG.error("Failed to construct serialization delegate, falling back to default", e);
-            delegate = new DefaultSerializationDelegate();
-        }
-        delegate.prepare(stormConf);
-        return delegate;
-    }
-
-    public static void handleUncaughtException(Throwable t) {
-        if (t != null && t instanceof Error) {
-            if (t instanceof OutOfMemoryError) {
-                try {
-                    System.err.println("Halting due to Out Of Memory Error..." + Thread.currentThread().getName());
-                } catch (Throwable err) {
-                    //Again we don't want to exit because of logging issues.
-                }
-                Runtime.getRuntime().halt(-1);
-            } else {
-                //Running in daemon mode, we would pass Error to calling thread.
-                throw (Error) t;
-            }
-        }
     }
 
     public static void validateTopologyBlobStoreMap(Map<String, ?> stormConf, Set<String> blobStoreKeys) throws InvalidTopologyException {
@@ -1446,57 +732,6 @@ public class Utils {
         return val;
     }
 
-    public static double zeroIfNaNOrInf(double x) {
-        return (Double.isNaN(x) || Double.isInfinite(x)) ? 0.0 : x;
-    }
-
-    /**
-     * parses the arguments to extract jvm heap memory size in MB.
-     * @param input
-     * @param defaultValue
-     * @return the value of the JVM heap memory setting (in MB) in a java command.
-     */
-    public static Double parseJvmHeapMemByChildOpts(String input, Double defaultValue) {
-        if (input != null) {
-            Pattern optsPattern = Pattern.compile("Xmx[0-9]+[mkgMKG]");
-            Matcher m = optsPattern.matcher(input);
-            String memoryOpts = null;
-            while (m.find()) {
-                memoryOpts = m.group();
-            }
-            if (memoryOpts != null) {
-                int unit = 1;
-                memoryOpts = memoryOpts.toLowerCase();
-
-                if (memoryOpts.endsWith("k")) {
-                    unit = 1024;
-                } else if (memoryOpts.endsWith("m")) {
-                    unit = 1024 * 1024;
-                } else if (memoryOpts.endsWith("g")) {
-                    unit = 1024 * 1024 * 1024;
-                }
-
-                memoryOpts = memoryOpts.replaceAll("[a-zA-Z]", "");
-                Double result =  Double.parseDouble(memoryOpts) * unit / 1024.0 / 1024.0;
-                return (result < 1.0) ? 1.0 : result;
-            } else {
-                return defaultValue;
-            }
-        } else {
-            return defaultValue;
-        }
-    }
-
-    @VisibleForTesting
-    public static void setClassLoaderForJavaDeSerialize(ClassLoader cl) {
-        Utils.cl = cl;
-    }
-
-    @VisibleForTesting
-    public static void resetClassLoaderForJavaDeSerialize() {
-        Utils.cl = ClassLoader.getSystemClassLoader();
-    }
-
     public static TopologyInfo getTopologyInfo(String name, String asUser, Map stormConf) {
         try (NimbusClient client = NimbusClient.getConfiguredClientAs(stormConf, asUser)) {
             String topologyId = getTopologyId(name, client.getClient());
@@ -1521,34 +756,6 @@ public class Utils {
             throw new RuntimeException(e);
         }
         return null;
-    }
-
-    /**
-     * A cheap way to deterministically convert a number to a positive value. When the input is
-     * positive, the original value is returned. When the input number is negative, the returned
-     * positive value is the original value bit AND against Integer.MAX_VALUE(0x7fffffff) which
-     * is not its absolutely value.
-     *
-     * @param number a given number
-     * @return a positive number.
-     */
-    public static int toPositive(int number) {
-        return number & Integer.MAX_VALUE;
-    }
-
-    public static GlobalStreamId getGlobalStreamId(String streamId, String componentId) {
-        if (componentId == null) {
-            return new GlobalStreamId(streamId, DEFAULT_STREAM_ID);
-        }
-        return new GlobalStreamId(streamId, componentId);
-    }
-
-    public static RuntimeException wrapInRuntime(Exception e){
-        if (e instanceof RuntimeException){
-            return (RuntimeException)e;
-        } else {
-            return new RuntimeException(e);
-        }
     }
 
     public static int getAvailablePort(int prefferedPort) {
@@ -1673,7 +880,7 @@ public class Utils {
      */
     public static Object getConfiguredClass(Map conf, Object configKey) {
         if (conf.containsKey(configKey)) {
-            return newInstance((String)conf.get(configKey));
+            return ReflectionUtils.newInstance((String)conf.get(configKey));
         }
         return null;
     }
@@ -1693,39 +900,6 @@ public class Utils {
             LOG.error("Failed to read yaml file.", ex);
         }
         return null;
-    }
-
-    public static void setupDefaultUncaughtExceptionHandler() {
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-                public void uncaughtException(Thread thread, Throwable thrown) {
-                    try {
-                        handleUncaughtException(thrown);
-                    } catch (Error err) {
-                        LOG.error("Received error in main thread.. terminating server...", err);
-                        Runtime.getRuntime().exit(-2);
-                    }
-                }
-            });
-    }
-
-    /**
-     * Creates a new map with a string value in the map replaced with an
-     * equivalently-lengthed string of '#'.  (If the object is not a string
-     * to string will be called on it and replaced) 
-     * @param m The map that a value will be redacted from
-     * @param key The key pointing to the value to be redacted
-     * @return a new map with the value redacted. The original map will not be modified.
-     */
-    public static Map<String, Object> redactValue(Map<String, Object> m, String key) {
-        if (m.containsKey(key)) {
-            HashMap<String, Object> newMap = new HashMap<>(m);
-            Object value = newMap.get(key);
-            String v = value.toString();
-            String redacted = new String(new char[v.length()]).replace("\0", "#");
-            newMap.put(key, redacted);
-            return newMap;
-        }
-        return m;
     }
 
     /**
@@ -1771,134 +945,6 @@ public class Utils {
         return findOne(pred, (Set<T>) map.entrySet());
     }
 
-    public static String localHostname () throws UnknownHostException {
-        return _instance.localHostnameImpl();
-    }
-
-    // Non-static impl methods exist for mocking purposes.
-    protected String localHostnameImpl () throws UnknownHostException {
-        return InetAddress.getLocalHost().getCanonicalHostName();
-    }
-
-    private static String memoizedLocalHostnameString = null;
-
-    public static String memoizedLocalHostname () throws UnknownHostException {
-        if (memoizedLocalHostnameString == null) {
-            memoizedLocalHostnameString = localHostname();
-        }
-        return memoizedLocalHostnameString;
-    }
-
-    /**
-     * Gets the storm.local.hostname value, or tries to figure out the local hostname
-     * if it is not set in the config.
-     * @return a string representation of the hostname.
-     */
-    public static String hostname() throws UnknownHostException {
-        return _instance.hostnameImpl();
-    }
-
-    // Non-static impl methods exist for mocking purposes.
-    protected String hostnameImpl () throws UnknownHostException  {
-        if (localConf == null) {
-            return memoizedLocalHostname();
-        }
-        Object hostnameString = localConf.get(Config.STORM_LOCAL_HOSTNAME);
-        if (hostnameString == null || hostnameString.equals("")) {
-            return memoizedLocalHostname();
-        }
-        return (String)hostnameString;
-    }
-
-    public static String uuid() {
-        return UUID.randomUUID().toString();
-    }
-
-    public static void exitProcess (int val, String msg) {
-        String combinedErrorMessage = "Halting process: " + msg;
-        LOG.error(combinedErrorMessage, new RuntimeException(combinedErrorMessage));
-        Runtime.getRuntime().exit(val);
-    }
-
-    public static Runnable mkSuicideFn() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                Utils.exitProcess(1, "Worker died");
-            }
-        };
-    }
-
-    /**
-     * "{:a 1 :b 1 :c 2} -> {1 [:a :b] 2 :c}"
-     *
-     * Example usage in java:
-     *  Map<Integer, String> tasks;
-     *  Map<String, List<Integer>> componentTasks = Utils.reverse_map(tasks);
-     *
-     * The order of he resulting list values depends on the ordering properties
-     * of the Map passed in. The caller is responsible for passing an ordered
-     * map if they expect the result to be consistently ordered as well.
-     *
-     * @param map to reverse
-     * @return a reversed map
-     */
-    public static <K, V> HashMap<V, List<K>> reverseMap(Map<K, V> map) {
-        HashMap<V, List<K>> rtn = new HashMap<V, List<K>>();
-        if (map == null) {
-            return rtn;
-        }
-        for (Entry<K, V> entry : map.entrySet()) {
-            K key = entry.getKey();
-            V val = entry.getValue();
-            List<K> list = rtn.get(val);
-            if (list == null) {
-                list = new ArrayList<K>();
-                rtn.put(entry.getValue(), list);
-            }
-            list.add(key);
-        }
-        return rtn;
-    }
-
-    /**
-     * "[[:a 1] [:b 1] [:c 2]} -> {1 [:a :b] 2 :c}"
-     * Reverses an assoc-list style Map like reverseMap(Map...)
-     *
-     * @param listSeq to reverse
-     * @return a reversed map
-     */
-    public static HashMap reverseMap(List listSeq) {
-        HashMap<Object, List<Object>> rtn = new HashMap();
-        if (listSeq == null) {
-            return rtn;
-        }
-        for (Object entry : listSeq) {
-            List listEntry = (List) entry;
-            Object key = listEntry.get(0);
-            Object val = listEntry.get(1);
-            List list = rtn.get(val);
-            if (list == null) {
-                list = new ArrayList<Object>();
-                rtn.put(val, list);
-            }
-            list.add(key);
-        }
-        return rtn;
-    }
-
-
-    /**
-     * @return the pid of this JVM, because Java doesn't provide a real way to do this.
-     */
-    public static String processPid() {
-        String name = ManagementFactory.getRuntimeMXBean().getName();
-        String[] split = name.split("@");
-        if (split.length != 2) {
-            throw new RuntimeException("Got unexpected process name: " + name);
-        }
-        return split[0];
-    }
 
     public static int execCommand(String... command) throws ExecuteException, IOException {
         CommandLine cmd = new CommandLine(command[0]);
@@ -1943,7 +989,7 @@ public class Utils {
     public static void sendSignalToProcess(long lpid, int signum) throws IOException {
         String pid = Long.toString(lpid);
         try {
-            if (isOnWindows()) {
+            if (ClientUtils.isOnWindows()) {
                 if (signum == SIGKILL) {
                     execCommand("taskkill", "/f", "/pid", pid);
                 } else {
@@ -1966,28 +1012,6 @@ public class Utils {
 
     public static void killProcessWithSigTerm (String pid) throws IOException {
         sendSignalToProcess(Long.parseLong(pid), SIGTERM);
-    }
-
-    /**
-     * Adds the user supplied function as a shutdown hook for cleanup.
-     * Also adds a function that sleeps for a second and then halts the
-     * runtime to avoid any zombie process in case cleanup function hangs.
-     */
-    public static void addShutdownHookWithForceKillIn1Sec (Runnable func) {
-        Runnable sleepKill = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Time.sleepSecs(1);
-                    LOG.warn("Forceing Halt...");
-                    Runtime.getRuntime().halt(20);
-                } catch (Exception e) {
-                    LOG.warn("Exception in the ShutDownHook", e);
-                }
-            }
-        };
-        Runtime.getRuntime().addShutdownHook(new Thread(func));
-        Runtime.getRuntime().addShutdownHook(new Thread(sleepKill));
     }
 
     /**
@@ -2016,25 +1040,6 @@ public class Utils {
 
     public static double nullToZero (Double v) {
         return (v != null ? v : 0);
-    }
-
-    /**
-     * Deletes a file or directory and its contents if it exists. Does not
-     * complain if the input is null or does not exist.
-     * @param path the path to the file or directory
-     */
-    public static void forceDelete(String path) throws IOException {
-        _instance.forceDeleteImpl(path);
-    }
-
-    // Non-static impl methods exist for mocking purposes.
-    protected void forceDeleteImpl(String path) throws IOException {
-        LOG.debug("Deleting path {}", path);
-        if (checkFileExists(path)) {
-            try {
-                FileUtils.forceDelete(new File(path));
-            } catch (FileNotFoundException ignored) {}
-        }
     }
 
     /**
@@ -2101,27 +1106,6 @@ public class Utils {
         return StringUtils.join(allPaths, CLASS_PATH_SEPARATOR);
     }
 
-    public static class UptimeComputer {
-        int startTime = 0;
-
-        public UptimeComputer() {
-            startTime = Time.currentTimeSecs();
-        }
-
-        public int upTime() {
-            return Time.deltaSecs(startTime);
-        }
-    }
-
-    public static UptimeComputer makeUptimeComputer() {
-        return _instance.makeUptimeComputerImpl();
-    }
-
-    // Non-static impl methods exist for mocking purposes.
-    public UptimeComputer makeUptimeComputerImpl() {
-        return new UptimeComputer();
-    }
-
     /**
      * a or b the first one that is not null
      * @param a something
@@ -2164,103 +1148,6 @@ public class Utils {
         return path;
     }
 
-    /**
-     * A thread that can answer if it is sleeping in the case of simulated time.
-     * This class is not useful when simulated time is not being used.
-     */
-    public static class SmartThread extends Thread {
-        public boolean isSleeping() {
-            return Time.isThreadWaiting(this);
-        }
-        public SmartThread(Runnable r) {
-            super(r);
-        }
-    }
-
-    /**
-     * Creates a thread that calls the given code repeatedly, sleeping for an
-     * interval of seconds equal to the return value of the previous call.
-     *
-     * The given afn may be a callable that returns the number of seconds to
-     * sleep, or it may be a Callable that returns another Callable that in turn
-     * returns the number of seconds to sleep. In the latter case isFactory.
-     *
-     * @param afn the code to call on each iteration
-     * @param isDaemon whether the new thread should be a daemon thread
-     * @param eh code to call when afn throws an exception
-     * @param priority the new thread's priority
-     * @param isFactory whether afn returns a callable instead of sleep seconds
-     * @param startImmediately whether to start the thread before returning
-     * @param threadName a suffix to be appended to the thread name
-     * @return the newly created thread
-     * @see java.lang.Thread
-     */
-    public static SmartThread asyncLoop(final Callable afn,
-            boolean isDaemon, final Thread.UncaughtExceptionHandler eh,
-            int priority, final boolean isFactory, boolean startImmediately,
-            String threadName) {
-        SmartThread thread = new SmartThread(new Runnable() {
-            public void run() {
-                Object s;
-                try {
-                    Callable fn = isFactory ? (Callable) afn.call() : afn;
-                    while ((s = fn.call()) instanceof Long) {
-                        Time.sleepSecs((Long) s);
-                    }
-                } catch (Throwable t) {
-                    if (Utils.exceptionCauseIsInstanceOf(
-                            InterruptedException.class, t)) {
-                        LOG.info("Async loop interrupted!");
-                        return;
-                    }
-                    LOG.error("Async loop died!", t);
-                    throw new RuntimeException(t);
-                }
-            }
-        });
-        if (eh != null) {
-            thread.setUncaughtExceptionHandler(eh);
-        } else {
-            thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-                public void uncaughtException(Thread t, Throwable e) {
-                    LOG.error("Async loop died!", e);
-                    Utils.exitProcess(1, "Async loop died!");
-                }
-            });
-        }
-        thread.setDaemon(isDaemon);
-        thread.setPriority(priority);
-        if (threadName != null && !threadName.isEmpty()) {
-            thread.setName(thread.getName() +"-"+ threadName);
-        }
-        if (startImmediately) {
-            thread.start();
-        }
-        return thread;
-    }
-
-    /**
-     * Convenience method used when only the function and name suffix are given.
-     * @param afn the code to call on each iteration
-     * @param threadName a suffix to be appended to the thread name
-     * @return the newly created thread
-     * @see java.lang.Thread
-     */
-    public static SmartThread asyncLoop(final Callable afn, String threadName, final Thread.UncaughtExceptionHandler eh) {
-        return asyncLoop(afn, false, eh, Thread.NORM_PRIORITY, false, true,
-                threadName);
-    }
-
-    /**
-     * Convenience method used when only the function is given.
-     * @param afn the code to call on each iteration
-     * @return the newly created thread
-     */
-    public static SmartThread asyncLoop(final Callable afn) {
-        return asyncLoop(afn, false, null, Thread.NORM_PRIORITY, false, true,
-                null);
-    }
-
     public static <T> List<T> interleaveAll(List<List<T>> nodeList) {
         if (nodeList != null && nodeList.size() > 0) {
             List<T> first = new ArrayList<T>();
@@ -2279,25 +1166,6 @@ public class Utils {
         }
         return null;
       }
-
-    public static long bitXor(Long a, Long b) {
-        return a ^ b;
-    }
-
-    public static List<String> getRepeat(List<String> list) {
-        List<String> rtn = new ArrayList<String>();
-        Set<String> idSet = new HashSet<String>();
-
-        for (String id : list) {
-            if (idSet.contains(id)) {
-                rtn.add(id);
-            } else {
-                idSet.add(id);
-            }
-        }
-
-        return rtn;
-    }
 
     /**
      * converts a clojure PersistentMap to java HashMap

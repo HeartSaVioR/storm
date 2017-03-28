@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.apache.storm.container.ResourceIsolationInterface;
 import org.apache.storm.generated.LocalAssignment;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.LocalState;
 import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ public class RunAsUserContainer extends BasicContainer {
             String workerId, Map<String, Object> topoConf, AdvancedFSOps ops, String profileCmd) throws IOException {
         super(type, conf, supervisorId, port, assignment, resourceIsolationManager, localState, workerId, topoConf, ops,
                 profileCmd);
-        if (Utils.isOnWindows()) {
+        if (ClientUtils.isOnWindows()) {
             throw new UnsupportedOperationException("ERROR: Windows doesn't support running workers as different users yet");
         }
     }
@@ -53,7 +54,7 @@ public class RunAsUserContainer extends BasicContainer {
         List<String> commands = Arrays.asList("signal", String.valueOf(pid), String.valueOf(signal));
         String user = getWorkerUser();
         String logPrefix = "kill -"+signal+" " + pid;
-        SupervisorUtils.processLauncherAndWait(_conf, user, commands, null, logPrefix);
+        ClientSupervisorUtils.processLauncherAndWait(_conf, user, commands, null, logPrefix);
     }
     
     @Override
@@ -72,16 +73,16 @@ public class RunAsUserContainer extends BasicContainer {
         String td = targetDir.getAbsolutePath();
         LOG.info("Running as user: {} command: {}", user, command);
         String containerFile = Utils.containerFilePath(td);
-        if (Utils.checkFileExists(containerFile)) {
+        if (ClientUtils.checkFileExists(containerFile)) {
             SupervisorUtils.rmrAsUser(_conf, containerFile, containerFile);
         }
         String scriptFile = Utils.scriptFilePath(td);
-        if (Utils.checkFileExists(scriptFile)) {
+        if (ClientUtils.checkFileExists(scriptFile)) {
             SupervisorUtils.rmrAsUser(_conf, scriptFile, scriptFile);
         }
         String script = Utils.writeScript(td, command, env);
         List<String> args = Arrays.asList("profiler", td, script);
-        int ret = SupervisorUtils.processLauncherAndWait(_conf, user, args, env, logPrefix);
+        int ret = ClientSupervisorUtils.processLauncherAndWait(_conf, user, args, env, logPrefix);
         return ret == 0;
     }
 
@@ -95,6 +96,6 @@ public class RunAsUserContainer extends BasicContainer {
         if (_resourceIsolationManager != null) {
             commandPrefix = _resourceIsolationManager.getLaunchCommandPrefix(_workerId);
         }
-        SupervisorUtils.processLauncher(_conf, user, commandPrefix, args, null, logPrefix, processExitCallback, targetDir);
+        ClientSupervisorUtils.processLauncher(_conf, user, commandPrefix, args, null, logPrefix, processExitCallback, targetDir);
     }
 }

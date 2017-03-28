@@ -20,10 +20,8 @@
 package org.apache.storm.sql.compiler.backends.trident;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import org.apache.calcite.DataContext;
 import org.apache.calcite.avatica.util.DateTimeUtils;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.LocalCluster.LocalTopology;
@@ -35,7 +33,7 @@ import org.apache.storm.sql.AbstractTridentProcessor;
 import org.apache.storm.trident.TridentTopology;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,7 +43,6 @@ import org.junit.Test;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -208,7 +205,7 @@ public class TestPlanCompiler {
 
     if (proc.getClassLoaders() != null && proc.getClassLoaders().size() > 0) {
       CompilingClassLoader lastClassloader = proc.getClassLoaders().get(proc.getClassLoaders().size() - 1);
-      Utils.setClassLoaderForJavaDeSerialize(lastClassloader);
+      ClientUtils.setClassLoaderForJavaDeSerialize(lastClassloader);
     }
 
     try (LocalTopology stormTopo = cluster.submitTopology("storm-sql", conf, topo.build())) {
@@ -222,7 +219,7 @@ public class TestPlanCompiler {
       while(cluster.getClusterInfo().get_topologies_size() > 0) {
         Thread.sleep(10);
       }
-      Utils.resetClassLoaderForJavaDeSerialize();
+      ClientUtils.resetClassLoaderForJavaDeSerialize();
     }
   }
 

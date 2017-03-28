@@ -19,12 +19,12 @@
            [org.apache.storm.zookeeper Zookeeper])
   (:use [org.apache.storm util config log])
   (:require [clojure.string :as str])
-  (:import [org.apache.storm.utils ConfigUtils])
+  (:import [org.apache.storm.utils ConfigUtils ClientConfigUtils])
   (:gen-class))
 
 
 (defn -main [^String tmpjarpath & args]
-  (let [conf (clojurify-structure (ConfigUtils/readStormConfig))
+  (let [conf (clojurify-structure (ClientConfigUtils/readStormConfig))
         ; since this is not a purpose to add to leader lock queue, passing nil as blob-store is ok
         zk-leader-elector (Zookeeper/zkLeaderElector conf nil)
         leader-nimbus (.getLeader zk-leader-elector)

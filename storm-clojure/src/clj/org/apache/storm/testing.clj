@@ -17,7 +17,7 @@
 (ns org.apache.storm.testing
   (:import [org.apache.storm LocalCluster$Builder])
   (:import [java.util.function UnaryOperator])
-  (:import [org.apache.storm.utils Time Time$SimulatedTime Utils RegisteredGlobalState])
+  (:import [org.apache.storm.utils Time Time$SimulatedTime Utils RegisteredGlobalState ClientUtils])
   (:import [org.apache.storm.testing InProcessZookeeper MkTupleParam TestJob MkClusterParam 
             TrackedTopology CompleteTopologyParam MockedSources])
   (:import [org.apache.storm Thrift Testing Testing$Condition])
@@ -252,7 +252,7 @@
 
 (defnk test-tuple
   [values
-   :stream Utils/DEFAULT_STREAM_ID
+   :stream ClientUtils/DEFAULT_STREAM_ID
    :component "component"
    :fields nil]
   (Testing/testTuple

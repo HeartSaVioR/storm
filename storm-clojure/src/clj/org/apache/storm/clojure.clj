@@ -21,7 +21,7 @@
   (:import [org.apache.storm.tuple Tuple])
   (:import [org.apache.storm.task OutputCollector IBolt TopologyContext])
   (:import [org.apache.storm.spout SpoutOutputCollector ISpout])
-  (:import [org.apache.storm.utils Utils])
+  (:import [org.apache.storm.utils Utils ClientUtils])
   (:import [org.apache.storm.clojure ClojureBolt ClojureSpout])
   (:import [java.util Collection List])
   (:require [org.apache.storm [thrift :as thrift]]))
@@ -160,14 +160,14 @@
     [obj]))
 
 (defnk emit-bolt! [collector values
-                   :stream Utils/DEFAULT_STREAM_ID :anchor []]
+                   :stream ClientUtils/DEFAULT_STREAM_ID :anchor []]
   (let [^List anchor (collectify anchor)
         values (tuple-values values collector stream) ]
     (.emit ^OutputCollector (:output-collector collector) stream anchor values)
     ))
 
 (defnk emit-direct-bolt! [collector task values
-                          :stream Utils/DEFAULT_STREAM_ID :anchor []]
+                          :stream ClientUtils/DEFAULT_STREAM_ID :anchor []]
   (let [^List anchor (collectify anchor)
         values (tuple-values values collector stream) ]
     (.emitDirect ^OutputCollector (:output-collector collector) task stream anchor values)
@@ -186,12 +186,12 @@
   (.reportError ^OutputCollector (:output-collector collector) tuple))
 
 (defnk emit-spout! [collector values
-                    :stream Utils/DEFAULT_STREAM_ID :id nil]
+                    :stream ClientUtils/DEFAULT_STREAM_ID :id nil]
   (let [values (tuple-values values collector stream)]
     (.emit ^SpoutOutputCollector (:output-collector collector) stream values id)))
 
 (defnk emit-direct-spout! [collector task values
-                           :stream Utils/DEFAULT_STREAM_ID :id nil]
+                           :stream ClientUtils/DEFAULT_STREAM_ID :id nil]
   (let [values (tuple-values values collector stream)]
     (.emitDirect ^SpoutOutputCollector (:output-collector collector) task stream values id)))
 

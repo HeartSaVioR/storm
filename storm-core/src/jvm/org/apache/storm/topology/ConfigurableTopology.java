@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -34,7 +34,7 @@ import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.LocalCluster.LocalTopology;
 import org.apache.storm.StormSubmitter;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -82,7 +82,7 @@ public abstract class ConfigurableTopology {
 
     /** Submits the topology with the name taken from the configuration **/
     protected int submit(Config conf, TopologyBuilder builder) {
-        String name = (String) Utils.get(conf, Config.TOPOLOGY_NAME, null);
+        String name = (String) ClientUtils.get(conf, Config.TOPOLOGY_NAME, null);
         if (StringUtils.isBlank(name))
             throw new RuntimeException(
                     "No value found for " + Config.TOPOLOGY_NAME);
@@ -97,7 +97,7 @@ public abstract class ConfigurableTopology {
                     LocalTopology topo = cluster.submitTopology(name, conf,
                             builder.createTopology());) {
                 if (ttl != -1) {
-                    Utils.sleep(ttl * 1000);
+                    ClientUtils.sleep(ttl * 1000);
                     cluster.shutdown();
                 }
             } catch (Exception e) {

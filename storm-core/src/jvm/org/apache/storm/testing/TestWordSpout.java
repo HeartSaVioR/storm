@@ -25,7 +25,8 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
+
 import java.util.HashMap;
 import java.util.Random;
 import org.slf4j.Logger;
@@ -54,7 +55,7 @@ public class TestWordSpout extends BaseRichSpout {
     }
         
     public void nextTuple() {
-        Utils.sleep(100);
+        ClientUtils.sleep(100);
         final String[] words = new String[] {"nathan", "mike", "jackson", "golda", "bertels"};
         final Random rand = new Random();
         final String word = words[rand.nextInt(words.length)];

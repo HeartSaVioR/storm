@@ -30,7 +30,7 @@ import org.apache.storm.streams.operations.mappers.ValueMapper;
 import org.apache.storm.testing.TestWordSpout;
 import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.tuple.ITuple;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 /**
  * An example that computes word counts and finally emits the results to an
@@ -73,7 +73,7 @@ public class WordCountToBolt {
         } else {
             try (LocalCluster cluster = new LocalCluster();
                  LocalCluster.LocalTopology topo = cluster.submitTopology("test", config, builder.build())) {
-                Utils.sleep(60_000);
+                ClientUtils.sleep(60_000);
             }
         }
     }

@@ -19,7 +19,7 @@ package org.apache.storm.blobstore;
 
 import org.apache.storm.Config;
 import org.apache.storm.nimbus.NimbusInfo;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -71,7 +71,7 @@ public class BlobSynchronizerTest {
 
   private LocalFsBlobStore initLocalFs() {
     LocalFsBlobStore store = new LocalFsBlobStore();
-    Map conf = Utils.readStormConfig();
+    Map conf = ClientUtils.readStormConfig();
     conf.put(Config.STORM_LOCAL_DIR, baseFile.getAbsolutePath());
     conf.put(Config.STORM_PRINCIPAL_TO_LOCAL_PLUGIN,"org.apache.storm.security.auth.DefaultPrincipalToLocal");
     this.conf = conf;

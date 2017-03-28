@@ -23,7 +23,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.storm.spout.Scheme;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -48,7 +48,7 @@ public class CsvScheme implements Scheme {
   @Override
   public List<Object> deserialize(ByteBuffer ser) {
     try {
-      String data = new String(Utils.toByteArray(ser), StandardCharsets.UTF_8);
+      String data = new String(ClientUtils.toByteArray(ser), StandardCharsets.UTF_8);
       CSVParser parser = CSVParser.parse(data, CSVFormat.RFC4180);
       CSVRecord record = parser.getRecords().get(0);
       Preconditions.checkArgument(record.size() == fieldNames.size(), "Invalid schema");

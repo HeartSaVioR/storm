@@ -24,7 +24,7 @@ import org.apache.storm.topology.base.BaseBatchBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import clojure.lang.Numbers;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class KeyedSummingBatchBolt extends BaseBatchBolt {
     @Override
     public void execute(Tuple tuple) {
         Object key = tuple.getValue(1);
-        Number curr = Utils.get(_sums, key, 0);        
+        Number curr = ClientUtils.get(_sums, key, 0);
         _sums.put(key, Numbers.add(curr, tuple.getValue(2)));
     }
 

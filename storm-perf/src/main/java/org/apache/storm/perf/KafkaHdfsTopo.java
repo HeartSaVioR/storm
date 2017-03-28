@@ -35,7 +35,8 @@ import org.apache.storm.kafka.ZkHosts;
 import org.apache.storm.perf.utils.Helper;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ObjectReader;
 
 import java.util.Map;
 import java.util.UUID;
@@ -117,7 +118,7 @@ public class KafkaHdfsTopo {
 
 
   public static int getInt(Map map, Object key, int def) {
-    return Utils.getInt(Utils.get(map, key, def));
+    return ObjectReader.getInt(ClientUtils.get(map, key, def));
   }
 
   public static String getStr(Map map, Object key) {
@@ -135,7 +136,7 @@ public class KafkaHdfsTopo {
 
         Integer durationSec = Integer.parseInt(args[0]);
         String confFile = args[1];
-        Map topoConf = Utils.findAndReadConfigFile(confFile);
+        Map topoConf = ClientUtils.findAndReadConfigFile(confFile);
 
         //  Submit topology to Storm cluster
         Helper.runOnClusterAndPrintMetrics(durationSec, TOPOLOGY_NAME, topoConf, getTopology(topoConf));

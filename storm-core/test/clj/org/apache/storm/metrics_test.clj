@@ -30,7 +30,7 @@
   (:use [org.apache.storm.internal clojure])
   (:use [org.apache.storm.util])
   (:import [org.apache.storm Thrift])
-  (:import [org.apache.storm.utils Utils]
+  (:import [org.apache.storm.utils Utils ClientUtils]
            (org.apache.storm.metric FakeMetricConsumer)))
 
 (defbolt acking-bolt {} {:prepare true}
@@ -110,7 +110,7 @@
           topology (Thrift/buildTopology
                     {"1" (Thrift/prepareSpoutDetails feeder)}
                     {"2" (Thrift/prepareBoltDetails
-                           {(Utils/getGlobalStreamId "1" nil)
+                           {(ClientUtils/getGlobalStreamId "1" nil)
                             (Thrift/prepareGlobalGrouping)}
                            count-acks)})]
       (.submitTopology cluster "metrics-tester" {} topology)
@@ -142,7 +142,7 @@
           topology (Thrift/buildTopology
                      {"1" (Thrift/prepareSpoutDetails feeder)}
                      {"2" (Thrift/prepareBoltDetails
-                            {(Utils/getGlobalStreamId "1" nil)
+                            {(ClientUtils/getGlobalStreamId "1" nil)
                              (Thrift/prepareAllGrouping)}
                             count-acks (Integer. 1) {TOPOLOGY-TASKS 2})})]
       (.submitTopology cluster "metrics-tester-with-multitasks" {} topology)
@@ -179,7 +179,7 @@
           topology (Thrift/buildTopology
                      {"1" (Thrift/prepareSpoutDetails feeder)}
                      {"2" (mk-shell-bolt-with-metrics-spec
-                            {(Utils/getGlobalStreamId "1" nil)
+                            {(ClientUtils/getGlobalStreamId "1" nil)
                              (Thrift/prepareGlobalGrouping)}
                             "python" "tester_bolt_metrics.py")})]
       (.submitTopology cluster "shell-metrics-tester" {} topology)
@@ -215,7 +215,7 @@
     (let [topology (Thrift/buildTopology
                      {"1" (mk-shell-spout-with-metrics-spec "python" "tester_spout_metrics.py")}
                      {"2" (Thrift/prepareBoltDetails
-                            {(Utils/getGlobalStreamId "1" nil)
+                            {(ClientUtils/getGlobalStreamId "1" nil)
                              (Thrift/prepareAllGrouping)}
                             count-acks)})]
       (.submitTopology cluster "shell-spout-metrics-tester" {} topology)
@@ -236,7 +236,7 @@
           topology (Thrift/buildTopology
                     {"myspout" (Thrift/prepareSpoutDetails feeder)}
                     {"mybolt" (Thrift/prepareBoltDetails
-                                {(Utils/getGlobalStreamId "myspout" nil)
+                                {(ClientUtils/getGlobalStreamId "myspout" nil)
                                  (Thrift/prepareShuffleGrouping)}
                                 acking-bolt)})]
       (.submitTopology cluster "metrics-tester" {} topology)
@@ -279,7 +279,7 @@
           topology (Thrift/buildTopology
                     {"myspout" (Thrift/prepareSpoutDetails feeder)}
                     {"mybolt" (Thrift/prepareBoltDetails
-                                {(Utils/getGlobalStreamId "myspout" nil)
+                                {(ClientUtils/getGlobalStreamId "myspout" nil)
                                  (Thrift/prepareShuffleGrouping)}
                                 ack-every-other)})]
       (.submitTopology cluster
@@ -333,11 +333,11 @@
           tracker (AckFailMapTracker.)
           _ (.setAckFailDelegate feeder tracker)
           topology (Thrift/buildTopology
-                    {"myspout" (Thrift/prepareSpoutDetails feeder)}
-                    {"mybolt" (Thrift/prepareBoltDetails
-                                {(Utils/getGlobalStreamId "myspout" nil)
-                                 (Thrift/prepareGlobalGrouping)}
-                                ack-every-other)})]
+                     {"myspout" (Thrift/prepareSpoutDetails feeder)}
+                     {"mybolt" (Thrift/prepareBoltDetails
+                                 {(ClientUtils/getGlobalStreamId "myspout" nil)
+                                  (Thrift/prepareGlobalGrouping)}
+                                 ack-every-other)})]
       (.submitTopology cluster
                              "timeout-tester"
                              {TOPOLOGY-MESSAGE-TIMEOUT-SECS 10}

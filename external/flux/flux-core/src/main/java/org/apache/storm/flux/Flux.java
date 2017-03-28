@@ -24,7 +24,7 @@ import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.generated.SubmitOptions;
 import org.apache.storm.generated.TopologyInitialStatus;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.commons.cli.*;
 import org.apache.storm.flux.model.*;
 import org.apache.storm.flux.parser.FluxParser;
@@ -32,8 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * Flux entry point.
@@ -206,7 +204,7 @@ public class Flux {
                     cluster = new LocalCluster();
                 }
                 try (LocalTopology topo = cluster.submitTopology(topologyName, conf, topology)) {
-                    Utils.sleep(sleepTime);
+                    ClientUtils.sleep(sleepTime);
                 } finally {
                     cluster.shutdown();
                 }

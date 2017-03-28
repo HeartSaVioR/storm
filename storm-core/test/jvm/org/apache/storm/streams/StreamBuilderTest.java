@@ -39,7 +39,7 @@ import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.topology.base.BaseWindowedBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -72,7 +72,7 @@ public class StreamBuilderTest {
 
     @Test
     public void testSpoutToBolt() throws Exception {
-        Stream<Tuple> stream = streamBuilder.newStream(newSpout(Utils.DEFAULT_STREAM_ID));
+        Stream<Tuple> stream = streamBuilder.newStream(newSpout(ClientUtils.DEFAULT_STREAM_ID));
         stream.to(newBolt());
         StormTopology topology = streamBuilder.build();
         assertEquals(1, topology.get_spouts_size());
@@ -85,7 +85,7 @@ public class StreamBuilderTest {
 
     @Test
     public void testBranch() throws Exception {
-        Stream<Tuple> stream = streamBuilder.newStream(newSpout(Utils.DEFAULT_STREAM_ID));
+        Stream<Tuple> stream = streamBuilder.newStream(newSpout(ClientUtils.DEFAULT_STREAM_ID));
         Stream<Tuple>[] streams = stream.branch(x -> true);
         StormTopology topology = streamBuilder.build();
         assertEquals(1, topology.get_spouts_size());
@@ -106,7 +106,7 @@ public class StreamBuilderTest {
 
     @Test
     public void testJoin() throws Exception {
-        Stream<Integer> stream = streamBuilder.newStream(newSpout(Utils.DEFAULT_STREAM_ID), new ValueMapper<>(0));
+        Stream<Integer> stream = streamBuilder.newStream(newSpout(ClientUtils.DEFAULT_STREAM_ID), new ValueMapper<>(0));
         Stream<Integer>[] streams = stream.branch(x -> x % 2 == 0, x-> x % 3 == 0);
         PairStream<Integer, Integer> s1 = streams[0].mapToPair(x -> Pair.of(x, 1));
         PairStream<Integer, Integer> s2 = streams[1].mapToPair(x -> Pair.of(x, 1));
@@ -117,7 +117,7 @@ public class StreamBuilderTest {
 
     @Test
     public void testGroupBy() throws Exception {
-        PairStream<String, String> stream = streamBuilder.newStream(newSpout(Utils.DEFAULT_STREAM_ID), new PairValueMapper<>(0, 1), 2);
+        PairStream<String, String> stream = streamBuilder.newStream(newSpout(ClientUtils.DEFAULT_STREAM_ID), new PairValueMapper<>(0, 1), 2);
 
         stream.window(TumblingWindows.of(BaseWindowedBolt.Count.of(10))).aggregateByKey(new Count<>());
 
@@ -131,7 +131,7 @@ public class StreamBuilderTest {
 
     @Test
     public void testGlobalAggregate() throws Exception {
-        Stream<String> stream = streamBuilder.newStream(newSpout(Utils.DEFAULT_STREAM_ID), new ValueMapper<>(0), 2);
+        Stream<String> stream = streamBuilder.newStream(newSpout(ClientUtils.DEFAULT_STREAM_ID), new ValueMapper<>(0), 2);
 
         stream.aggregate(new Count<>());
 
@@ -151,7 +151,7 @@ public class StreamBuilderTest {
 
     @Test
     public void testRepartition() throws Exception {
-        Stream<String> stream = streamBuilder.newStream(newSpout(Utils.DEFAULT_STREAM_ID), new ValueMapper<>(0));
+        Stream<String> stream = streamBuilder.newStream(newSpout(ClientUtils.DEFAULT_STREAM_ID), new ValueMapper<>(0));
         stream.repartition(3).filter(x -> true).repartition(2).filter(x -> true).aggregate(new Count<>());
         StormTopology topology = streamBuilder.build();
         assertEquals(1, topology.get_spouts_size());
@@ -172,7 +172,7 @@ public class StreamBuilderTest {
     public void testBranchAndJoin() throws Exception {
         TopologyContext mockContext = Mockito.mock(TopologyContext.class);
         OutputCollector mockCollector = Mockito.mock(OutputCollector.class);
-        Stream<Integer> stream = streamBuilder.newStream(newSpout(Utils.DEFAULT_STREAM_ID), new ValueMapper<>(0), 2);
+        Stream<Integer> stream = streamBuilder.newStream(newSpout(ClientUtils.DEFAULT_STREAM_ID), new ValueMapper<>(0), 2);
         Stream<Integer>[] streams = stream.branch(x -> x % 2 == 0, x -> x % 2 == 1);
         PairStream<Integer, Pair<Integer, Integer>> joined = streams[0].mapToPair(x -> Pair.of(x, 1)).join(streams[1].mapToPair(x -> Pair.of(x, 1)));
         assertTrue(joined.getNode() instanceof ProcessorNode);
@@ -184,7 +184,7 @@ public class StreamBuilderTest {
     public void testMultiPartitionByKey() {
         TopologyContext mockContext = Mockito.mock(TopologyContext.class);
         OutputCollector mockCollector = Mockito.mock(OutputCollector.class);
-        Stream<Integer> stream = streamBuilder.newStream(newSpout(Utils.DEFAULT_STREAM_ID), new ValueMapper<>(0));
+        Stream<Integer> stream = streamBuilder.newStream(newSpout(ClientUtils.DEFAULT_STREAM_ID), new ValueMapper<>(0));
         stream.mapToPair(x -> Pair.of(x, x))
                 .window(TumblingWindows.of(BaseWindowedBolt.Count.of(10)))
                 .reduceByKey((x, y) -> x + y)
@@ -201,7 +201,7 @@ public class StreamBuilderTest {
         Map<GlobalStreamId, Grouping> expected = new HashMap<>();
         expected.put(new GlobalStreamId("bolt2", "s3"), Grouping.fields(Collections.singletonList("key")));
         expected.put(new GlobalStreamId("bolt2", "s3__punctuation"), Grouping.all(new NullStruct()));
-        Stream<Integer> stream = streamBuilder.newStream(newSpout(Utils.DEFAULT_STREAM_ID), new ValueMapper<>(0));
+        Stream<Integer> stream = streamBuilder.newStream(newSpout(ClientUtils.DEFAULT_STREAM_ID), new ValueMapper<>(0));
         stream.mapToPair(x -> Pair.of(x, x))
                 .window(TumblingWindows.of(BaseWindowedBolt.Count.of(10)))
                 .reduceByKey((x, y) -> x + y)
@@ -218,7 +218,7 @@ public class StreamBuilderTest {
     public void testPartitionByKeySinglePartition() {
         TopologyContext mockContext = Mockito.mock(TopologyContext.class);
         OutputCollector mockCollector = Mockito.mock(OutputCollector.class);
-        Stream<Integer> stream = streamBuilder.newStream(newSpout(Utils.DEFAULT_STREAM_ID), new ValueMapper<>(0));
+        Stream<Integer> stream = streamBuilder.newStream(newSpout(ClientUtils.DEFAULT_STREAM_ID), new ValueMapper<>(0));
         stream.mapToPair(x -> Pair.of(x, x))
                 .reduceByKey((x, y) -> x + y)
                 .print();

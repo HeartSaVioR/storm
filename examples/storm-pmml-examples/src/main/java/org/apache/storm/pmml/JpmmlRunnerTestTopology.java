@@ -34,7 +34,7 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.topology.base.BaseBasicBolt;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -198,7 +198,7 @@ public class JpmmlRunnerTestTopology {
     }
 
     private IRichBolt newBolt() throws Exception {
-        final List<String> streams = Lists.newArrayList(Utils.DEFAULT_STREAM_ID, NON_DEFAULT_STREAM_ID);
+        final List<String> streams = Lists.newArrayList(ClientUtils.DEFAULT_STREAM_ID, NON_DEFAULT_STREAM_ID);
         if (blobKey != null) {  // Load PMML Model from Blob store
             final ModelOutputs outFields = JpmmlModelOutputs.toStreams(blobKey, streams);
             return new PMMLPredictorBolt(new JpmmlFactory.ModelRunnerFromBlobStore(blobKey, outFields), outFields);

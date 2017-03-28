@@ -19,8 +19,8 @@ package org.apache.storm.daemon.supervisor;
 
 import org.apache.storm.Config;
 import org.apache.storm.scheduler.ISupervisor;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.LocalState;
-import org.apache.storm.utils.Utils;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -86,6 +86,6 @@ public class StandaloneSupervisor implements ISupervisor {
         } catch (UnknownHostException e) {
             // This should not happen (localhost), but if it does we are still OK
         }
-        return Utils.uuid() + extraPart;
+        return ClientUtils.uuid() + extraPart;
     }
 }

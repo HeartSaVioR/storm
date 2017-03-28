@@ -26,7 +26,7 @@
                                          ReqContext ThriftConnectionType])
   (:import [org.apache.storm.generated Nimbus Nimbus$Client Nimbus$Processor
             AuthorizationException SubmitOptions TopologyInitialStatus KillOptions])
-  (:import [org.apache.storm.utils Utils])
+  (:import [org.apache.storm.utils Utils ClientConfigUtils])
   (:import [org.apache.storm.cluster IStormClusterState])
   (:import [org.mockito Mockito Matchers])
   (:use [org.apache.storm util config log])
@@ -52,7 +52,7 @@
 (deftest Simple-authentication-test
   (let [port (Utils/getAvailablePort)]
     (with-test-cluster [port nil nil "org.apache.storm.security.auth.SimpleTransportPlugin"]
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.SimpleTransportPlugin"
                                STORM-NIMBUS-RETRY-TIMES 0})
             client (NimbusClient. storm-conf "localhost" port nimbus-timeout)
@@ -77,7 +77,7 @@
                                {NIMBUS-AUTHORIZER "org.apache.storm.security.auth.authorizer.NoopAuthorizer"
                                 NIMBUS-THRIFT-PORT port
                                 STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.SimpleTransportPlugin"})))]
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                                {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.SimpleTransportPlugin"
                                 STORM-NIMBUS-RETRY-TIMES 0})
             client (NimbusClient. storm-conf "localhost" port nimbus-timeout)
@@ -104,7 +104,7 @@
                                {NIMBUS-AUTHORIZER "org.apache.storm.security.auth.authorizer.DenyAuthorizer"
                                 NIMBUS-THRIFT-PORT port
                                 STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.SimpleTransportPlugin"})))]
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                                {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.SimpleTransportPlugin"
                                Config/NIMBUS_THRIFT_PORT port
                                STORM-NIMBUS-RETRY-TIMES 0})
@@ -139,7 +139,7 @@
                   "test/clj/org/apache/storm/security/auth/jaas_digest.conf"
                   "org.apache.storm.security.auth.authorizer.NoopAuthorizer"
                   "org.apache.storm.security.auth.digest.DigestSaslTransportPlugin"]
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.digest.DigestSaslTransportPlugin"
                                "java.security.auth.login.config" "test/clj/org/apache/storm/security/auth/jaas_digest.conf"
                                Config/NIMBUS_THRIFT_PORT port
@@ -169,7 +169,7 @@
                                 NIMBUS-THRIFT-PORT port
                                 "java.security.auth.login.config" "test/clj/org/apache/storm/security/auth/jaas_digest.conf"
                                 STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.digest.DigestSaslTransportPlugin"})))]
-      (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
+      (let [storm-conf (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
                                {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.digest.DigestSaslTransportPlugin"
                                "java.security.auth.login.config" "test/clj/org/apache/storm/security/auth/jaas_digest.conf"
                                Config/NIMBUS_THRIFT_PORT port

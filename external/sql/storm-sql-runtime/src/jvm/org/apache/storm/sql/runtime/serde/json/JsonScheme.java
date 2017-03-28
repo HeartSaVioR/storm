@@ -19,7 +19,7 @@ package org.apache.storm.sql.runtime.serde.json;
 
 import org.apache.storm.spout.Scheme;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ClientUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class JsonScheme implements Scheme {
     ObjectMapper mapper = new ObjectMapper();
     try {
       @SuppressWarnings("unchecked")
-      HashMap<String, Object> map = mapper.readValue(Utils.toByteArray(ser), HashMap.class);
+      HashMap<String, Object> map = mapper.readValue(ClientUtils.toByteArray(ser), HashMap.class);
       ArrayList<Object> list = new ArrayList<>(fields.size());
       for (String f : fields) {
         list.add(map.get(f));

@@ -41,6 +41,8 @@ import org.apache.storm.daemon.supervisor.AdvancedFSOps;
 import org.apache.storm.daemon.supervisor.SupervisorUtils;
 import org.apache.storm.generated.LocalAssignment;
 import org.apache.storm.generated.StormTopology;
+import org.apache.storm.utils.ClientConfigUtils;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.ConfigUtils;
 import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
@@ -102,16 +104,16 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
         
         public DownloadBaseBlobsDistributed(String topologyId) throws IOException {
             _topologyId = topologyId;
-            _stormRoot = new File(ConfigUtils.supervisorStormDistRoot(_conf, _topologyId));
+            _stormRoot = new File(ClientConfigUtils.supervisorStormDistRoot(_conf, _topologyId));
         }
         
         protected void downloadBaseBlobs(File tmproot) throws Exception {
             String stormJarKey = ConfigUtils.masterStormJarKey(_topologyId);
             String stormCodeKey = ConfigUtils.masterStormCodeKey(_topologyId);
             String stormConfKey = ConfigUtils.masterStormConfKey(_topologyId);
-            String jarPath = ConfigUtils.supervisorStormJarPath(tmproot.getAbsolutePath());
-            String codePath = ConfigUtils.supervisorStormCodePath(tmproot.getAbsolutePath());
-            String confPath = ConfigUtils.supervisorStormConfPath(tmproot.getAbsolutePath());
+            String jarPath = ClientConfigUtils.supervisorStormJarPath(tmproot.getAbsolutePath());
+            String codePath = ClientConfigUtils.supervisorStormCodePath(tmproot.getAbsolutePath());
+            String confPath = ClientConfigUtils.supervisorStormConfPath(tmproot.getAbsolutePath());
             _fsOps.forceMkdir(tmproot);
             _fsOps.restrictDirectoryPermissions(tmproot);
             ClientBlobStore blobStore = Utils.getClientBlobStoreForSupervisor(_conf);
@@ -138,12 +140,12 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
                     }
                 }
                 boolean deleteAll = true;
-                String tmproot = ConfigUtils.supervisorTmpDir(_conf) + Utils.FILE_PATH_SEPARATOR + Utils.uuid();
+                String tmproot = ConfigUtils.supervisorTmpDir(_conf) + Utils.FILE_PATH_SEPARATOR + ClientUtils.uuid();
                 File tr = new File(tmproot);
                 try {
                     downloadBaseBlobs(tr);
                     _fsOps.moveDirectoryPreferAtomic(tr, _stormRoot);
-                    _fsOps.setupStormCodeDir(ConfigUtils.readSupervisorStormConf(_conf, _topologyId), _stormRoot);
+                    _fsOps.setupStormCodeDir(ClientConfigUtils.readSupervisorStormConf(_conf, _topologyId), _stormRoot);
                     deleteAll = false;
                 } finally {
                     if (deleteAll) {
@@ -171,8 +173,8 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
             _fsOps.forceMkdir(tmproot);
             String stormCodeKey = ConfigUtils.masterStormCodeKey(_topologyId);
             String stormConfKey = ConfigUtils.masterStormConfKey(_topologyId);
-            File codePath = new File(ConfigUtils.supervisorStormCodePath(tmproot.getAbsolutePath()));
-            File confPath = new File(ConfigUtils.supervisorStormConfPath(tmproot.getAbsolutePath()));
+            File codePath = new File(ClientConfigUtils.supervisorStormCodePath(tmproot.getAbsolutePath()));
+            File confPath = new File(ClientConfigUtils.supervisorStormConfPath(tmproot.getAbsolutePath()));
             BlobStore blobStore = Utils.getNimbusBlobStore(_conf, null);
             try {
                 try (OutputStream codeOutStream = _fsOps.getOutputStream(codePath)){
@@ -216,8 +218,8 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
         @Override
         public Void call() throws Exception {
             try {
-                String stormroot = ConfigUtils.supervisorStormDistRoot(_conf, _topologyId);
-                Map<String, Object> stormConf = ConfigUtils.readSupervisorStormConf(_conf, _topologyId);
+                String stormroot = ClientConfigUtils.supervisorStormDistRoot(_conf, _topologyId);
+                Map<String, Object> stormConf = ClientConfigUtils.readSupervisorStormConf(_conf, _topologyId);
 
                 @SuppressWarnings("unchecked")
                 Map<String, Map<String, Object>> blobstoreMap = (Map<String, Map<String, Object>>) stormConf.get(Config.TOPOLOGY_BLOBSTORE_MAP);
@@ -232,7 +234,7 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
                     }
                 }
 
-                StormTopology stormCode = ConfigUtils.readSupervisorTopology(_conf, _topologyId, _fsOps);
+                StormTopology stormCode = ClientConfigUtils.readSupervisorTopology(_conf, _topologyId, _fsOps);
                 List<String> dependencies = new ArrayList<>();
                 if (stormCode.is_set_dependency_jars()) {
                     dependencies.addAll(stormCode.get_dependency_jars());
@@ -286,7 +288,7 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
     AsyncLocalizer(Map<String, Object> conf, Localizer localizer, AdvancedFSOps ops) {
         _conf = conf;
         _symlinksDisabled = (boolean)conf.getOrDefault(Config.DISABLE_SYMLINKS, false);
-        _isLocalMode = ConfigUtils.isLocalMode(conf);
+        _isLocalMode = ClientConfigUtils.isLocalMode(conf);
         _localizer = localizer;
         _execService = Executors.newFixedThreadPool(1,  
                 new ThreadFactoryBuilder()
@@ -380,7 +382,7 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
         } else if (localResource.isDone()){
             LOG.info("Released blob reference {} {} Cleaning up BLOB references...", topologyId, port);
             _blobPending.remove(topologyId);
-            Map<String, Object> topoConf = ConfigUtils.readSupervisorStormConf(_conf, topologyId);
+            Map<String, Object> topoConf = ClientConfigUtils.readSupervisorStormConf(_conf, topologyId);
             @SuppressWarnings("unchecked")
             Map<String, Map<String, Object>> blobstoreMap = (Map<String, Map<String, Object>>) topoConf.get(Config.TOPOLOGY_BLOBSTORE_MAP);
             if (blobstoreMap != null) {
@@ -407,7 +409,7 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
         } else if (localResource.isDone()){
             LOG.info("Released blob reference {} {} Cleaning up basic files...", topologyId, port);
             _basicPending.remove(topologyId);
-            String path = ConfigUtils.supervisorStormDistRoot(_conf, topologyId);
+            String path = ClientConfigUtils.supervisorStormDistRoot(_conf, topologyId);
             _fsOps.deleteIfExists(new File(path), null, "rmr "+topologyId);
         } else {
             LOG.debug("Released basic reference {} {} still waiting on {}", topologyId, port, localResource);
@@ -416,7 +418,7 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
 
     @Override
     public synchronized void cleanupUnusedTopologies() throws IOException {
-        File distRoot = new File(ConfigUtils.supervisorStormDistRoot(_conf));
+        File distRoot = new File(ClientConfigUtils.supervisorStormDistRoot(_conf));
         LOG.info("Cleaning up unused topologies in {}", distRoot);
         File[] children = distRoot.listFiles();
         if (children != null) {

@@ -25,8 +25,8 @@ import org.apache.storm.generated.KeyNotFoundException;
 import org.apache.storm.generated.ReadableBlobMeta;
 import org.apache.storm.nimbus.NimbusInfo;
 import org.apache.storm.security.auth.NimbusPrincipal;
+import org.apache.storm.utils.CuratorUtils;
 import org.apache.storm.utils.NimbusClient;
-import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ZookeeperAuthInfo;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.thrift.transport.TTransportException;
@@ -55,7 +55,7 @@ public class BlobStoreUtils {
         List<String> zkServers = (List<String>) conf.get(Config.STORM_ZOOKEEPER_SERVERS);
         Object port = conf.get(Config.STORM_ZOOKEEPER_PORT);
         ZookeeperAuthInfo zkAuthInfo = new ZookeeperAuthInfo(conf);
-        CuratorFramework zkClient = Utils.newCurator(conf, zkServers, port, (String) conf.get(Config.STORM_ZOOKEEPER_ROOT), zkAuthInfo);
+        CuratorFramework zkClient = CuratorUtils.newCurator(conf, zkServers, port, (String) conf.get(Config.STORM_ZOOKEEPER_ROOT), zkAuthInfo);
         zkClient.start();
         return zkClient;
     }

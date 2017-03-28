@@ -24,8 +24,10 @@ import org.apache.storm.transactional.TransactionAttempt;
 import org.apache.storm.coordination.BatchOutputCollector;
 import org.apache.storm.transactional.partitioned.IPartitionedTransactionalSpout;
 import org.apache.storm.tuple.Fields;
+import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.RegisteredGlobalState;
-import org.apache.storm.utils.Utils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,7 +87,7 @@ public class MemoryTransactionalSpout implements IPartitionedTransactionalSpout<
         public Emitter(Map conf) {
             Object c = conf.get(Config.TOPOLOGY_MAX_SPOUT_PENDING);
             if(c==null) _maxSpoutPending = 1;
-            else _maxSpoutPending = Utils.getInt(c);
+            else _maxSpoutPending = ObjectReader.getInt(c);
         }
         
         
@@ -107,7 +109,7 @@ public class MemoryTransactionalSpout implements IPartitionedTransactionalSpout<
             if(toTake==0) {
                 // this is a pretty hacky way to determine when all the partitions have been committed
                 // wait until we've emitted max-spout-pending empty partitions for the partition
-                int curr = Utils.get(_emptyPartitions, partition, 0) + 1;
+                int curr = ClientUtils.get(_emptyPartitions, partition, 0) + 1;
                 _emptyPartitions.put(partition, curr);
                 if(curr > _maxSpoutPending) {
                     Map<Integer, Boolean> finishedStatuses = getFinishedStatuses();

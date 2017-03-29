@@ -20,7 +20,7 @@ package org.apache.storm.starter;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
-import org.apache.storm.metric.HttpForwardingMetricsServer;
+import org.apache.storm.misc.metric.HttpForwardingMetricsServer;
 import org.apache.storm.metric.api.IMetricsConsumer.TaskInfo;
 import org.apache.storm.metric.api.IMetricsConsumer.DataPoint;
 import org.apache.storm.generated.*;
@@ -393,7 +393,7 @@ public class ThroughputVsLatency {
     C cluster = new C(conf);
     conf.setNumWorkers(parallelism);
     conf.registerMetricsConsumer(org.apache.storm.metric.LoggingMetricsConsumer.class);
-    conf.registerMetricsConsumer(org.apache.storm.metric.HttpForwardingMetricsConsumer.class, url, 1);
+    conf.registerMetricsConsumer(org.apache.storm.misc.metric.HttpForwardingMetricsConsumer.class, url, 1);
     Map<String, String> workerMetrics = new HashMap<String, String>();
     if (!cluster.isLocal()) {
       //sigar uses JNI and does not work in local mode

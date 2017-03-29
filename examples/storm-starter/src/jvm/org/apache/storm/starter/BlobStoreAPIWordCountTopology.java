@@ -43,7 +43,6 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.apache.storm.utils.ClientUtils;
-import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +70,7 @@ public class BlobStoreAPIWordCountTopology {
     public static void prepare() {
         Config conf = new Config();
         conf.putAll(ClientUtils.readStormConfig());
-        store = Utils.getClientBlobStore(conf);
+        store = ClientUtils.getClientBlobStore(conf);
     }
 
     // Spout implementation

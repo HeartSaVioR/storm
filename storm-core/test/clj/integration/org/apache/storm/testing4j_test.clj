@@ -19,7 +19,7 @@
   (:use [org.apache.storm.internal clojure])
   (:require [integration.org.apache.storm.integration-test :as it])
   (:require [org.apache.storm.internal.thrift :as thrift])
-  (:import [org.apache.storm Testing Config ILocalCluster]
+  (:import [org.apache.storm Testing Config ILocalClusterTrackedTopologyAware]
            [org.apache.storm.generated GlobalStreamId])
   (:import [org.apache.storm.tuple Values Tuple])
   (:import [org.apache.storm.utils Time Utils])
@@ -27,7 +27,7 @@
             TestWordCounter TestGlobalCount TestAggregatesCounter CompleteTopologyParam
             AckFailMapTracker MkTupleParam])
   (:import [org.apache.storm.utils Utils ClientUtils])
-  (:import [org.apache.storm Thrift]))
+  (:import [org.apache.storm Thrift ILocalCluster]))
 
 (deftest test-with-simulated-time
   (is (= false (Time/isSimulating)))
@@ -43,7 +43,7 @@
                       (.put SUPERVISOR-ENABLE false)
                       (.put TOPOLOGY-ACKER-EXECUTORS 0))]
     (Testing/withLocalCluster mk-cluster-param (reify TestJob
-                                                 (^void run [this ^ILocalCluster cluster]
+                                                 (^void run [this ^ILocalClusterTrackedTopologyAware cluster]
                                                    (is (not (nil? cluster)))
                                                    (is (not (nil? (.getNimbus cluster)))))))))
 
@@ -55,7 +55,7 @@
                       (.put TOPOLOGY-ACKER-EXECUTORS 0))]
     (is (not (Time/isSimulating)))
     (Testing/withSimulatedTimeLocalCluster mk-cluster-param (reify TestJob
-                                                              (^void run [this ^ILocalCluster cluster]
+                                                              (^void run [this ^ILocalClusterTrackedTopologyAware cluster]
                                                                 (is (not (nil? cluster)))
                                                                 (is (not (nil? (.getNimbus cluster))))
                                                                 (is (Time/isSimulating)))))
@@ -63,7 +63,7 @@
 
 (def complete-topology-testjob
   (reify TestJob
-       (^void run [this ^ILocalCluster cluster]
+       (^void run [this ^ILocalClusterTrackedTopologyAware cluster]
          (let [topology (Thrift/buildTopology
                          {"1" (Thrift/prepareSpoutDetails (TestWordSpout. true) (Integer. 3))}
                          {"2" (Thrift/prepareBoltDetails
@@ -117,7 +117,7 @@
 (deftest test-with-tracked-cluster
   (Testing/withTrackedCluster
    (reify TestJob
-     (^void run [this ^ILocalCluster cluster]
+     (^void run [this ^ILocalClusterTrackedTopologyAware cluster]
        (let [[feeder checker] (it/ack-tracking-feeder ["num"])
              tracked (Testing/mkTrackedTopology
                       cluster
@@ -158,7 +158,7 @@
     (Testing/withSimulatedTimeLocalCluster
      mk-cluster-param
      (reify TestJob
-       (^void run [this ^ILocalCluster cluster]
+       (^void run [this ^ILocalClusterTrackedTopologyAware cluster]
          (let [feeder (FeederSpout. ["field1"])
                tracker (AckFailMapTracker.)
                _ (.setAckFailDelegate feeder tracker)
@@ -192,7 +192,7 @@
     (Testing/withSimulatedTimeLocalCluster
       mk-cluster-param
       (reify TestJob
-        (^void run [this ^ILocalCluster cluster]
+        (^void run [this ^ILocalClusterTrackedTopologyAware cluster]
           (let [feeder (FeederSpout. ["field1"])
                 tracker (AckFailMapTracker.)
                 _ (.setAckFailDelegate feeder tracker)

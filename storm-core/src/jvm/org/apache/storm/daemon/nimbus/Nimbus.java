@@ -2490,7 +2490,7 @@ public class Nimbus implements Iface, Shutdownable, DaemonCommon {
                 }
             }
 
-            Utils.validateTopologyBlobStoreMap(topoConf, Sets.newHashSet(blobStore.listKeys()));
+            ClientUtils.validateTopologyBlobStoreMap(topoConf, Sets.newHashSet(blobStore.listKeys()));
             long uniqueNum = submittedCount.incrementAndGet();
             String topoId = topoName + "-" + uniqueNum + "-" + Time.currentTimeSecs();
             Map<String, String> creds = null;

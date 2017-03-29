@@ -24,10 +24,16 @@ import org.apache.storm.Config;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ClassLoaderObjectInputStream;
+import org.apache.storm.blobstore.ClientBlobStore;
+import org.apache.storm.generated.ClusterSummary;
 import org.apache.storm.generated.ComponentCommon;
 import org.apache.storm.generated.ComponentObject;
 import org.apache.storm.generated.GlobalStreamId;
+import org.apache.storm.generated.InvalidTopologyException;
+import org.apache.storm.generated.Nimbus;
 import org.apache.storm.generated.StormTopology;
+import org.apache.storm.generated.TopologyInfo;
+import org.apache.storm.generated.TopologySummary;
 import org.apache.storm.serialization.DefaultSerializationDelegate;
 import org.apache.storm.serialization.SerializationDelegate;
 import org.apache.thrift.TBase;
@@ -92,7 +98,7 @@ public class ClientUtils {
     static SerializationDelegate serializationDelegate;
 
     static {
-        localConf = ClientUtils.readStormConfig();
+        localConf = readStormConfig();
         serializationDelegate = getSerializationDelegate(localConf);
     }
 
@@ -916,10 +922,89 @@ public class ClientUtils {
         }
     }
 
+    public static ClientBlobStore getClientBlobStore(Map conf) {
+        ClientBlobStore store = (ClientBlobStore) ReflectionUtils.newInstance((String) conf.get(Config.CLIENT_BLOBSTORE));
+        store.prepare(conf);
+        return store;
+    }
+
+    private static Object normalizeConf(Object conf) {
+        if (conf == null) return new HashMap();
+        if (conf instanceof Map) {
+            Map<Object, Object> confMap = new HashMap((Map) conf);
+            for (Map.Entry<Object, Object> entry : confMap.entrySet()) {
+                confMap.put(entry.getKey(), normalizeConf(entry.getValue()));
+            }
+            return confMap;
+        } else if (conf instanceof List) {
+            List confList =  new ArrayList((List) conf);
+            for (int i = 0; i < confList.size(); i++) {
+                Object val = confList.get(i);
+                confList.set(i, normalizeConf(val));
+            }
+            return confList;
+        } else if (conf instanceof Integer) {
+            return ((Integer) conf).longValue();
+        } else if (conf instanceof Float) {
+            return ((Float) conf).doubleValue();
+        } else {
+            return conf;
+        }
+    }
+
+    public static boolean isValidConf(Map<String, Object> stormConf) {
+        return normalizeConf(stormConf).equals(normalizeConf((Map) JSONValue.parse(JSONValue.toJSONString(stormConf))));
+    }
+
+    public static TopologyInfo getTopologyInfo(String name, String asUser, Map stormConf) {
+        try (NimbusClient client = NimbusClient.getConfiguredClientAs(stormConf, asUser)) {
+            String topologyId = getTopologyId(name, client.getClient());
+            if (null != topologyId) {
+                return client.getClient().getTopologyInfo(topologyId);
+            }
+            return null;
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String getTopologyId(String name, Nimbus.Client client) {
+        try {
+            ClusterSummary summary = client.getClusterInfo();
+            for(TopologySummary s : summary.get_topologies()) {
+                if(s.get_name().equals(name)) {
+                    return s.get_id();
+                }
+            }
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    public static void validateTopologyBlobStoreMap(Map<String, ?> stormConf, Set<String> blobStoreKeys) throws InvalidTopologyException {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> blobStoreMap = (Map<String, Object>) stormConf.get(Config.TOPOLOGY_BLOBSTORE_MAP);
+        if (blobStoreMap != null) {
+            Set<String> mapKeys = blobStoreMap.keySet();
+            Set<String> missingKeys = new HashSet<>();
+
+            for (String key : mapKeys) {
+                if (!blobStoreKeys.contains(key)) {
+                    missingKeys.add(key);
+                }
+            }
+            if (!missingKeys.isEmpty()) {
+                throw new InvalidTopologyException("The topology blob store map does not " +
+                        "contain the valid keys to launch the topology " + missingKeys);
+            }
+        }
+    }
+
     // Non-static impl methods exist for mocking purposes.
     protected void forceDeleteImpl(String path) throws IOException {
         LOG.debug("Deleting path {}", path);
-        if (ClientUtils.checkFileExists(path)) {
+        if (checkFileExists(path)) {
             try {
                 FileUtils.forceDelete(new File(path));
             } catch (FileNotFoundException ignored) {}
@@ -927,8 +1012,8 @@ public class ClientUtils {
     }
 
     // Non-static impl methods exist for mocking purposes.
-    public ClientUtils.UptimeComputer makeUptimeComputerImpl() {
-        return new ClientUtils.UptimeComputer();
+    public UptimeComputer makeUptimeComputerImpl() {
+        return new UptimeComputer();
     }
 
     // Non-static impl methods exist for mocking purposes.

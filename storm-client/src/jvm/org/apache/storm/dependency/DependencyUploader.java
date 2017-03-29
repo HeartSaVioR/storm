@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,7 +19,6 @@ package org.apache.storm.dependency;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.storm.blobstore.AtomicOutputStream;
-import org.apache.storm.blobstore.BlobStoreUtils;
 import org.apache.storm.blobstore.ClientBlobStore;
 import org.apache.storm.generated.AccessControl;
 import org.apache.storm.generated.AuthorizationException;
@@ -27,7 +26,6 @@ import org.apache.storm.generated.KeyAlreadyExistsException;
 import org.apache.storm.generated.KeyNotFoundException;
 import org.apache.storm.generated.SettableBlobMeta;
 import org.apache.storm.utils.ClientUtils;
-import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +64,7 @@ public class DependencyUploader {
 
     private synchronized ClientBlobStore getBlobStore() {
         if (blobStore == null) {
-            blobStore = Utils.getClientBlobStore(conf);
+            blobStore = ClientUtils.getClientBlobStore(conf);
         }
         return blobStore;
     }
@@ -78,7 +76,7 @@ public class DependencyUploader {
         try {
             for (File dependency : dependencies) {
                 String fileName = dependency.getName();
-                String key = BlobStoreUtils.generateDependencyBlobKey(BlobStoreUtils.applyUUIDToFileName(fileName));
+                String key = DependencyBlobStoreUtils.generateDependencyBlobKey(DependencyBlobStoreUtils.applyUUIDToFileName(fileName));
 
                 try {
                     uploadDependencyToBlobStore(key, dependency);
@@ -108,7 +106,7 @@ public class DependencyUploader {
                 String artifact = artifactToFile.getKey();
                 File dependency = artifactToFile.getValue();
 
-                String key = BlobStoreUtils.generateDependencyBlobKey(convertArtifactToJarFileName(artifact));
+                String key = DependencyBlobStoreUtils.generateDependencyBlobKey(convertArtifactToJarFileName(artifact));
                 try {
                     uploadDependencyToBlobStore(key, dependency);
                 } catch (KeyAlreadyExistsException e) {

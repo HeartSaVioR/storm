@@ -151,13 +151,13 @@
 
 (defn submit-local-topology
   [nimbus storm-name conf topology]
-  (when-not (Utils/isValidConf conf)
+  (when-not (ClientUtils/isValidConf conf)
     (throw (IllegalArgumentException. "Topology conf is not json-serializable")))
   (.submitTopology nimbus storm-name nil (JSONValue/toJSONString conf) topology))
 
 (defn submit-local-topology-with-opts
   [nimbus storm-name conf topology submit-opts]
-  (when-not (Utils/isValidConf conf)
+  (when-not (ClientUtils/isValidConf conf)
     (throw (IllegalArgumentException. "Topology conf is not json-serializable")))
   (.submitTopologyWithOpts nimbus storm-name nil (JSONValue/toJSONString conf) topology submit-opts))
 

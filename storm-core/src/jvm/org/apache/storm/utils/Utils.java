@@ -53,8 +53,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -77,14 +75,9 @@ import org.apache.storm.daemon.JarTransformer;
 import org.apache.storm.generated.AccessControl;
 import org.apache.storm.generated.AccessControlType;
 import org.apache.storm.generated.AuthorizationException;
-import org.apache.storm.generated.ClusterSummary;
-import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.generated.KeyNotFoundException;
-import org.apache.storm.generated.Nimbus;
 import org.apache.storm.generated.ReadableBlobMeta;
 import org.apache.storm.generated.SettableBlobMeta;
-import org.apache.storm.generated.TopologyInfo;
-import org.apache.storm.generated.TopologySummary;
 import org.apache.storm.localizer.Localizer;
 import org.apache.storm.nimbus.NimbusInfo;
 import org.apache.thrift.TException;
@@ -144,35 +137,6 @@ public class Utils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-
-    private static Object normalizeConf(Object conf) {
-        if (conf == null) return new HashMap();
-        if (conf instanceof Map) {
-            Map<Object, Object> confMap = new HashMap((Map) conf);
-            for (Map.Entry<Object, Object> entry : confMap.entrySet()) {
-                confMap.put(entry.getKey(), normalizeConf(entry.getValue()));
-            }
-            return confMap;
-        } else if (conf instanceof List) {
-            List confList =  new ArrayList((List) conf);
-            for (int i = 0; i < confList.size(); i++) {
-                Object val = confList.get(i);
-                confList.set(i, normalizeConf(val));
-            }
-            return confList;
-        } else if (conf instanceof Integer) {
-            return ((Integer) conf).longValue();
-        } else if (conf instanceof Float) {
-            return ((Float) conf).doubleValue();
-        } else {
-            return conf;
-        }
-    }
-
-    public static boolean isValidConf(Map<String, Object> stormConf) {
-        return normalizeConf(stormConf).equals(normalizeConf((Map) JSONValue.parse(JSONValue.toJSONString(stormConf))));
     }
 
 
@@ -240,12 +204,6 @@ public class Utils {
             }
             ClientUtils.sleep(ATTEMPTS_INTERVAL_TIME);
         }
-    }
-
-    public static ClientBlobStore getClientBlobStore(Map conf) {
-        ClientBlobStore store = (ClientBlobStore) ReflectionUtils.newInstance((String) conf.get(Config.CLIENT_BLOBSTORE));
-        store.prepare(conf);
-        return store;
     }
 
     private static boolean downloadResourcesAsSupervisorAttempt(ClientBlobStore cb, String key, String localFile) {
@@ -648,25 +606,6 @@ public class Utils {
         return dump.toString();
     }
 
-    public static void validateTopologyBlobStoreMap(Map<String, ?> stormConf, Set<String> blobStoreKeys) throws InvalidTopologyException {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> blobStoreMap = (Map<String, Object>) stormConf.get(Config.TOPOLOGY_BLOBSTORE_MAP);
-        if (blobStoreMap != null) {
-            Set<String> mapKeys = blobStoreMap.keySet();
-            Set<String> missingKeys = new HashSet<>();
-
-            for (String key : mapKeys) {
-                if (!blobStoreKeys.contains(key)) {
-                    missingKeys.add(key);
-                }
-            }
-            if (!missingKeys.isEmpty()) {
-                throw new InvalidTopologyException("The topology blob store map does not " +
-                        "contain the valid keys to launch the topology " + missingKeys);
-            }
-        }
-    }
-    
     /**
      * Given a File input it will unzip the file in a the unzip directory
      * passed as the second parameter
@@ -730,32 +669,6 @@ public class Utils {
         long val = (b1 << 24) | (b2 << 16) + (b3 << 8) + b4;
         raf.close();
         return val;
-    }
-
-    public static TopologyInfo getTopologyInfo(String name, String asUser, Map stormConf) {
-        try (NimbusClient client = NimbusClient.getConfiguredClientAs(stormConf, asUser)) {
-            String topologyId = getTopologyId(name, client.getClient());
-            if (null != topologyId) {
-                return client.getClient().getTopologyInfo(topologyId);
-            }
-            return null;
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static String getTopologyId(String name, Nimbus.Client client) {
-        try {
-            ClusterSummary summary = client.getClusterInfo();
-            for(TopologySummary s : summary.get_topologies()) {
-                if(s.get_name().equals(name)) {
-                    return s.get_id();
-                }
-            }
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-        return null;
     }
 
     public static int getAvailablePort(int prefferedPort) {

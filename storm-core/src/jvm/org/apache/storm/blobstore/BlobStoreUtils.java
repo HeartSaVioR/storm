@@ -47,7 +47,6 @@ import java.util.UUID;
 
 public class BlobStoreUtils {
     private static final String BLOBSTORE_SUBTREE="/blobstore";
-    private static final String BLOB_DEPENDENCIES_PREFIX = "dep-";
     private static final Logger LOG = LoggerFactory.getLogger(BlobStoreUtils.class);
 
     public static CuratorFramework createZKClient(Map<String, Object> conf) {
@@ -267,21 +266,6 @@ public class BlobStoreUtils {
         } catch (Exception exp) {
             throw new RuntimeException(exp);
         }
-    }
-
-    public static String generateDependencyBlobKey(String key) {
-        return BLOB_DEPENDENCIES_PREFIX + key;
-    }
-
-    public static String applyUUIDToFileName(String fileName) {
-        String fileNameWithExt = com.google.common.io.Files.getNameWithoutExtension(fileName);
-        String ext = com.google.common.io.Files.getFileExtension(fileName);
-        if (StringUtils.isEmpty(ext)) {
-            fileName = fileName + "-" + UUID.randomUUID();
-        } else {
-            fileName = fileNameWithExt + "-" + UUID.randomUUID() + "." + ext;
-        }
-        return fileName;
     }
 
 

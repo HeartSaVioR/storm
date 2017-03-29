@@ -27,24 +27,19 @@ import org.apache.storm.generated.RebalanceOptions;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.generated.SubmitOptions;
 import org.apache.storm.generated.TopologyInfo;
-import org.apache.storm.testing.TrackedTopology;
 import org.apache.thrift.TException;
 
 /**
  * This is here mostly for backwards compatibility.
- * Please see {@link org.apache.storm.LocalCluster} for
- * more details on testing a Storm Topology. 
  */
 public interface ILocalCluster extends AutoCloseable {
     /**
      * Close this class to kill the topology.
      * This is here mostly for backwards compatibility.
-     * Please see {@link org.apache.storm.LocalCluster.LocalTopology} for
-     * more details on testing a Storm Topology. 
      */
-    public interface ILocalTopology extends AutoCloseable {
+    interface ILocalTopology extends AutoCloseable {
 
-    };
+    }
     
     /**
      * Submit a topology to be run in local mode
@@ -66,27 +61,6 @@ public interface ILocalCluster extends AutoCloseable {
      * @throws TException on any error from nimbus
      */
     ILocalTopology submitTopologyWithOpts(String topologyName, Map<String, Object> conf, StormTopology topology, SubmitOptions submitOpts) throws TException;
-    
-    /**
-     * Submit a tracked topology to be run in local mode
-     * @param topologyName the name of the topology to use
-     * @param conf the config for the topology
-     * @param topology the topology itself.
-     * @return an AutoCloseable that will kill the topology.
-     * @throws TException on any error from nimbus
-     */
-    ILocalTopology submitTopology(String topologyName, Map<String, Object> conf, TrackedTopology topology) throws TException;
-    
-    /**
-     * Submit a tracked topology to be run in local mode
-     * @param topologyName the name of the topology to use
-     * @param conf the config for the topology
-     * @param topology the topology itself.
-     * @param submitOpts options for topology
-     * @return an AutoCloseable that will kill the topology.
-     * @throws TException on any error from nimbus
-     */
-    ILocalTopology submitTopologyWithOpts(String topologyName, Map<String, Object> conf, TrackedTopology topology, SubmitOptions submitOpts) throws TException;
     
     /**
      * Upload new credentials to a topology.

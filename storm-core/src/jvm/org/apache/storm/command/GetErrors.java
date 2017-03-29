@@ -22,8 +22,8 @@ import org.apache.storm.generated.GetInfoOptions;
 import org.apache.storm.generated.Nimbus;
 import org.apache.storm.generated.NumErrorsChoice;
 import org.apache.storm.generated.TopologyInfo;
+import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.NimbusClient;
-import org.apache.storm.utils.Utils;
 import org.json.simple.JSONValue;
 
 import java.util.HashMap;
@@ -43,7 +43,7 @@ public class GetErrors {
             public void run(Nimbus.Client client) throws Exception {
                 GetInfoOptions opts = new GetInfoOptions();
                 opts.set_num_err_choice(NumErrorsChoice.ONE);
-                String topologyId = Utils.getTopologyId(name, client);
+                String topologyId = ClientUtils.getTopologyId(name, client);
 
                 TopologyInfo topologyInfo = null;
                 if (topologyId != null) {

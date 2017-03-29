@@ -93,7 +93,7 @@ import org.slf4j.LoggerFactory;
  * }
  * // The cluster has been shut down.
  */
-public class LocalCluster implements ILocalCluster {
+public class LocalCluster implements ILocalClusterTrackedTopologyAware {
     private static final Logger LOG = LoggerFactory.getLogger(LocalCluster.class);
     
     private static ThriftServer startNimbusDaemon(Map<String, Object> conf, Nimbus nimbus) {
@@ -506,14 +506,14 @@ public class LocalCluster implements ILocalCluster {
     @Override
     public LocalTopology submitTopology(String topologyName, Map<String, Object> conf, StormTopology topology)
             throws TException {
-        if (!Utils.isValidConf(conf)) {
+        if (!ClientUtils.isValidConf(conf)) {
             throw new IllegalArgumentException("Topology conf is not json-serializable");
         }
         getNimbus().submitTopology(topologyName, null, JSONValue.toJSONString(conf), topology);
         
         ISubmitterHook hook = (ISubmitterHook) Utils.getConfiguredClass(conf, Config.STORM_TOPOLOGY_SUBMISSION_NOTIFIER_PLUGIN);
         if (hook != null) {
-            TopologyInfo topologyInfo = Utils.getTopologyInfo(topologyName, null, conf);
+            TopologyInfo topologyInfo = ClientUtils.getTopologyInfo(topologyName, null, conf);
             try {
                 hook.notify(topologyInfo, conf, topology);
             } catch (IllegalAccessException e) {
@@ -526,7 +526,7 @@ public class LocalCluster implements ILocalCluster {
     @Override
     public LocalTopology submitTopologyWithOpts(String topologyName, Map<String, Object> conf, StormTopology topology, SubmitOptions submitOpts)
             throws TException {
-        if (!Utils.isValidConf(conf)) {
+        if (!ClientUtils.isValidConf(conf)) {
             throw new IllegalArgumentException("Topology conf is not json-serializable");
         }
         getNimbus().submitTopologyWithOpts(topologyName, null, JSONValue.toJSONString(conf), topology, submitOpts);

@@ -22,7 +22,6 @@ import org.apache.storm.pmml.model.ModelOutputs;
 import org.apache.storm.pmml.runner.ModelRunner;
 import org.apache.storm.pmml.runner.ModelRunnerFactory;
 import org.apache.storm.utils.ClientUtils;
-import org.apache.storm.utils.Utils;
 import org.dmg.pmml.IOUtil;
 import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.Evaluator;
@@ -97,7 +96,7 @@ public class JpmmlFactory {
         Objects.requireNonNull(blobKey);
         Objects.requireNonNull(config);
         try {
-            return Utils.getClientBlobStore(config).getBlob(blobKey);
+            return ClientUtils.getClientBlobStore(config).getBlob(blobKey);
         } catch (Exception e) {
             throw new RuntimeException("Failed to download PMML Model from Blobstore using blob key [" + blobKey + "]", e);
         }

@@ -22,7 +22,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.utils.ClientUtils;
-import org.apache.storm.utils.Utils;
 import org.apache.storm.validation.ConfigValidation;
 import org.apache.storm.validation.ConfigValidation.*;
 import org.apache.storm.validation.ConfigValidationAnnotations.*;
@@ -95,9 +94,9 @@ public class TestConfigValidate {
         HashSet<String> keySet = new HashSet<>();
         keySet.add("key1");
         keySet.add("key2");
-        Utils.validateTopologyBlobStoreMap(stormConf, keySet);
+        ClientUtils.validateTopologyBlobStoreMap(stormConf, keySet);
         keySet.remove("key2");
-        Utils.validateTopologyBlobStoreMap(stormConf, keySet);
+        ClientUtils.validateTopologyBlobStoreMap(stormConf, keySet);
     }
 
     @Test
@@ -247,7 +246,7 @@ public class TestConfigValidate {
         testList.add(new Integer("3"));
         testList.add(new Long("4"));
         conf.put("eee", testList);
-        Utils.isValidConf(conf);
+        ClientUtils.isValidConf(conf);
     }
 
     @Test

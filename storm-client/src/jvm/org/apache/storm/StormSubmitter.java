@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -48,7 +48,6 @@ import org.apache.storm.security.auth.AuthUtils;
 import org.apache.storm.generated.*;
 import org.apache.storm.utils.BufferFileInputStream;
 import org.apache.storm.utils.NimbusClient;
-import org.apache.storm.utils.Utils;
 
 /**
  * Use this class to submit topologies to run on the Storm cluster. You should run your program
@@ -200,7 +199,7 @@ public class StormSubmitter {
      */
     public static void submitTopologyAs(String name, Map stormConf, StormTopology topology, SubmitOptions opts, ProgressListener progressListener, String asUser)
             throws AlreadyAliveException, InvalidTopologyException, AuthorizationException, IllegalArgumentException {
-        if(!Utils.isValidConf(stormConf)) {
+        if(!ClientUtils.isValidConf(stormConf)) {
             throw new IllegalArgumentException("Storm conf is not valid. Must be json-serializable");
         }
         stormConf = new HashMap(stormConf);
@@ -361,7 +360,7 @@ public class StormSubmitter {
                 }
 
                 ISubmitterHook submitterHook = (ISubmitterHook) Class.forName(submissionNotifierClassName).newInstance();
-                TopologyInfo topologyInfo = Utils.getTopologyInfo(name, asUser, stormConf);
+                TopologyInfo topologyInfo = ClientUtils.getTopologyInfo(name, asUser, stormConf);
                 LOG.info("Invoking the registered ISubmitterHook [{}]", submissionNotifierClassName);
                 submitterHook.notify(topologyInfo, stormConf, topology);
             }
@@ -563,7 +562,7 @@ public class StormSubmitter {
     private static void validateConfs(Map<String, Object> stormConf, StormTopology topology) throws IllegalArgumentException, InvalidTopologyException {
         ConfigValidation.validateFields(stormConf);
         validateTopologyWorkerMaxHeapSizeMBConfigs(stormConf, topology);
-        Utils.validateTopologyBlobStoreMap(stormConf, getListOfKeysFromBlobStore(stormConf));
+        ClientUtils.validateTopologyBlobStoreMap(stormConf, getListOfKeysFromBlobStore(stormConf));
     }
 
     private static void validateTopologyWorkerMaxHeapSizeMBConfigs(Map<String, Object> stormConf, StormTopology topology) {

@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.cluster.IStormClusterState;
 import org.apache.storm.cluster.VersionedData;
 import org.apache.storm.daemon.supervisor.Slot.MachineState;
@@ -82,7 +83,7 @@ public class ReadClusterState implements Runnable, AutoCloseable {
         this.launcher = ContainerLauncher.make(superConf, assignmentId, supervisor.getSharedContext());
         
         @SuppressWarnings("unchecked")
-        List<Number> ports = (List<Number>)superConf.get(Config.SUPERVISOR_SLOTS_PORTS);
+        List<Number> ports = (List<Number>)superConf.get(DaemonConfig.SUPERVISOR_SLOTS_PORTS);
         for (Number port: ports) {
             slots.put(port.intValue(), mkSlot(port.intValue()));
         }

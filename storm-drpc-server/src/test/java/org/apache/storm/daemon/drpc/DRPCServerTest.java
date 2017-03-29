@@ -32,6 +32,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.daemon.drpc.DRPCServer;
 import org.apache.storm.drpc.DRPCInvocationsClient;
 import org.apache.storm.generated.DRPCExecutionException;
@@ -80,7 +81,7 @@ public class DRPCServerTest {
         conf.put(Config.STORM_NIMBUS_RETRY_INTERVAL, 10);
         conf.put(Config.STORM_NIMBUS_RETRY_INTERVAL_CEILING, 100);
         if (httpPort != null) {
-            conf.put(Config.DRPC_HTTP_PORT, httpPort);
+            conf.put(DaemonConfig.DRPC_HTTP_PORT, httpPort);
         }
         return conf;
     }

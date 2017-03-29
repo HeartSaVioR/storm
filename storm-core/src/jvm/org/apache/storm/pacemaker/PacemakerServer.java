@@ -18,6 +18,7 @@
 package org.apache.storm.pacemaker;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.generated.HBMessage;
 import org.apache.storm.messaging.netty.ISaslServer;
 import org.apache.storm.messaging.netty.NettyRenameThreadFactory;
@@ -55,7 +56,7 @@ class PacemakerServer implements ISaslServer {
     private ThriftNettyServerCodec.AuthMethod authMethod;
 
     public PacemakerServer(IServerMessageHandler handler, Map config){
-        int maxWorkers = (int)config.get(Config.PACEMAKER_MAX_THREADS);
+        int maxWorkers = (int)config.get(DaemonConfig.PACEMAKER_MAX_THREADS);
         this.port = (int)config.get(Config.PACEMAKER_PORT);
         this.handler = handler;
         this.topo_name = "pacemaker_server";

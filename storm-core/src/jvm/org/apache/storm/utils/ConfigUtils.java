@@ -20,6 +20,7 @@ package org.apache.storm.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.validation.ConfigValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,9 +97,20 @@ public class ConfigUtils {
         return readYamlConfig(name, true);
     }
 
+    // we use this "weird" wrapper pattern temporarily for mocking in clojure test
+    public static Map<String, Object> readStormConfig() {
+        return _instance.readStormConfigImpl();
+    }
+
+    public Map<String, Object> readStormConfigImpl() {
+        Map<String, Object> conf = ClientUtils.readStormConfig();
+        ConfigValidation.validateFields(conf, DaemonConfig.class);
+        return conf;
+    }
+
     public static String absoluteHealthCheckDir(Map conf) {
         String stormHome = System.getProperty("storm.home");
-        String healthCheckDir = (String) conf.get(Config.STORM_HEALTH_CHECK_DIR);
+        String healthCheckDir = (String) conf.get(DaemonConfig.STORM_HEALTH_CHECK_DIR);
         if (healthCheckDir == null) {
             return (stormHome + FILE_SEPARATOR + "healthchecks");
         } else {
@@ -232,7 +244,7 @@ public class ConfigUtils {
 
     /* TODO: make sure test these two functions in manual tests */
     public static List<String> getTopoLogsUsers(Map topologyConf) {
-        List<String> logsUsers = (List<String>)topologyConf.get(Config.LOGS_USERS);
+        List<String> logsUsers = (List<String>)topologyConf.get(DaemonConfig.LOGS_USERS);
         List<String> topologyUsers = (List<String>)topologyConf.get(Config.TOPOLOGY_USERS);
         Set<String> mergedUsers = new HashSet<String>();
         if (logsUsers != null) {
@@ -255,7 +267,7 @@ public class ConfigUtils {
     }
 
     public static List<String> getTopoLogsGroups(Map topologyConf) {
-        List<String> logsGroups = (List<String>)topologyConf.get(Config.LOGS_GROUPS);
+        List<String> logsGroups = (List<String>)topologyConf.get(DaemonConfig.LOGS_GROUPS);
         List<String> topologyGroups = (List<String>)topologyConf.get(Config.TOPOLOGY_GROUPS);
         Set<String> mergedGroups = new HashSet<String>();
         if (logsGroups != null) {

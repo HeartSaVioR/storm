@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.container.ResourceIsolationInterface;
 import org.apache.storm.generated.LocalAssignment;
 import org.apache.storm.generated.ProfileAction;
@@ -145,7 +146,7 @@ public class BasicContainer extends Container {
 
         if (profileCmd == null) {
             profileCmd = _stormHome + Utils.FILE_PATH_SEPARATOR + "bin" + Utils.FILE_PATH_SEPARATOR
-                    + conf.get(Config.WORKER_PROFILER_COMMAND);
+                    + conf.get(DaemonConfig.WORKER_PROFILER_COMMAND);
         }
         _profileCmd = profileCmd;
     }
@@ -328,7 +329,7 @@ public class BasicContainer extends Container {
         String arch = System.getProperty("os.arch");
         String archResourceRoot = resourceRoot + Utils.FILE_PATH_SEPARATOR + os + "-" + arch;
         String ret = CPJ.join(archResourceRoot, resourceRoot,
-                conf.get(Config.JAVA_LIBRARY_PATH));
+                conf.get(DaemonConfig.JAVA_LIBRARY_PATH));
         return ret;
     }
 
@@ -460,7 +461,7 @@ public class BasicContainer extends Container {
     }
 
     private String getWorkerLoggingConfigFile() {
-        String log4jConfigurationDir = (String) (_conf.get(Config.STORM_LOG4J2_CONF_DIR));
+        String log4jConfigurationDir = (String) (_conf.get(DaemonConfig.STORM_LOG4J2_CONF_DIR));
 
         if (StringUtils.isNotBlank(log4jConfigurationDir)) {
             if (!Utils.isAbsolutePath(log4jConfigurationDir)) {
@@ -609,8 +610,8 @@ public class BasicContainer extends Container {
     
     private List<String> getWorkerProfilerChildOpts(int memOnheap) {
         List<String> workerProfilerChildopts = new ArrayList<>();
-        if (ObjectReader.getBoolean(_conf.get(Config.WORKER_PROFILER_ENABLED), false)) {
-            workerProfilerChildopts = substituteChildopts(_conf.get(Config.WORKER_PROFILER_CHILDOPTS), memOnheap);
+        if (ObjectReader.getBoolean(_conf.get(DaemonConfig.WORKER_PROFILER_ENABLED), false)) {
+            workerProfilerChildopts = substituteChildopts(_conf.get(DaemonConfig.WORKER_PROFILER_CHILDOPTS), memOnheap);
         }
         return workerProfilerChildopts;
     }
@@ -704,7 +705,7 @@ public class BasicContainer extends Container {
             int memoffheap = (int) Math.ceil(resources.get_mem_off_heap());
             int cpu = (int) Math.ceil(resources.get_cpu());
             
-            int cGroupMem = (int) (Math.ceil((double) _conf.get(Config.STORM_CGROUP_MEMORY_LIMIT_TOLERANCE_MARGIN_MB)));
+            int cGroupMem = (int) (Math.ceil((double) _conf.get(DaemonConfig.STORM_CGROUP_MEMORY_LIMIT_TOLERANCE_MARGIN_MB)));
             int memoryValue = memoffheap + memOnheap + cGroupMem;
             int cpuValue = cpu;
             Map<String, Number> map = new HashMap<>();

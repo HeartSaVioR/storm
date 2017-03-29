@@ -67,7 +67,7 @@ public class AdminCommands {
     }
 
     private static void initialize() {
-        conf = ClientConfigUtils.readStormConfig();
+        conf = ConfigUtils.readStormConfig();
         nimbusBlobStore = Utils.getNimbusBlobStore (conf, NimbusInfo.fromConf(conf));
         List<String> servers = (List<String>) conf.get(Config.STORM_ZOOKEEPER_SERVERS);
         Object port = conf.get(Config.STORM_ZOOKEEPER_PORT);

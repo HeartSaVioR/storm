@@ -30,6 +30,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.cluster.IStormClusterState;
 import org.apache.storm.generated.ExecutorInfo;
 import org.apache.storm.generated.LSWorkerHeartbeat;
@@ -654,9 +655,9 @@ public class Slot extends Thread implements AutoCloseable {
         dynamicState = new DynamicState(currentAssignment, container, newAssignment);
         staticState = new StaticState(localizer, 
                 ObjectReader.getInt(conf.get(Config.SUPERVISOR_WORKER_TIMEOUT_SECS)) * 1000,
-                ObjectReader.getInt(conf.get(Config.SUPERVISOR_WORKER_START_TIMEOUT_SECS)) * 1000,
-                ObjectReader.getInt(conf.get(Config.SUPERVISOR_WORKER_SHUTDOWN_SLEEP_SECS)) * 1000,
-                ObjectReader.getInt(conf.get(Config.SUPERVISOR_MONITOR_FREQUENCY_SECS)) * 1000,
+                ObjectReader.getInt(conf.get(DaemonConfig.SUPERVISOR_WORKER_START_TIMEOUT_SECS)) * 1000,
+                ObjectReader.getInt(conf.get(DaemonConfig.SUPERVISOR_WORKER_SHUTDOWN_SLEEP_SECS)) * 1000,
+                ObjectReader.getInt(conf.get(DaemonConfig.SUPERVISOR_MONITOR_FREQUENCY_SECS)) * 1000,
                 containerLauncher,
                 host,
                 port,

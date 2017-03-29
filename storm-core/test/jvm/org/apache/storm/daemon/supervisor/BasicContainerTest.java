@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.container.ResourceIsolationInterface;
 import org.apache.storm.daemon.supervisor.Container.ContainerType;
 import org.apache.storm.generated.LocalAssignment;
@@ -378,7 +379,7 @@ public class BasicContainerTest {
         final Map<String, Object> superConf = new HashMap<>();
         superConf.put(Config.STORM_LOCAL_DIR, stormLocal);
         superConf.put(Config.STORM_WORKERS_ARTIFACTS_DIR, stormLocal);
-        superConf.put(Config.STORM_LOG4J2_CONF_DIR, log4jdir);
+        superConf.put(DaemonConfig.STORM_LOG4J2_CONF_DIR, log4jdir);
         superConf.put(Config.WORKER_CHILDOPTS, " -Dtesting=true");
         
         LocalAssignment la = new LocalAssignment();

@@ -18,6 +18,7 @@
 package org.apache.storm.localizer;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.blobstore.ClientBlobStore;
 import org.apache.storm.blobstore.InputStreamWithMeta;
 import org.apache.storm.generated.AuthorizationException;
@@ -98,16 +99,16 @@ public class Localizer {
     _conf = conf;
     _localBaseDir = baseDir;
     // default cache size 10GB, converted to Bytes
-    _cacheTargetSize = ObjectReader.getInt(_conf.get(Config.SUPERVISOR_LOCALIZER_CACHE_TARGET_SIZE_MB),
+    _cacheTargetSize = ObjectReader.getInt(_conf.get(DaemonConfig.SUPERVISOR_LOCALIZER_CACHE_TARGET_SIZE_MB),
             10 * 1024).longValue() << 20;
     // default 10 minutes.
     _cacheCleanupPeriod = ObjectReader.getInt(_conf.get(
-            Config.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS), 10 * 60 * 1000).longValue();
+            DaemonConfig.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS), 10 * 60 * 1000).longValue();
 
     // if we needed we could make config for update thread pool size
-    _threadPoolSize = ObjectReader.getInt(_conf.get(Config.SUPERVISOR_BLOBSTORE_DOWNLOAD_THREAD_COUNT), 5);
+    _threadPoolSize = ObjectReader.getInt(_conf.get(DaemonConfig.SUPERVISOR_BLOBSTORE_DOWNLOAD_THREAD_COUNT), 5);
     _blobDownloadRetries = ObjectReader.getInt(_conf.get(
-            Config.SUPERVISOR_BLOBSTORE_DOWNLOAD_MAX_RETRIES), 3);
+            DaemonConfig.SUPERVISOR_BLOBSTORE_DOWNLOAD_MAX_RETRIES), 3);
 
     _execService = Executors.newFixedThreadPool(_threadPoolSize);
     _updateExecService = Executors.newFixedThreadPool(_threadPoolSize);

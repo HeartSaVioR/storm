@@ -52,7 +52,7 @@ public class TestCgroups {
         Config config = new Config();
         config.putAll(ClientUtils.readDefaultConfig());
         //We don't want to run the test is CGroups are not setup
-        Assume.assumeTrue("Check if CGroups are setup", ((boolean) config.get(Config.STORM_RESOURCE_ISOLATION_PLUGIN_ENABLE)) == true);
+        Assume.assumeTrue("Check if CGroups are setup", ((boolean) config.get(DaemonConfig.STORM_RESOURCE_ISOLATION_PLUGIN_ENABLE)) == true);
 
         Assert.assertTrue("Check if STORM_CGROUP_HIERARCHY_DIR exists", stormCgroupHierarchyExists(config));
         Assert.assertTrue("Check if STORM_SUPERVISOR_CGROUP_ROOTDIR exists", stormCgroupSupervisorRootDirExists(config));
@@ -71,14 +71,14 @@ public class TestCgroups {
         for (String entry : commandList) {
             command.append(entry).append(" ");
         }
-        String correctCommand1 = config.get(Config.STORM_CGROUP_CGEXEC_CMD) + " -g memory,cpu:/"
-                + config.get(Config.STORM_SUPERVISOR_CGROUP_ROOTDIR) + "/" + workerId + " ";
-        String correctCommand2 = config.get(Config.STORM_CGROUP_CGEXEC_CMD) + " -g cpu,memory:/"
-                + config.get(Config.STORM_SUPERVISOR_CGROUP_ROOTDIR) + "/" + workerId + " ";
+        String correctCommand1 = config.get(DaemonConfig.STORM_CGROUP_CGEXEC_CMD) + " -g memory,cpu:/"
+                + config.get(DaemonConfig.STORM_SUPERVISOR_CGROUP_ROOTDIR) + "/" + workerId + " ";
+        String correctCommand2 = config.get(DaemonConfig.STORM_CGROUP_CGEXEC_CMD) + " -g cpu,memory:/"
+                + config.get(DaemonConfig.STORM_SUPERVISOR_CGROUP_ROOTDIR) + "/" + workerId + " ";
         Assert.assertTrue("Check if cgroup launch command is correct", command.toString().equals(correctCommand1) || command.toString().equals(correctCommand2));
 
-        String pathToWorkerCgroupDir = ((String) config.get(Config.STORM_CGROUP_HIERARCHY_DIR))
-                + "/" + ((String) config.get(Config.STORM_SUPERVISOR_CGROUP_ROOTDIR)) + "/" + workerId;
+        String pathToWorkerCgroupDir = ((String) config.get(DaemonConfig.STORM_CGROUP_HIERARCHY_DIR))
+                + "/" + ((String) config.get(DaemonConfig.STORM_SUPERVISOR_CGROUP_ROOTDIR)) + "/" + workerId;
 
         Assert.assertTrue("Check if cgroup directory exists for worker", dirExists(pathToWorkerCgroupDir));
 
@@ -101,13 +101,13 @@ public class TestCgroups {
     }
 
     private boolean stormCgroupHierarchyExists(Map config) {
-        String pathToStormCgroupHierarchy = (String) config.get(Config.STORM_CGROUP_HIERARCHY_DIR);
+        String pathToStormCgroupHierarchy = (String) config.get(DaemonConfig.STORM_CGROUP_HIERARCHY_DIR);
         return dirExists(pathToStormCgroupHierarchy);
     }
 
     private boolean stormCgroupSupervisorRootDirExists(Map config) {
-        String pathTostormCgroupSupervisorRootDir = ((String) config.get(Config.STORM_CGROUP_HIERARCHY_DIR))
-                + "/" + ((String) config.get(Config.STORM_SUPERVISOR_CGROUP_ROOTDIR));
+        String pathTostormCgroupSupervisorRootDir = ((String) config.get(DaemonConfig.STORM_CGROUP_HIERARCHY_DIR))
+                + "/" + ((String) config.get(DaemonConfig.STORM_SUPERVISOR_CGROUP_ROOTDIR));
 
         return dirExists(pathTostormCgroupSupervisorRootDir);
     }

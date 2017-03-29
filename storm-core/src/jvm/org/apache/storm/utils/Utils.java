@@ -66,6 +66,7 @@ import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.blobstore.BlobStore;
 import org.apache.storm.blobstore.BlobStoreAclHandler;
 import org.apache.storm.blobstore.ClientBlobStore;
@@ -146,7 +147,7 @@ public class Utils {
 
     public static ClientBlobStore getClientBlobStoreForSupervisor(Map conf) {
         ClientBlobStore store = (ClientBlobStore) ReflectionUtils.newInstance(
-                (String) conf.get(Config.SUPERVISOR_BLOBSTORE));
+                (String) conf.get(DaemonConfig.SUPERVISOR_BLOBSTORE));
         store.prepare(conf);
         return store;
     }
@@ -156,14 +157,14 @@ public class Utils {
     }
 
     public static BlobStore getNimbusBlobStore(Map conf, String baseDir, NimbusInfo nimbusInfo) {
-        String type = (String)conf.get(Config.NIMBUS_BLOBSTORE);
+        String type = (String)conf.get(DaemonConfig.NIMBUS_BLOBSTORE);
         if (type == null) {
             type = LocalFsBlobStore.class.getName();
         }
         BlobStore store = (BlobStore) ReflectionUtils.newInstance(type);
         HashMap nconf = new HashMap(conf);
         // only enable cleanup of blobstore on nimbus
-        nconf.put(Config.BLOBSTORE_CLEANUP_ENABLE, Boolean.TRUE);
+        nconf.put(DaemonConfig.BLOBSTORE_CLEANUP_ENABLE, Boolean.TRUE);
 
         if(store != null) {
             // store can be null during testing when mocking utils.

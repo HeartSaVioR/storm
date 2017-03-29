@@ -18,6 +18,7 @@
 package org.apache.storm.localizer;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.blobstore.BlobStoreAclHandler;
 import org.apache.storm.blobstore.ClientBlobStore;
 import org.apache.storm.blobstore.InputStreamWithMeta;
@@ -267,7 +268,7 @@ public class LocalizerTest {
 
     Map conf = new HashMap();
     // set clean time really high so doesn't kick in
-    conf.put(Config.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS, 60*60*1000);
+    conf.put(DaemonConfig.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS, 60*60*1000);
 
     String key1 = new File(archivePath).getName();
     String topo1 = "topo1";
@@ -344,7 +345,7 @@ public class LocalizerTest {
   public void testBasic() throws Exception {
     Map conf = new HashMap();
     // set clean time really high so doesn't kick in
-    conf.put(Config.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS, 60*60*1000);
+    conf.put(DaemonConfig.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS, 60*60*1000);
 
     String key1 = "key1";
     String topo1 = "topo1";
@@ -411,7 +412,7 @@ public class LocalizerTest {
   public void testMultipleKeysOneUser() throws Exception {
     Map conf = new HashMap();
     // set clean time really high so doesn't kick in
-    conf.put(Config.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS, 60*60*1000);
+    conf.put(DaemonConfig.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS, 60*60*1000);
 
     String key1 = "key1";
     String topo1 = "topo1";
@@ -500,7 +501,7 @@ public class LocalizerTest {
   public void testFailAcls() throws Exception {
     Map conf = new HashMap();
     // set clean time really high so doesn't kick in
-    conf.put(Config.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS, 60 * 60 * 1000);
+    conf.put(DaemonConfig.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS, 60 * 60 * 1000);
 
     String topo1 = "topo1";
     String key1 = "key1";
@@ -537,7 +538,7 @@ public class LocalizerTest {
   public void testMultipleUsers() throws Exception {
     Map conf = new HashMap();
     // set clean time really high so doesn't kick in
-    conf.put(Config.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS, 60*60*1000);
+    conf.put(DaemonConfig.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS, 60*60*1000);
 
     String topo1 = "topo1";
     String topo2 = "topo2";
@@ -621,7 +622,7 @@ public class LocalizerTest {
   public void testUpdate() throws Exception {
     Map conf = new HashMap();
     // set clean time really high so doesn't kick in
-    conf.put(Config.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS, 60*60*1000);
+    conf.put(DaemonConfig.SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS, 60*60*1000);
 
     String key1 = "key1";
     String topo1 = "topo1";

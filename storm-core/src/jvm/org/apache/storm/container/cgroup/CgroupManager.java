@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.container.ResourceIsolationInterface;
 import org.apache.storm.container.cgroup.core.CpuCore;
 import org.apache.storm.container.cgroup.core.MemoryCore;
@@ -60,12 +61,12 @@ public class CgroupManager implements ResourceIsolationInterface {
      */
     public void prepare(Map<String, Object> conf) throws IOException {
         this.conf = conf;
-        this.rootDir = Config.getCgroupRootDir(this.conf);
+        this.rootDir = DaemonConfig.getCgroupRootDir(this.conf);
         if (this.rootDir == null) {
             throw new RuntimeException("Check configuration file. The storm.supervisor.cgroup.rootdir is missing.");
         }
 
-        File file = new File(Config.getCgroupStormHierarchyDir(conf) + "/" + this.rootDir);
+        File file = new File(DaemonConfig.getCgroupStormHierarchyDir(conf) + "/" + this.rootDir);
         if (!file.exists()) {
             LOG.error("{} is not existing.", file.getPath());
             throw new RuntimeException("Check if cgconfig service starts or /etc/cgconfig.conf is consistent with configuration file.");
@@ -82,7 +83,7 @@ public class CgroupManager implements ResourceIsolationInterface {
      */
     private void prepareSubSystem(Map<String, Object> conf) throws IOException {
         List<SubSystemType> subSystemTypes = new LinkedList<>();
-        for (String resource : Config.getCgroupStormResources(conf)) {
+        for (String resource : DaemonConfig.getCgroupStormResources(conf)) {
             subSystemTypes.add(SubSystemType.getSubSystem(resource));
         }
 
@@ -91,7 +92,7 @@ public class CgroupManager implements ResourceIsolationInterface {
         if (this.hierarchy == null) {
             Set<SubSystemType> types = new HashSet<SubSystemType>();
             types.add(SubSystemType.cpu);
-            this.hierarchy = new Hierarchy(Config.getCgroupStormHierarchyName(conf), types, Config.getCgroupStormHierarchyDir(conf));
+            this.hierarchy = new Hierarchy(DaemonConfig.getCgroupStormHierarchyName(conf), types, DaemonConfig.getCgroupStormHierarchyDir(conf));
         }
         this.rootCgroup = new CgroupCommon(this.rootDir, this.hierarchy, this.hierarchy.getRootCgroups());
 
@@ -120,16 +121,16 @@ public class CgroupManager implements ResourceIsolationInterface {
     public void reserveResourcesForWorker(String workerId, Map<String, Number> resourcesMap) throws SecurityException {
         Number cpuNum = null;
         // The manually set STORM_WORKER_CGROUP_CPU_LIMIT config on supervisor will overwrite resources assigned by RAS (Resource Aware Scheduler)
-        if (this.conf.get(Config.STORM_WORKER_CGROUP_CPU_LIMIT) != null) {
-            cpuNum = (Number) this.conf.get(Config.STORM_WORKER_CGROUP_CPU_LIMIT);
+        if (this.conf.get(DaemonConfig.STORM_WORKER_CGROUP_CPU_LIMIT) != null) {
+            cpuNum = (Number) this.conf.get(DaemonConfig.STORM_WORKER_CGROUP_CPU_LIMIT);
         } else if(resourcesMap.get("cpu") != null) {
             cpuNum = (Number) resourcesMap.get("cpu");
         }
 
         Number totalMem = null;
         // The manually set STORM_WORKER_CGROUP_MEMORY_MB_LIMIT config on supervisor will overwrite resources assigned by RAS (Resource Aware Scheduler)
-        if (this.conf.get(Config.STORM_WORKER_CGROUP_MEMORY_MB_LIMIT) != null) {
-            totalMem = (Number) this.conf.get(Config.STORM_WORKER_CGROUP_MEMORY_MB_LIMIT);
+        if (this.conf.get(DaemonConfig.STORM_WORKER_CGROUP_MEMORY_MB_LIMIT) != null) {
+            totalMem = (Number) this.conf.get(DaemonConfig.STORM_WORKER_CGROUP_MEMORY_MB_LIMIT);
         } else if (resourcesMap.get("memory") != null) {
             totalMem = (Number) resourcesMap.get("memory");
         }
@@ -190,7 +191,7 @@ public class CgroupManager implements ResourceIsolationInterface {
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append(this.conf.get(Config.STORM_CGROUP_CGEXEC_CMD)).append(" -g ");
+        sb.append(this.conf.get(DaemonConfig.STORM_CGROUP_CGEXEC_CMD)).append(" -g ");
 
         Iterator<SubSystemType> it = this.hierarchy.getSubSystems().iterator();
         while (it.hasNext()) {

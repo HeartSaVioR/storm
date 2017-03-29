@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.container.ResourceIsolationInterface;
 import org.apache.storm.daemon.supervisor.Container.ContainerType;
 import org.apache.storm.generated.LocalAssignment;
@@ -163,9 +164,9 @@ public class ContainerTest {
         final List<String> logGroups = Arrays.asList("l-group-a", "l-group-b");
         
         topoConf.put(Config.TOPOLOGY_SUBMITTER_USER, user);
-        topoConf.put(Config.LOGS_GROUPS, logGroups);
+        topoConf.put(DaemonConfig.LOGS_GROUPS, logGroups);
         topoConf.put(Config.TOPOLOGY_GROUPS, topoGroups);
-        topoConf.put(Config.LOGS_USERS, logUsers);
+        topoConf.put(DaemonConfig.LOGS_USERS, logUsers);
         topoConf.put(Config.TOPOLOGY_USERS, topoUsers);
         
         final Map<String, Object> superConf = new HashMap<>();
@@ -203,11 +204,11 @@ public class ContainerTest {
         assertEquals(user, result.get(Config.TOPOLOGY_SUBMITTER_USER));
         HashSet<String> allowedUsers = new HashSet<>(topoUsers);
         allowedUsers.addAll(logUsers);
-        assertEquals(allowedUsers, new HashSet<String>((List<String>)result.get(Config.LOGS_USERS)));
+        assertEquals(allowedUsers, new HashSet<String>((List<String>)result.get(DaemonConfig.LOGS_USERS)));
         
         HashSet<String> allowedGroups = new HashSet<>(topoGroups);
         allowedGroups.addAll(logGroups);
-        assertEquals(allowedGroups, new HashSet<String>((List<String>)result.get(Config.LOGS_GROUPS)));
+        assertEquals(allowedGroups, new HashSet<String>((List<String>)result.get(DaemonConfig.LOGS_GROUPS)));
         
         //Save the current user to help with recovery
         verify(ops).dump(workerUserFile, user);

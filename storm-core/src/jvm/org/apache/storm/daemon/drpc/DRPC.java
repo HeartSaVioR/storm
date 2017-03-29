@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.daemon.StormCommon;
 import org.apache.storm.generated.AuthorizationException;
 import org.apache.storm.generated.DRPCExceptionType;
@@ -97,8 +98,8 @@ public class DRPC implements AutoCloseable {
     private final IAuthorizer _auth;
     
     public DRPC(Map<String, Object> conf) {
-        this(mkAuthorizationHandler((String)conf.get(Config.DRPC_AUTHORIZER), conf),
-                ObjectReader.getInt(conf.get(Config.DRPC_REQUEST_TIMEOUT_SECS), 600) * 1000);
+        this(mkAuthorizationHandler((String)conf.get(DaemonConfig.DRPC_AUTHORIZER), conf),
+                ObjectReader.getInt(conf.get(DaemonConfig.DRPC_REQUEST_TIMEOUT_SECS), 600) * 1000);
     }
     
     public DRPC(IAuthorizer auth, long timeoutMs) {

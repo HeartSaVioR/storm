@@ -17,13 +17,10 @@
  */
 package org.apache.storm;
 
-import org.apache.storm.container.ResourceIsolationInterface;
-import org.apache.storm.nimbus.ITopologyActionNotifierPlugin;
-import org.apache.storm.scheduler.resource.strategies.eviction.IEvictionStrategy;
-import org.apache.storm.scheduler.resource.strategies.priority.ISchedulingPriorityStrategy;
 import org.apache.storm.scheduler.resource.strategies.scheduling.IStrategy;
 import org.apache.storm.serialization.IKryoDecorator;
 import org.apache.storm.serialization.IKryoFactory;
+import org.apache.storm.validation.ConfigValidation;
 import org.apache.storm.validation.ConfigValidationAnnotations.*;
 import org.apache.storm.validation.ConfigValidation.*;
 import com.esotericsoftware.kryo.Serializer;
@@ -51,257 +48,8 @@ import java.util.Map;
  */
 public class Config extends HashMap<String, Object> {
 
-    // FIXME: NOW!!
-    // FIXME: extract fields to make another Config class to 'storm-core' which is suitable for daemon,
-    // FIXME: and move interfaces / classes to 'storm-core' which were moved just only for Config.
-
     //DO NOT CHANGE UNLESS WE ADD IN STATE NOT STORED IN THE PARENT CLASS
     private static final long serialVersionUID = -1550278723792864455L;
-
-    /**
-     * This is part of a temporary workaround to a ZK bug, it is the 'scheme:acl' for
-     * the user Nimbus and Supervisors use to authenticate with ZK.
-     */
-    @isString
-    public static final String STORM_ZOOKEEPER_SUPERACL = "storm.zookeeper.superACL";
-
-    /**
-     * The transporter for communication among Storm tasks
-     */
-    @isString
-    public static final String STORM_MESSAGING_TRANSPORT = "storm.messaging.transport";
-
-    /**
-     * Netty based messaging: The buffer size for send/recv buffer
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String STORM_MESSAGING_NETTY_BUFFER_SIZE = "storm.messaging.netty.buffer_size";
-
-    /**
-     * Netty based messaging: Sets the backlog value to specify when the channel binds to a local address
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String STORM_MESSAGING_NETTY_SOCKET_BACKLOG = "storm.messaging.netty.socket.backlog";
-
-    /**
-     * Netty based messaging: The max # of retries that a peer will perform when a remote is not accessible
-     *@deprecated "Since netty clients should never stop reconnecting - this does not make sense anymore.
-     */
-    @Deprecated
-    @isInteger
-    public static final String STORM_MESSAGING_NETTY_MAX_RETRIES = "storm.messaging.netty.max_retries";
-
-    /**
-     * Netty based messaging: The min # of milliseconds that a peer will wait.
-     */
-    @isInteger
-    @isPositiveNumber(includeZero = true)
-    public static final String STORM_MESSAGING_NETTY_MIN_SLEEP_MS = "storm.messaging.netty.min_wait_ms";
-
-    /**
-     * Netty based messaging: The max # of milliseconds that a peer will wait.
-     */
-    @isInteger
-    @isPositiveNumber(includeZero = true)
-    public static final String STORM_MESSAGING_NETTY_MAX_SLEEP_MS = "storm.messaging.netty.max_wait_ms";
-
-    /**
-     * Netty based messaging: The # of worker threads for the server.
-     */
-    @isInteger
-    @isPositiveNumber(includeZero = true)
-    public static final String STORM_MESSAGING_NETTY_SERVER_WORKER_THREADS = "storm.messaging.netty.server_worker_threads";
-
-    /**
-     * Netty based messaging: The # of worker threads for the client.
-     */
-    @isInteger
-    public static final String STORM_MESSAGING_NETTY_CLIENT_WORKER_THREADS = "storm.messaging.netty.client_worker_threads";
-
-    /**
-     * If the Netty messaging layer is busy, the Netty client will try to batch message as more as possible up to the size of STORM_NETTY_MESSAGE_BATCH_SIZE bytes
-     */
-    @isInteger
-    public static final String STORM_NETTY_MESSAGE_BATCH_SIZE = "storm.messaging.netty.transfer.batch.size";
-
-    /**
-     * We check with this interval that whether the Netty channel is writable and try to write pending messages
-     */
-    @isInteger
-    public static final String STORM_NETTY_FLUSH_CHECK_INTERVAL_MS = "storm.messaging.netty.flush.check.interval.ms";
-
-    /**
-     * Netty based messaging: Is authentication required for Netty messaging from client worker process to server worker process.
-     */
-    @isBoolean
-    public static final String STORM_MESSAGING_NETTY_AUTHENTICATION = "storm.messaging.netty.authentication";
-
-    /**
-     * The delegate for serializing metadata, should be used for serialized objects stored in zookeeper and on disk.
-     * This is NOT used for compressing serialized tuples sent between topologies.
-     */
-    @isString
-    public static final String STORM_META_SERIALIZATION_DELEGATE = "storm.meta.serialization.delegate";
-
-    /**
-     * A list of daemon metrics  reporter plugin class names.
-     * These plugins must implement {@link org.apache.storm.daemon.metrics.reporters.PreparableReporter} interface.
-     */
-    @isStringList
-    public static final String STORM_DAEMON_METRICS_REPORTER_PLUGINS = "storm.daemon.metrics.reporter.plugins";
-
-    /**
-     * A specify Locale for daemon metrics reporter plugin.
-     * Use the specified IETF BCP 47 language tag string for a Locale.
-     */
-    @isString
-    public static final String STORM_DAEMON_METRICS_REPORTER_PLUGIN_LOCALE = "storm.daemon.metrics.reporter.plugin.locale";
-
-    /**
-     * A specify domain for daemon metrics reporter plugin to limit reporting to specific domain.
-     */
-    @isString
-    public static final String STORM_DAEMON_METRICS_REPORTER_PLUGIN_DOMAIN = "storm.daemon.metrics.reporter.plugin.domain";
-
-    /**
-     * A specify rate-unit in TimeUnit to specify reporting frequency for daemon metrics reporter plugin.
-     */
-    @isString
-    public static final String STORM_DAEMON_METRICS_REPORTER_PLUGIN_RATE_UNIT = "storm.daemon.metrics.reporter.plugin.rate.unit";
-
-    /**
-     * A specify duration-unit in TimeUnit to specify reporting window for daemon metrics reporter plugin.
-     */
-    @isString
-    public static final String STORM_DAEMON_METRICS_REPORTER_PLUGIN_DURATION_UNIT = "storm.daemon.metrics.reporter.plugin.duration.unit";
-
-
-    /**
-     * A specify csv reporter directory for CvsPreparableReporter daemon metrics reporter.
-     */
-    @isString
-    public static final String STORM_DAEMON_METRICS_REPORTER_CSV_LOG_DIR = "storm.daemon.metrics.reporter.csv.log.dir";
-
-    /**
-     * A list of hosts of ZooKeeper servers used to manage the cluster.
-     */
-    @isStringList
-    public static final String STORM_ZOOKEEPER_SERVERS = "storm.zookeeper.servers";
-
-    /**
-     * The port Storm will use to connect to each of the ZooKeeper servers.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String STORM_ZOOKEEPER_PORT = "storm.zookeeper.port";
-
-    /**
-     * A list of hosts of Exhibitor servers used to discover/maintain connection to ZooKeeper cluster.
-     * Any configured ZooKeeper servers will be used for the curator/exhibitor backup connection string.
-     */
-    @isStringList
-    public static final String STORM_EXHIBITOR_SERVERS = "storm.exhibitor.servers";
-
-    /**
-     * The port Storm will use to connect to each of the exhibitor servers.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String STORM_EXHIBITOR_PORT = "storm.exhibitor.port";
-
-    /**
-     * A directory on the local filesystem used by Storm for any local
-     * filesystem usage it needs. The directory must exist and the Storm daemons must
-     * have permission to read/write from this location.
-     */
-    @isString
-    public static final String STORM_LOCAL_DIR = "storm.local.dir";
-
-    /**
-     * A directory that holds configuration files for log4j2.
-     * It can be either a relative or an absolute directory.
-     * If relative, it is relative to the storm's home directory.
-     */
-    @isString
-    public static final String STORM_LOG4J2_CONF_DIR = "storm.log4j2.conf.dir";
-
-    /**
-     * A global task scheduler used to assign topologies's tasks to supervisors' workers.
-     *
-     * If this is not set, a default system scheduler will be used.
-     */
-    @isString
-    public static final String STORM_SCHEDULER = "storm.scheduler";
-
-    /**
-     * Whether we want to display all the resource capacity and scheduled usage on the UI page.
-     * You MUST have this variable set if you are using any kind of resource-related scheduler.
-     *
-     * If this is not set, we will not display resource capacity and usage on the UI.
-     */
-    @isBoolean
-    public static final String SCHEDULER_DISPLAY_RESOURCE = "scheduler.display.resource";
-
-    /**
-     * The mode this Storm cluster is running in. Either "distributed" or "local".
-     */
-    @isString
-    public static final String STORM_CLUSTER_MODE = "storm.cluster.mode";
-
-    /**
-     * What Network Topography detection classes should we use.
-     * Given a list of supervisor hostnames (or IP addresses), this class would return a list of
-     * rack names that correspond to the supervisors. This information is stored in Cluster.java, and
-     * is used in the resource aware scheduler.
-     */
-    @NotNull
-    @isImplementationOfClass(implementsClass = org.apache.storm.networktopography.DNSToSwitchMapping.class)
-    public static final String STORM_NETWORK_TOPOGRAPHY_PLUGIN = "storm.network.topography.plugin";
-
-    /**
-     * The hostname the supervisors/workers should report to nimbus. If unset, Storm will
-     * get the hostname to report by calling <code>InetAddress.getLocalHost().getCanonicalHostName()</code>.
-     *
-     * You should set this config when you don't have a DNS which supervisors/workers
-     * can utilize to find each other based on hostname got from calls to
-     * <code>InetAddress.getLocalHost().getCanonicalHostName()</code>.
-     */
-    @isString
-    public static final String STORM_LOCAL_HOSTNAME = "storm.local.hostname";
-
-    /**
-     * The plugin that will convert a principal to a local user.
-     */
-    @isString
-    public static final String STORM_PRINCIPAL_TO_LOCAL_PLUGIN = "storm.principal.tolocal";
-
-    /**
-     * The plugin that will provide user groups service
-     */
-    @isString
-    public static final String STORM_GROUP_MAPPING_SERVICE_PROVIDER_PLUGIN = "storm.group.mapping.service";
-
-    /**
-     * Max no.of seconds group mapping service will cache user groups
-     */
-    @isInteger
-    public static final String STORM_GROUP_MAPPING_SERVICE_CACHE_DURATION_SECS = "storm.group.mapping.service.cache.duration.secs";
-
-    /**
-     * Initialization parameters for the group mapping service plugin.
-     * Provides a way for a @link{STORM_GROUP_MAPPING_SERVICE_PROVIDER_PLUGIN}
-     * implementation to access optional settings.
-     */
-    @isType(type=Map.class)
-    public static final String STORM_GROUP_MAPPING_SERVICE_PARAMS = "storm.group.mapping.service.params";
-
-    /**
-     * The default transport plug-in for Thrift client/server communication
-     */
-    @isString
-    public static final String STORM_THRIFT_TRANSPORT_PLUGIN = "storm.thrift.transport";
 
     /**
      * The serializer class for ListDelegate (tuple payload).
@@ -325,973 +73,6 @@ public class Config extends HashMap<String, Object> {
     public static final String TOPOLOGY_TESTING_ALWAYS_TRY_SERIALIZE = "topology.testing.always.try.serialize";
 
     /**
-     * Whether or not to use ZeroMQ for messaging in local mode. If this is set
-     * to false, then Storm will use a pure-Java messaging system. The purpose
-     * of this flag is to make it easy to run Storm in local mode by eliminating
-     * the need for native dependencies, which can be difficult to install.
-     *
-     * Defaults to false.
-     */
-    @isBoolean
-    public static final String STORM_LOCAL_MODE_ZMQ = "storm.local.mode.zmq";
-
-    /**
-     * The root location at which Storm stores data in ZooKeeper.
-     */
-    @isString
-    public static final String STORM_ZOOKEEPER_ROOT = "storm.zookeeper.root";
-
-    /**
-     * The session timeout for clients to ZooKeeper.
-     */
-    @isInteger
-    public static final String STORM_ZOOKEEPER_SESSION_TIMEOUT = "storm.zookeeper.session.timeout";
-
-    /**
-     * The connection timeout for clients to ZooKeeper.
-     */
-    @isInteger
-    public static final String STORM_ZOOKEEPER_CONNECTION_TIMEOUT = "storm.zookeeper.connection.timeout";
-
-    /**
-     * The number of times to retry a Zookeeper operation.
-     */
-    @isInteger
-    public static final String STORM_ZOOKEEPER_RETRY_TIMES="storm.zookeeper.retry.times";
-
-    /**
-     * The interval between retries of a Zookeeper operation.
-     */
-    @isInteger
-    public static final String STORM_ZOOKEEPER_RETRY_INTERVAL="storm.zookeeper.retry.interval";
-
-    /**
-     * The ceiling of the interval between retries of a Zookeeper operation.
-     */
-    @isInteger
-    public static final String STORM_ZOOKEEPER_RETRY_INTERVAL_CEILING="storm.zookeeper.retry.intervalceiling.millis";
-
-    /**
-     * The cluster Zookeeper authentication scheme to use, e.g. "digest". Defaults to no authentication.
-     */
-    @isString
-    public static final String STORM_ZOOKEEPER_AUTH_SCHEME="storm.zookeeper.auth.scheme";
-
-    /**
-     * A string representing the payload for cluster Zookeeper authentication.
-     * It gets serialized using UTF-8 encoding during authentication.
-     * Note that if this is set to something with a secret (as when using
-     * digest authentication) then it should only be set in the
-     * storm-cluster-auth.yaml file.
-     * This file storm-cluster-auth.yaml should then be protected with
-     * appropriate permissions that deny access from workers.
-     */
-    @isString
-    public static final String STORM_ZOOKEEPER_AUTH_PAYLOAD="storm.zookeeper.auth.payload";
-
-    /**
-     * The topology Zookeeper authentication scheme to use, e.g. "digest". Defaults to no authentication.
-     */
-    @isString
-    public static final String STORM_ZOOKEEPER_TOPOLOGY_AUTH_SCHEME="storm.zookeeper.topology.auth.scheme";
-
-    /**
-     * A string representing the payload for topology Zookeeper authentication. It gets serialized using UTF-8 encoding during authentication.
-     */
-    @isString
-    public static final String STORM_ZOOKEEPER_TOPOLOGY_AUTH_PAYLOAD="storm.zookeeper.topology.auth.payload";
-
-    /*
-     * How often to poll Exhibitor cluster in millis.
-     */
-    @isString
-    public static final String STORM_EXHIBITOR_URIPATH="storm.exhibitor.poll.uripath";
-
-    /**
-     * How often to poll Exhibitor cluster in millis.
-     */
-    @isInteger
-    public static final String STORM_EXHIBITOR_POLL="storm.exhibitor.poll.millis";
-
-    /**
-     * The number of times to retry an Exhibitor operation.
-     */
-    @isInteger
-    public static final String STORM_EXHIBITOR_RETRY_TIMES="storm.exhibitor.retry.times";
-
-    /**
-     * The interval between retries of an Exhibitor operation.
-     */
-    @isInteger
-    public static final String STORM_EXHIBITOR_RETRY_INTERVAL="storm.exhibitor.retry.interval";
-
-    /**
-     * The ceiling of the interval between retries of an Exhibitor operation.
-     */
-    @isInteger
-    public static final String STORM_EXHIBITOR_RETRY_INTERVAL_CEILING="storm.exhibitor.retry.intervalceiling.millis";
-
-    /**
-     * The id assigned to a running topology. The id is the storm name with a unique nonce appended.
-     */
-    @isString
-    public static final String STORM_ID = "storm.id";
-
-    /**
-     * The workers-artifacts directory (where we place all workers' logs), can be either absolute or relative.
-     * By default, ${storm.log.dir}/workers-artifacts is where worker logs go.
-     * If the setting is a relative directory, it is relative to storm.log.dir.
-     */
-    @isString
-    public static final String STORM_WORKERS_ARTIFACTS_DIR = "storm.workers.artifacts.dir";
-
-    /**
-     * The directory where storm's health scripts go.
-     */
-    @isString
-    public static final String STORM_HEALTH_CHECK_DIR = "storm.health.check.dir";
-
-    /**
-     * The time to allow any given healthcheck script to run before it
-     * is marked failed due to timeout
-     */
-    @isNumber
-    public static final String STORM_HEALTH_CHECK_TIMEOUT_MS = "storm.health.check.timeout.ms";
-
-    /**
-     * The number of times to retry a Nimbus operation.
-     */
-    @isNumber
-    public static final String STORM_NIMBUS_RETRY_TIMES="storm.nimbus.retry.times";
-
-    /**
-     * The starting interval between exponential backoff retries of a Nimbus operation.
-     */
-    @isNumber
-    public static final String STORM_NIMBUS_RETRY_INTERVAL="storm.nimbus.retry.interval.millis";
-
-    /**
-     * The ceiling of the interval between retries of a client connect to Nimbus operation.
-     */
-    @isNumber
-    public static final String STORM_NIMBUS_RETRY_INTERVAL_CEILING="storm.nimbus.retry.intervalceiling.millis";
-
-    /**
-     * The ClusterState factory that worker will use to create a ClusterState
-     * to store state in. Defaults to ZooKeeper.
-     */
-    @isString
-    public static final String STORM_CLUSTER_STATE_STORE = "storm.cluster.state.store";
-
-    /**
-     * The Nimbus transport plug-in for Thrift client/server communication
-     */
-    @isString
-    public static final String NIMBUS_THRIFT_TRANSPORT_PLUGIN = "nimbus.thrift.transport";
-
-    /**
-     * How long before a Thrift Client socket hangs before timeout
-     * and restart the socket.
-     */
-    @isInteger
-    public static final String STORM_THRIFT_SOCKET_TIMEOUT_MS = "storm.thrift.socket.timeout.ms";
-
-    /**
-     * The host that the master server is running on, added only for backward compatibility,
-     * the usage deprecated in favor of nimbus.seeds config.
-     */
-    @Deprecated
-    @isString
-    public static final String NIMBUS_HOST = "nimbus.host";
-
-    /**
-     * List of seed nimbus hosts to use for leader nimbus discovery.
-     */
-    @isStringList
-    public static final String NIMBUS_SEEDS = "nimbus.seeds";
-
-    /**
-     * Which port the Thrift interface of Nimbus should run on. Clients should
-     * connect to this port to upload jars and submit topologies.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String NIMBUS_THRIFT_PORT = "nimbus.thrift.port";
-
-    /**
-     * The number of threads that should be used by the nimbus thrift server.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String NIMBUS_THRIFT_THREADS = "nimbus.thrift.threads";
-
-    /**
-     * A list of users that are cluster admins and can run any command.  To use this set
-     * nimbus.authorizer to org.apache.storm.security.auth.authorizer.SimpleACLAuthorizer
-     */
-    @isStringList
-    public static final String NIMBUS_ADMINS = "nimbus.admins";
-
-    /**
-     * A list of users that are the only ones allowed to run user operation on storm cluster.
-     * To use this set nimbus.authorizer to org.apache.storm.security.auth.authorizer.SimpleACLAuthorizer
-     */
-    @isStringList
-    public static final String NIMBUS_USERS = "nimbus.users";
-
-    /**
-     * A list of groups , users belong to these groups are the only ones allowed to run user operation on storm cluster.
-     * To use this set nimbus.authorizer to org.apache.storm.security.auth.authorizer.SimpleACLAuthorizer
-     */
-    @isStringList
-    public static final String NIMBUS_GROUPS = "nimbus.groups";
-
-    /**
-     * A list of users that run the supervisors and should be authorized to interact with
-     * nimbus as a supervisor would.  To use this set
-     * nimbus.authorizer to org.apache.storm.security.auth.authorizer.SimpleACLAuthorizer
-     */
-    @isStringList
-    public static final String NIMBUS_SUPERVISOR_USERS = "nimbus.supervisor.users";
-
-    /**
-     * This is the user that the Nimbus daemon process is running as. May be used when security
-     * is enabled to authorize actions in the cluster.
-     */
-    @isString
-    public static final String NIMBUS_DAEMON_USER = "nimbus.daemon.user";
-
-    /**
-     * The maximum buffer size thrift should use when reading messages.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String NIMBUS_THRIFT_MAX_BUFFER_SIZE = "nimbus.thrift.max_buffer_size";
-
-    /**
-     * This parameter is used by the storm-deploy project to configure the
-     * jvm options for the nimbus daemon.
-     */
-    @isString
-    public static final String NIMBUS_CHILDOPTS = "nimbus.childopts";
-
-
-    /**
-     * How long without heartbeating a task can go before nimbus will consider the
-     * task dead and reassign it to another location.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String NIMBUS_TASK_TIMEOUT_SECS = "nimbus.task.timeout.secs";
-
-
-    /**
-     * How often nimbus should wake up to check heartbeats and do reassignments. Note
-     * that if a machine ever goes down Nimbus will immediately wake up and take action.
-     * This parameter is for checking for failures when there's no explicit event like that
-     * occurring.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String NIMBUS_MONITOR_FREQ_SECS = "nimbus.monitor.freq.secs";
-
-    /**
-     * How often nimbus should wake the cleanup thread to clean the inbox.
-     * @see #NIMBUS_INBOX_JAR_EXPIRATION_SECS
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String NIMBUS_CLEANUP_INBOX_FREQ_SECS = "nimbus.cleanup.inbox.freq.secs";
-
-    /**
-     * The length of time a jar file lives in the inbox before being deleted by the cleanup thread.
-     *
-     * Probably keep this value greater than or equal to NIMBUS_CLEANUP_INBOX_JAR_EXPIRATION_SECS.
-     * Note that the time it takes to delete an inbox jar file is going to be somewhat more than
-     * NIMBUS_CLEANUP_INBOX_JAR_EXPIRATION_SECS (depending on how often NIMBUS_CLEANUP_FREQ_SECS
-     * is set to).
-     * @see #NIMBUS_CLEANUP_INBOX_FREQ_SECS
-     */
-    @isInteger
-    public static final String NIMBUS_INBOX_JAR_EXPIRATION_SECS = "nimbus.inbox.jar.expiration.secs";
-
-    /**
-     * How long before a supervisor can go without heartbeating before nimbus considers it dead
-     * and stops assigning new work to it.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String NIMBUS_SUPERVISOR_TIMEOUT_SECS = "nimbus.supervisor.timeout.secs";
-
-    /**
-     * A special timeout used when a task is initially launched. During launch, this is the timeout
-     * used until the first heartbeat, overriding nimbus.task.timeout.secs.
-     *
-     * <p>A separate timeout exists for launch because there can be quite a bit of overhead
-     * to launching new JVM's and configuring them.</p>
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String NIMBUS_TASK_LAUNCH_SECS = "nimbus.task.launch.secs";
-
-    /**
-     * During upload/download with the master, how long an upload or download connection is idle
-     * before nimbus considers it dead and drops the connection.
-     */
-    @isInteger
-    public static final String NIMBUS_FILE_COPY_EXPIRATION_SECS = "nimbus.file.copy.expiration.secs";
-
-    /**
-     * A custom class that implements ITopologyValidator that is run whenever a
-     * topology is submitted. Can be used to provide business-specific logic for
-     * whether topologies are allowed to run or not.
-     */
-    @isString
-    public static final String NIMBUS_TOPOLOGY_VALIDATOR = "nimbus.topology.validator";
-
-    /**
-     * Class name for authorization plugin for Nimbus
-     */
-    @isString
-    public static final String NIMBUS_AUTHORIZER = "nimbus.authorizer";
-
-    /**
-     * Impersonation user ACL config entries.
-     */
-    @isString
-    public static final String NIMBUS_IMPERSONATION_AUTHORIZER = "nimbus.impersonation.authorizer";
-
-    /**
-     * Impersonation user ACL config entries.
-     */
-    @isMapEntryCustom(keyValidatorClasses = {StringValidator.class}, valueValidatorClasses = {ImpersonationAclUserEntryValidator.class})
-    public static final String NIMBUS_IMPERSONATION_ACL = "nimbus.impersonation.acl";
-
-    /**
-     * How often nimbus should wake up to renew credentials if needed.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String NIMBUS_CREDENTIAL_RENEW_FREQ_SECS = "nimbus.credential.renewers.freq.secs";
-
-    /**
-     * A list of credential renewers that nimbus should load.
-     */
-    @isStringList
-    public static final String NIMBUS_CREDENTIAL_RENEWERS = "nimbus.credential.renewers.classes";
-
-    /**
-     * A list of plugins that nimbus should load during submit topology to populate
-     * credentials on user's behalf.
-     */
-    @isStringList
-    public static final String NIMBUS_AUTO_CRED_PLUGINS = "nimbus.autocredential.plugins.classes";
-
-    /**
-     * Nimbus thrift server queue size, default is 100000. This is the request queue size , when there are more requests
-     * than number of threads to serve the requests, those requests will be queued to this queue. If the request queue
-     * size > this config, then the incoming requests will be rejected.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String NIMBUS_QUEUE_SIZE = "nimbus.queue.size";
-
-    /**
-     * FQCN of a class that implements {@code ISubmitterHook} @see ISubmitterHook for details.
-     */
-
-    @isString
-    public static final String STORM_TOPOLOGY_SUBMISSION_NOTIFIER_PLUGIN = "storm.topology.submission.notifier.plugin.class";
-
-    /**
-     * FQCN of a class that implements {@code I} @see org.apache.storm.nimbus.ITopologyActionNotifierPlugin for details.
-     */
-    @isImplementationOfClass(implementsClass = ITopologyActionNotifierPlugin.class)
-    public static final String NIMBUS_TOPOLOGY_ACTION_NOTIFIER_PLUGIN = "nimbus.topology.action.notifier.plugin.class";
-
-    /**
-     * Storm UI binds to this host/interface.
-     */
-    @isString
-    public static final String UI_HOST = "ui.host";
-
-    /**
-     * Storm UI binds to this port.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String UI_PORT = "ui.port";
-
-    /**
-     * Storm UI Project BUGTRACKER Link for reporting issue.
-     */
-    @isString
-    public static final String UI_PROJECT_BUGTRACKER_URL = "ui.project.bugtracker.url";
-
-    /**
-     * Storm UI Central Logging URL.
-     */
-    @isString
-    public static final String UI_CENTRAL_LOGGING_URL = "ui.central.logging.url";
-
-    /**
-     * HTTP UI port for log viewer
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String LOGVIEWER_PORT = "logviewer.port";
-
-    /**
-     * Childopts for log viewer java process.
-     */
-    @isString
-    public static final String LOGVIEWER_CHILDOPTS = "logviewer.childopts";
-
-    /**
-     * How often to clean up old log files
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String LOGVIEWER_CLEANUP_INTERVAL_SECS = "logviewer.cleanup.interval.secs";
-
-    /**
-     * How many minutes since a log was last modified for the log to be considered for clean-up
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String LOGVIEWER_CLEANUP_AGE_MINS = "logviewer.cleanup.age.mins";
-
-    /**
-     * The maximum number of bytes all worker log files can take up in MB
-     */
-    @isPositiveNumber
-    public static final String LOGVIEWER_MAX_SUM_WORKER_LOGS_SIZE_MB = "logviewer.max.sum.worker.logs.size.mb";
-
-    /**
-     * The maximum number of bytes per worker's files can take up in MB
-     */
-    @isPositiveNumber
-    public static final String LOGVIEWER_MAX_PER_WORKER_LOGS_SIZE_MB = "logviewer.max.per.worker.logs.size.mb";
-
-    /**
-     * Storm Logviewer HTTPS port
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String LOGVIEWER_HTTPS_PORT = "logviewer.https.port";
-
-    /**
-     * Path to the keystore containing the certs used by Storm Logviewer for HTTPS communications
-     */
-    @isString
-    public static final String LOGVIEWER_HTTPS_KEYSTORE_PATH = "logviewer.https.keystore.path";
-
-    /**
-     * Password for the keystore for HTTPS for Storm Logviewer
-     */
-    @isString
-    public static final String LOGVIEWER_HTTPS_KEYSTORE_PASSWORD = "logviewer.https.keystore.password";
-
-    /**
-     * Type of the keystore for HTTPS for Storm Logviewer.
-     * see http://docs.oracle.com/javase/8/docs/api/java/security/KeyStore.html for more details.
-     */
-    @isString
-    public static final String LOGVIEWER_HTTPS_KEYSTORE_TYPE = "logviewer.https.keystore.type";
-
-    /**
-     * Password to the private key in the keystore for setting up HTTPS (SSL).
-     */
-    @isString
-    public static final String LOGVIEWER_HTTPS_KEY_PASSWORD = "logviewer.https.key.password";
-
-    /**
-     * Path to the truststore containing the certs used by Storm Logviewer for HTTPS communications
-     */
-    @isString
-    public static final String LOGVIEWER_HTTPS_TRUSTSTORE_PATH = "logviewer.https.truststore.path";
-
-    /**
-     * Password for the truststore for HTTPS for Storm Logviewer
-     */
-    @isString
-    public static final String LOGVIEWER_HTTPS_TRUSTSTORE_PASSWORD = "logviewer.https.truststore.password";
-
-    /**
-     * Type of the truststore for HTTPS for Storm Logviewer.
-     * see http://docs.oracle.com/javase/8/docs/api/java/security/Truststore.html for more details.
-     */
-    @isString
-    public static final String LOGVIEWER_HTTPS_TRUSTSTORE_TYPE = "logviewer.https.truststore.type";
-
-    /**
-     * Password to the truststore used by Storm Logviewer setting up HTTPS (SSL).
-     */
-    @isBoolean
-    public static final String LOGVIEWER_HTTPS_WANT_CLIENT_AUTH = "logviewer.https.want.client.auth";
-
-    @isBoolean
-    public static final String LOGVIEWER_HTTPS_NEED_CLIENT_AUTH = "logviewer.https.need.client.auth";
-
-    /**
-     * A list of users allowed to view logs via the Log Viewer
-     */
-    @isStringList
-    public static final String LOGS_USERS = "logs.users";
-
-    /**
-     * A list of groups allowed to view logs via the Log Viewer
-     */
-    @isStringList
-    public static final String LOGS_GROUPS = "logs.groups";
-
-    /**
-     * Appender name used by log viewer to determine log directory.
-     */
-    @isString
-    public static final String LOGVIEWER_APPENDER_NAME = "logviewer.appender.name";
-
-    /**
-     * Childopts for Storm UI Java process.
-     */
-    @isString
-    public static final String UI_CHILDOPTS = "ui.childopts";
-
-    /**
-     * A class implementing javax.servlet.Filter for authenticating/filtering UI requests
-     */
-    @isString
-    public static final String UI_FILTER = "ui.filter";
-
-    /**
-     * Initialization parameters for the javax.servlet.Filter
-     */
-    @isMapEntryType(keyType = String.class, valueType = String.class)
-    public static final String UI_FILTER_PARAMS = "ui.filter.params";
-
-    /**
-     * The size of the header buffer for the UI in bytes
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String UI_HEADER_BUFFER_BYTES = "ui.header.buffer.bytes";
-
-    /**
-     * This port is used by Storm DRPC for receiving HTTPS (SSL) DPRC requests from clients.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String UI_HTTPS_PORT = "ui.https.port";
-
-    /**
-     * Path to the keystore used by Storm UI for setting up HTTPS (SSL).
-     */
-    @isString
-    public static final String UI_HTTPS_KEYSTORE_PATH = "ui.https.keystore.path";
-
-    /**
-     * Password to the keystore used by Storm UI for setting up HTTPS (SSL).
-     */
-    @isString
-    public static final String UI_HTTPS_KEYSTORE_PASSWORD = "ui.https.keystore.password";
-
-    /**
-     * Type of keystore used by Storm UI for setting up HTTPS (SSL).
-     * see http://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html for more details.
-     */
-    @isString
-    public static final String UI_HTTPS_KEYSTORE_TYPE = "ui.https.keystore.type";
-
-    /**
-     * Password to the private key in the keystore for setting up HTTPS (SSL).
-     */
-    @isString
-    public static final String UI_HTTPS_KEY_PASSWORD = "ui.https.key.password";
-
-    /**
-     * Path to the truststore used by Storm UI setting up HTTPS (SSL).
-     */
-    @isString
-    public static final String UI_HTTPS_TRUSTSTORE_PATH = "ui.https.truststore.path";
-
-    /**
-     * Password to the truststore used by Storm UI setting up HTTPS (SSL).
-     */
-    @isString
-    public static final String UI_HTTPS_TRUSTSTORE_PASSWORD = "ui.https.truststore.password";
-
-    /**
-     * Type of truststore used by Storm UI for setting up HTTPS (SSL).
-     * see http://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html for more details.
-     */
-    @isString
-    public static final String UI_HTTPS_TRUSTSTORE_TYPE = "ui.https.truststore.type";
-
-    /**
-     * Password to the truststore used by Storm DRPC setting up HTTPS (SSL).
-     */
-    @isBoolean
-    public static final String UI_HTTPS_WANT_CLIENT_AUTH = "ui.https.want.client.auth";
-
-    @isBoolean
-    public static final String UI_HTTPS_NEED_CLIENT_AUTH = "ui.https.need.client.auth";
-
-    /**
-     * The list of servers that Pacemaker is running on.
-     */
-    @isStringList
-    public static final String PACEMAKER_SERVERS = "pacemaker.servers";
-
-    /**
-     * The port Pacemaker should run on. Clients should
-     * connect to this port to submit or read heartbeats.
-     */
-    @isNumber
-    @isPositiveNumber
-    public static final String PACEMAKER_PORT = "pacemaker.port";
-
-    /**
-     * The maximum number of threads that should be used by the Pacemaker.
-     * When Pacemaker gets loaded it will spawn new threads, up to
-     * this many total, to handle the load.
-     */
-    @isNumber
-    @isPositiveNumber
-    public static final String PACEMAKER_MAX_THREADS = "pacemaker.max.threads";
-
-    /**
-     * This parameter is used by the storm-deploy project to configure the
-     * jvm options for the pacemaker daemon.
-     */
-    @isString
-    public static final String PACEMAKER_CHILDOPTS = "pacemaker.childopts";
-
-    /**
-     * This should be one of "DIGEST", "KERBEROS", or "NONE"
-     * Determines the mode of authentication the pacemaker server and client use.
-     * The client must either match the server, or be NONE. In the case of NONE,
-     * no authentication is performed for the client, and if the server is running with
-     * DIGEST or KERBEROS, the client can only write to the server (no reads).
-     * This is intended to provide a primitive form of access-control.
-     */
-    @CustomValidator(validatorClass=PacemakerAuthTypeValidator.class)
-    public static final String PACEMAKER_AUTH_METHOD = "pacemaker.auth.method";
-
-    /**
-     * List of DRPC servers so that the DRPCSpout knows who to talk to.
-     */
-    @isStringList
-    public static final String DRPC_SERVERS = "drpc.servers";
-
-    /**
-     * This port is used by Storm DRPC for receiving HTTP DPRC requests from clients.
-     */
-    @isInteger
-    public static final String DRPC_HTTP_PORT = "drpc.http.port";
-
-    /**
-     * This port is used by Storm DRPC for receiving HTTPS (SSL) DPRC requests from clients.
-     */
-    @isInteger
-    public static final String DRPC_HTTPS_PORT = "drpc.https.port";
-
-    /**
-     * Path to the keystore used by Storm DRPC for setting up HTTPS (SSL).
-     */
-    @isString
-    public static final String DRPC_HTTPS_KEYSTORE_PATH = "drpc.https.keystore.path";
-
-    /**
-     * Password to the keystore used by Storm DRPC for setting up HTTPS (SSL).
-     */
-    @isString
-    public static final String DRPC_HTTPS_KEYSTORE_PASSWORD = "drpc.https.keystore.password";
-
-    /**
-     * Type of keystore used by Storm DRPC for setting up HTTPS (SSL).
-     * see http://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html for more details.
-     */
-    @isString
-    public static final String DRPC_HTTPS_KEYSTORE_TYPE = "drpc.https.keystore.type";
-
-    /**
-     * Password to the private key in the keystore for setting up HTTPS (SSL).
-     */
-    @isString
-    public static final String DRPC_HTTPS_KEY_PASSWORD = "drpc.https.key.password";
-
-    /**
-     * Path to the truststore used by Storm DRPC setting up HTTPS (SSL).
-     */
-    @isString
-    public static final String DRPC_HTTPS_TRUSTSTORE_PATH = "drpc.https.truststore.path";
-
-    /**
-     * Password to the truststore used by Storm DRPC setting up HTTPS (SSL).
-     */
-    @isString
-    public static final String DRPC_HTTPS_TRUSTSTORE_PASSWORD = "drpc.https.truststore.password";
-
-    /**
-     * Type of truststore used by Storm DRPC for setting up HTTPS (SSL).
-     * see http://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html for more details.
-     */
-    @isString
-    public static final String DRPC_HTTPS_TRUSTSTORE_TYPE = "drpc.https.truststore.type";
-
-    /**
-     * Password to the truststore used by Storm DRPC setting up HTTPS (SSL).
-     */
-    @isBoolean
-    public static final String DRPC_HTTPS_WANT_CLIENT_AUTH = "drpc.https.want.client.auth";
-
-    @isBoolean
-    public static final String DRPC_HTTPS_NEED_CLIENT_AUTH = "drpc.https.need.client.auth";
-
-    /**
-     * The DRPC transport plug-in for Thrift client/server communication
-     */
-    @isString
-    public static final String DRPC_THRIFT_TRANSPORT_PLUGIN = "drpc.thrift.transport";
-
-    /**
-     * This port is used by Storm DRPC for receiving DPRC requests from clients.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String DRPC_PORT = "drpc.port";
-
-    /**
-     * Class name for authorization plugin for DRPC client
-     */
-    @isString
-    public static final String DRPC_AUTHORIZER = "drpc.authorizer";
-
-    /**
-     * The Access Control List for the DRPC Authorizer.
-     * @see org.apache.storm.security.auth.authorizer.DRPCSimpleACLAuthorizer
-     */
-    @isType(type=Map.class)
-    public static final String DRPC_AUTHORIZER_ACL = "drpc.authorizer.acl";
-
-    /**
-     * File name of the DRPC Authorizer ACL.
-     * @see org.apache.storm.security.auth.authorizer.DRPCSimpleACLAuthorizer
-     */
-    @isString
-    public static final String DRPC_AUTHORIZER_ACL_FILENAME = "drpc.authorizer.acl.filename";
-
-    /**
-     * Whether the DRPCSimpleAclAuthorizer should deny requests for operations
-     * involving functions that have no explicit ACL entry. When set to false
-     * (the default) DRPC functions that have no entry in the ACL will be
-     * permitted, which is appropriate for a development environment. When set
-     * to true, explicit ACL entries are required for every DRPC function, and
-     * any request for functions will be denied.
-     * @see org.apache.storm.security.auth.authorizer.DRPCSimpleACLAuthorizer
-     */
-    @isBoolean
-    public static final String DRPC_AUTHORIZER_ACL_STRICT = "drpc.authorizer.acl.strict";
-
-    /**
-     * DRPC thrift server worker threads
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String DRPC_WORKER_THREADS = "drpc.worker.threads";
-
-    /**
-     * The maximum buffer size thrift should use when reading messages for DRPC.
-     */
-    @isNumber
-    @isPositiveNumber
-    public static final String DRPC_MAX_BUFFER_SIZE = "drpc.max_buffer_size";
-
-    /**
-     * DRPC thrift server queue size
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String DRPC_QUEUE_SIZE = "drpc.queue.size";
-
-    /**
-     * The DRPC invocations transport plug-in for Thrift client/server communication
-     */
-    @isString
-    public static final String DRPC_INVOCATIONS_THRIFT_TRANSPORT_PLUGIN = "drpc.invocations.thrift.transport";
-
-    /**
-     * This port on Storm DRPC is used by DRPC topologies to receive function invocations and send results back.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String DRPC_INVOCATIONS_PORT = "drpc.invocations.port";
-
-    /**
-     * DRPC invocations thrift server worker threads
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String DRPC_INVOCATIONS_THREADS = "drpc.invocations.threads";
-
-    /**
-     * The timeout on DRPC requests within the DRPC server. Defaults to 10 minutes. Note that requests can also
-     * timeout based on the socket timeout on the DRPC client, and separately based on the topology message
-     * timeout for the topology implementing the DRPC function.
-     */
-
-    @isInteger
-    @isPositiveNumber
-    @NotNull
-    public static final String DRPC_REQUEST_TIMEOUT_SECS  = "drpc.request.timeout.secs";
-
-    /**
-     * Childopts for Storm DRPC Java process.
-     */
-    @isString
-    public static final String DRPC_CHILDOPTS = "drpc.childopts";
-
-    /**
-     * Class name of the HTTP credentials plugin for the UI.
-     */
-    @isString
-    public static final String UI_HTTP_CREDS_PLUGIN = "ui.http.creds.plugin";
-
-    /**
-     * Class name of the HTTP credentials plugin for DRPC.
-     */
-    @isString
-    public static final String DRPC_HTTP_CREDS_PLUGIN = "drpc.http.creds.plugin";
-
-    /**
-     * the metadata configured on the supervisor
-     */
-    @isType(type=Map.class)
-    public static final String SUPERVISOR_SCHEDULER_META = "supervisor.scheduler.meta";
-
-    /**
-     * A list of ports that can run workers on this supervisor. Each worker uses one port, and
-     * the supervisor will only run one worker per port. Use this configuration to tune
-     * how many workers run on each machine.
-     */
-    @isNoDuplicateInList
-    @NotNull
-    @isListEntryCustom(entryValidatorClasses={IntegerValidator.class,PositiveNumberValidator.class})
-    public static final String SUPERVISOR_SLOTS_PORTS = "supervisor.slots.ports";
-
-    /**
-     * What blobstore implementation the supervisor should use.
-     */
-    @isString
-    public static final String SUPERVISOR_BLOBSTORE = "supervisor.blobstore.class";
-
-    /**
-     * The distributed cache target size in MB. This is a soft limit to the size of the distributed
-     * cache contents.
-     */
-    @isPositiveNumber
-    @isInteger
-    public static final String SUPERVISOR_LOCALIZER_CACHE_TARGET_SIZE_MB = "supervisor.localizer.cache.target.size.mb";
-
-    /**
-     * The distributed cache cleanup interval. Controls how often it scans to attempt to cleanup
-     * anything over the cache target size.
-     */
-    @isPositiveNumber
-    @isInteger
-    public static final String SUPERVISOR_LOCALIZER_CACHE_CLEANUP_INTERVAL_MS = "supervisor.localizer.cleanup.interval.ms";
-
-    /**
-     * What blobstore implementation the storm client should use.
-     */
-    @isString
-    public static final String CLIENT_BLOBSTORE = "client.blobstore.class";
-
-    /**
-     * What blobstore download parallelism the supervisor should use.
-     */
-    @isPositiveNumber
-    @isInteger
-    public static final String SUPERVISOR_BLOBSTORE_DOWNLOAD_THREAD_COUNT = "supervisor.blobstore.download.thread.count";
-
-    /**
-     * Maximum number of retries a supervisor is allowed to make for downloading a blob.
-     */
-    @isPositiveNumber
-    @isInteger
-    public static final String SUPERVISOR_BLOBSTORE_DOWNLOAD_MAX_RETRIES = "supervisor.blobstore.download.max_retries";
-
-    /**
-     * The blobstore super user has all read/write/admin permissions to all blobs - user running
-     * the blobstore.
-     */
-    @isString
-    public static final String BLOBSTORE_SUPERUSER = "blobstore.superuser";
-
-    /**
-     * What directory to use for the blobstore. The directory is expected to be an
-     * absolute path when using HDFS blobstore, for LocalFsBlobStore it could be either
-     * absolute or relative.
-     */
-    @isString
-    public static final String BLOBSTORE_DIR = "blobstore.dir";
-
-    /**
-     * What buffer size to use for the blobstore uploads.
-     */
-    @isPositiveNumber
-    @isInteger
-    public static final String STORM_BLOBSTORE_INPUTSTREAM_BUFFER_SIZE_BYTES = "storm.blobstore.inputstream.buffer.size.bytes";
-
-    /**
-     * Enable the blobstore cleaner. Certain blobstores may only want to run the cleaner
-     * on one daemon. Currently Nimbus handles setting this.
-     */
-    @isBoolean
-    public static final String BLOBSTORE_CLEANUP_ENABLE = "blobstore.cleanup.enable";
-
-    /**
-     * principal for nimbus/supervisor to use to access secure hdfs for the blobstore.
-     */
-    @isString
-    public static final String BLOBSTORE_HDFS_PRINCIPAL = "blobstore.hdfs.principal";
-
-    /**
-     * keytab for nimbus/supervisor to use to access secure hdfs for the blobstore.
-     */
-    @isString
-    public static final String BLOBSTORE_HDFS_KEYTAB = "blobstore.hdfs.keytab";
-
-    /**
-     *  Set replication factor for a blob in HDFS Blobstore Implementation
-     */
-    @isPositiveNumber
-    @isInteger
-    public static final String STORM_BLOBSTORE_REPLICATION_FACTOR = "storm.blobstore.replication.factor";
-
-    /**
-     *  For secure mode we would want to turn on this config
-     *  By default this is turned off assuming the default is insecure
-     */
-    @isBoolean
-    public static final String STORM_BLOBSTORE_ACL_VALIDATION_ENABLED = "storm.blobstore.acl.validation.enabled";
-
-    /**
-     * What blobstore implementation nimbus should use.
-     */
-    @isString
-    public static final String NIMBUS_BLOBSTORE = "nimbus.blobstore.class";
-
-    /**
-     * During operations with the blob store, via master, how long a connection
-     * is idle before nimbus considers it dead and drops the session and any
-     * associated connections.
-     */
-    @isPositiveNumber
-    @isInteger
-    public static final String NIMBUS_BLOBSTORE_EXPIRATION_SECS = "nimbus.blobstore.expiration.secs";
-
-    /**
      * A map with blobstore keys mapped to each filename the worker will have access to in the
      * launch directory to the blob by local file name and uncompress flag. Both localname and
      * uncompress flag are optional. It uses the key is localname is not specified. Each topology
@@ -1301,204 +82,6 @@ public class Config extends HashMap<String, Object> {
      */
     @CustomValidator(validatorClass = MapOfStringToMapOfStringToObjectValidator.class)
     public static final String TOPOLOGY_BLOBSTORE_MAP = "topology.blobstore.map";
-
-    /**
-     * A number representing the maximum number of workers any single topology can acquire.
-     */
-    @isInteger
-    @isPositiveNumber(includeZero = true)
-    public static final String NIMBUS_SLOTS_PER_TOPOLOGY = "nimbus.slots.perTopology";
-
-    /**
-     * A class implementing javax.servlet.Filter for DRPC HTTP requests
-     */
-    @isString
-    public static final String DRPC_HTTP_FILTER = "drpc.http.filter";
-
-    /**
-     * Initialization parameters for the javax.servlet.Filter of the DRPC HTTP
-     * service
-     */
-    @isMapEntryType(keyType = String.class, valueType = String.class)
-    public static final String DRPC_HTTP_FILTER_PARAMS = "drpc.http.filter.params";
-
-    /**
-     * A number representing the maximum number of executors any single topology can acquire.
-     */
-    @isInteger
-    @isPositiveNumber(includeZero = true)
-    public static final String NIMBUS_EXECUTORS_PER_TOPOLOGY = "nimbus.executors.perTopology";
-
-    /**
-     * This parameter is used by the storm-deploy project to configure the
-     * jvm options for the supervisor daemon.
-     */
-    @isString
-    public static final String SUPERVISOR_CHILDOPTS = "supervisor.childopts";
-
-    /**
-     * How long a worker can go without heartbeating before the supervisor tries to
-     * restart the worker process.
-     */
-    @isInteger
-    @isPositiveNumber
-    @NotNull
-    public static final String SUPERVISOR_WORKER_TIMEOUT_SECS = "supervisor.worker.timeout.secs";
-
-    /**
-     * How many seconds to sleep for before shutting down threads on worker
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String SUPERVISOR_WORKER_SHUTDOWN_SLEEP_SECS = "supervisor.worker.shutdown.sleep.secs";
-
-    /**
-     * How long a worker can go without heartbeating during the initial launch before
-     * the supervisor tries to restart the worker process. This value override
-     * supervisor.worker.timeout.secs during launch because there is additional
-     * overhead to starting and configuring the JVM on launch.
-     */
-    @isInteger
-    @isPositiveNumber
-    @NotNull
-    public static final String SUPERVISOR_WORKER_START_TIMEOUT_SECS = "supervisor.worker.start.timeout.secs";
-
-    /**
-     * Whether or not the supervisor should launch workers assigned to it. Defaults
-     * to true -- and you should probably never change this value. This configuration
-     * is used in the Storm unit tests.
-     */
-    @isBoolean
-    public static final String SUPERVISOR_ENABLE = "supervisor.enable";
-
-    /**
-     * how often the supervisor sends a heartbeat to the master.
-     */
-    @isInteger
-    public static final String SUPERVISOR_HEARTBEAT_FREQUENCY_SECS = "supervisor.heartbeat.frequency.secs";
-
-
-    /**
-     * How often the supervisor checks the worker heartbeats to see if any of them
-     * need to be restarted.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String SUPERVISOR_MONITOR_FREQUENCY_SECS = "supervisor.monitor.frequency.secs";
-
-    /**
-     * Should the supervior try to run the worker as the lauching user or not.  Defaults to false.
-     */
-    @isBoolean
-    public static final String SUPERVISOR_RUN_WORKER_AS_USER = "supervisor.run.worker.as.user";
-
-    /**
-     * Full path to the worker-laucher executable that will be used to lauch workers when
-     * SUPERVISOR_RUN_WORKER_AS_USER is set to true.
-     */
-    @isString
-    public static final String SUPERVISOR_WORKER_LAUNCHER = "supervisor.worker.launcher";
-
-    /**
-     * The total amount of memory (in MiB) a supervisor is allowed to give to its workers.
-     *  A default value will be set for this config if user does not override
-     */
-    @isPositiveNumber
-    public static final String SUPERVISOR_MEMORY_CAPACITY_MB = "supervisor.memory.capacity.mb";
-
-    /**
-     * The total amount of CPU resources a supervisor is allowed to give to its workers.
-     * By convention 1 cpu core should be about 100, but this can be adjusted if needed
-     * using 100 makes it simple to set the desired value to the capacity measurement
-     * for single threaded bolts.  A default value will be set for this config if user does not override
-     */
-    @isPositiveNumber
-    public static final String SUPERVISOR_CPU_CAPACITY = "supervisor.cpu.capacity";
-
-    /**
-     * On some systems (windows for example) symlinks require special privileges that not everyone wants to
-     * grant a headless user.  You can completely disable the use of symlinks by setting this config to true, but
-     * by doing so you may also lose some features from storm.  For example the blobstore feature
-     * does not currently work without symlinks enabled.
-     */
-    @isBoolean
-    public static final String DISABLE_SYMLINKS = "storm.disable.symlinks";
-
-    /**
-     * The jvm opts provided to workers launched by this supervisor.
-     * All "%ID%", "%WORKER-ID%", "%TOPOLOGY-ID%",
-     * "%WORKER-PORT%" and "%HEAP-MEM%" substrings are replaced with:
-     * %ID%          -> port (for backward compatibility),
-     * %WORKER-ID%   -> worker-id,
-     * %TOPOLOGY-ID%    -> topology-id,
-     * %WORKER-PORT% -> port.
-     * %HEAP-MEM% -> mem-onheap.
-     */
-    @isStringOrStringList
-    public static final String WORKER_CHILDOPTS = "worker.childopts";
-
-    /**
-     * The default heap memory size in MB per worker, used in the jvm -Xmx opts for launching the worker
-      */
-    @isInteger
-    @isPositiveNumber
-    public static final String WORKER_HEAP_MEMORY_MB = "worker.heap.memory.mb";
-
-    /**
-     * The jvm profiler opts provided to workers launched by this supervisor.
-     */
-    @isStringOrStringList
-    public static final String WORKER_PROFILER_CHILDOPTS = "worker.profiler.childopts";
-
-    /**
-     * Enable profiling of worker JVMs using Oracle's Java Flight Recorder.
-     * Unlocking commercial features requires a special license from Oracle.
-     * See http://www.oracle.com/technetwork/java/javase/terms/products/index.html
-     */
-    @isBoolean
-    public static final String WORKER_PROFILER_ENABLED = "worker.profiler.enabled";
-
-    /**
-     * The command launched supervisor with worker arguments
-     * pid, action and [target_directory]
-     * Where action is - start profile, stop profile, jstack, heapdump and kill against pid
-     *
-     */
-    @isString
-    public static final String WORKER_PROFILER_COMMAND = "worker.profiler.command";
-
-    /**
-     * The jvm opts provided to workers launched by this supervisor for GC. All "%ID%" substrings are replaced
-     * with an identifier for this worker.  Because the JVM complains about multiple GC opts the topology
-     * can override this default value by setting topology.worker.gc.childopts.
-     */
-    @isStringOrStringList
-    public static final String WORKER_GC_CHILDOPTS = "worker.gc.childopts";
-
-    /**
-     * How often this worker should heartbeat to the supervisor.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String WORKER_HEARTBEAT_FREQUENCY_SECS = "worker.heartbeat.frequency.secs";
-
-    /**
-     * How often a task should heartbeat its status to the master.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String TASK_HEARTBEAT_FREQUENCY_SECS = "task.heartbeat.frequency.secs";
-
-    /**
-     * How often a task should sync its connections with other tasks (if a task is
-     * reassigned, the other tasks sending messages to it need to refresh their connections).
-     * In general though, when a reassignment happens other tasks will be notified
-     * almost immediately. This configuration is here just in case that notification doesn't
-     * come through.
-     */
-    @isInteger
-    @isPositiveNumber
-    public static final String TASK_REFRESH_POLL_SECS = "task.refresh.poll.secs";
 
     /**
      * How often a worker should check dynamic log level timeouts for expiration.
@@ -1545,22 +128,6 @@ public class Config extends HashMap<String, Object> {
      */
     @isPositiveNumber
     public static final String BACKPRESSURE_DISRUPTOR_LOW_WATERMARK="backpressure.disruptor.low.watermark";
-
-    /**
-     * A list of classes implementing IClusterMetricsConsumer (See storm.yaml.example for exact config format).
-     * Each listed class will be routed cluster related metrics data.
-     * Each listed class maps 1:1 to a ClusterMetricsConsumerExecutor and they're executed in Nimbus.
-     * Only consumers which run in leader Nimbus receives metrics data.
-     */
-    @isListEntryCustom(entryValidatorClasses = {ClusterMetricRegistryValidator.class})
-    public static final String STORM_CLUSTER_METRICS_CONSUMER_REGISTER = "storm.cluster.metrics.consumer.register";
-
-    /**
-     * How often cluster metrics data is published to metrics consumer.
-     */
-    @NotNull
-    @isPositiveNumber
-    public static final String STORM_CLUSTER_METRICS_CONSUMER_PUBLISH_INTERVAL_SECS = "storm.cluster.metrics.consumer.publish.interval.secs";
 
     /**
      * A list of users that are allowed to interact with the topology.  To use this set
@@ -1871,12 +438,6 @@ public class Config extends HashMap<String, Object> {
     public static final String TOPOLOGY_CLASSPATH_BEGINNING="topology.classpath.beginning";
 
     /**
-     * Enables user-first classpath. See topology.classpath.beginning
-     */
-    @isBoolean
-    public static final String STORM_TOPOLOGY_CLASSPATH_BEGINNING_ENABLED="storm.topology.classpath.beginning.enabled";
-
-    /**
      * Topology-specific environment variables for the worker child process.
      * This is added to the existing environment (that of the supervisor)
      */
@@ -2045,6 +606,12 @@ public class Config extends HashMap<String, Object> {
     public static final String TOPOLOGY_TRIDENT_WINDOWING_INMEMORY_CACHE_LIMIT="topology.trident.windowing.cache.tuple.limit";
 
     /**
+     * The id assigned to a running topology. The id is the storm name with a unique nonce appended.
+     */
+    @isString
+    public static final String STORM_ID = "storm.id";
+
+    /**
      * Name of the topology. This config is automatically set by Storm when the topology is submitted.
      */
     @isString
@@ -2136,82 +703,6 @@ public class Config extends HashMap<String, Object> {
     public static final String STORM_DO_AS_USER="storm.doAsUser";
 
     /**
-     * The number of threads that should be used by the zeromq context in each worker process.
-     */
-    @Deprecated
-    @isInteger
-    public static final String ZMQ_THREADS = "zmq.threads";
-
-    /**
-     * How long a connection should retry sending messages to a target host when
-     * the connection is closed. This is an advanced configuration and can almost
-     * certainly be ignored.
-     */
-    @Deprecated
-    @isInteger
-    public static final String ZMQ_LINGER_MILLIS = "zmq.linger.millis";
-
-    /**
-     * The high water for the ZeroMQ push sockets used for networking. Use this config to prevent buffer explosion
-     * on the networking layer.
-     */
-    @Deprecated
-    @isInteger
-    public static final String ZMQ_HWM = "zmq.hwm";
-
-    /**
-     * This value is passed to spawned JVMs (e.g., Nimbus, Supervisor, and Workers)
-     * for the java.library.path value. java.library.path tells the JVM where
-     * to look for native libraries. It is necessary to set this config correctly since
-     * Storm uses the ZeroMQ and JZMQ native libs.
-     */
-    @isString
-    public static final String JAVA_LIBRARY_PATH = "java.library.path";
-
-    /**
-     * The path to use as the zookeeper dir when running a zookeeper server via
-     * "storm dev-zookeeper". This zookeeper instance is only intended for development;
-     * it is not a production grade zookeeper setup.
-     */
-    @isString
-    public static final String DEV_ZOOKEEPER_PATH = "dev.zookeeper.path";
-
-    /**
-     * A map from topology name to the number of machines that should be dedicated for that topology. Set storm.scheduler
-     * to org.apache.storm.scheduler.IsolationScheduler to make use of the isolation scheduler.
-     */
-    @isMapEntryType(keyType = String.class, valueType = Number.class)
-    public static final String ISOLATION_SCHEDULER_MACHINES = "isolation.scheduler.machines";
-
-    /**
-     * A map from the user name to the number of machines that should that user is allowed to use. Set storm.scheduler
-     * to org.apache.storm.scheduler.multitenant.MultitenantScheduler
-     */
-    @isMapEntryType(keyType = String.class, valueType = Number.class)
-    public static final String MULTITENANT_SCHEDULER_USER_POOLS = "multitenant.scheduler.user.pools";
-
-    /**
-     * A map of users to another map of the resource guarantees of the user. Used by Resource Aware Scheduler to ensure
-     * per user resource guarantees.
-     */
-    @isMapEntryCustom(keyValidatorClasses = {StringValidator.class}, valueValidatorClasses = {UserResourcePoolEntryValidator.class})
-    public static final String RESOURCE_AWARE_SCHEDULER_USER_POOLS = "resource.aware.scheduler.user.pools";
-
-    /**
-     * The class that specifies the eviction strategy to use in ResourceAwareScheduler
-     */
-    @NotNull
-    @isImplementationOfClass(implementsClass = IEvictionStrategy.class)
-    public static final String RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY = "resource.aware.scheduler.eviction.strategy";
-
-    /**
-     * the class that specifies the scheduling priority strategy to use in ResourceAwareScheduler
-     */
-    @NotNull
-    @isImplementationOfClass(implementsClass = ISchedulingPriorityStrategy.class)
-    public static final String RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY = "resource.aware.scheduler.priority.strategy";
-
-    /**
      * The number of machines that should be used by this topology to isolate it from all others. Set storm.scheduler
      * to org.apache.storm.scheduler.multitenant.MultitenantScheduler
      */
@@ -2263,22 +754,6 @@ public class Config extends HashMap<String, Object> {
     public static final String TOPOLOGY_MAX_REPLICATION_WAIT_TIME_SEC = "topology.max.replication.wait.time.sec";
 
     /**
-     * How often nimbus's background thread to sync code for missing topologies should run.
-     */
-    @isInteger
-    public static final String NIMBUS_CODE_SYNC_FREQ_SECS = "nimbus.code.sync.freq.secs";
-
-    /**
-     * An implementation of @{link org.apache.storm.daemon.JarTransformer} that will can be used to transform a jar
-     * file before storm jar runs with it. Use with extreme caution.
-     * If you want to enable a transition between org.apache.storm and org.apache.storm to run older topologies
-     * you can set this to org.apache.storm.hack.StormShadeTransformer.  But this is likely to be deprecated in
-     * future releases.
-     */
-    @isString
-    public static final String CLIENT_JAR_TRANSFORMER = "client.jartransformer.class";
-
-    /**
      * This is a config that is not likely to be used.  Internally the disruptor queue will batch entries written
      * into the queue.  A background thread pool will flush those batches if they get too old.  By default that
      * pool can grow rather large, and sacrifice some CPU time to keep the latency low.  In some cases you may
@@ -2288,73 +763,710 @@ public class Config extends HashMap<String, Object> {
      */
     @isInteger
     public static final String STORM_WORKER_DISRUPTOR_FLUSHER_MAX_POOL_SIZE = "storm.worker.disruptor.flusher.max.pool.size";
-    
-    /**
-     * The plugin to be used for resource isolation
-     */
-    // FIXME: commented for now... to make test pass
-    //@isImplementationOfClass(implementsClass = ResourceIsolationInterface.class)
-    public static final String STORM_RESOURCE_ISOLATION_PLUGIN = "storm.resource.isolation.plugin";
 
     /**
-     * CGroup Setting below
-     */
-
-    /**
-     * root directory of the storm cgroup hierarchy
-     */
-    @isString
-    public static final String STORM_CGROUP_HIERARCHY_DIR = "storm.cgroup.hierarchy.dir";
-
-    /**
-     * resources to to be controlled by cgroups
+     * The list of servers that Pacemaker is running on.
      */
     @isStringList
-    public static final String STORM_CGROUP_RESOURCES = "storm.cgroup.resources";
+    public static final String PACEMAKER_SERVERS = "pacemaker.servers";
 
     /**
-     * name for the cgroup hierarchy
+     * The port Pacemaker should run on. Clients should
+     * connect to this port to submit or read heartbeats.
+     */
+    @isNumber
+    @isPositiveNumber
+    public static final String PACEMAKER_PORT = "pacemaker.port";
+
+    /**
+     * This should be one of "DIGEST", "KERBEROS", or "NONE"
+     * Determines the mode of authentication the pacemaker server and client use.
+     * The client must either match the server, or be NONE. In the case of NONE,
+     * no authentication is performed for the client, and if the server is running with
+     * DIGEST or KERBEROS, the client can only write to the server (no reads).
+     * This is intended to provide a primitive form of access-control.
+     */
+    @CustomValidator(validatorClass=ConfigValidation.PacemakerAuthTypeValidator.class)
+    public static final String PACEMAKER_AUTH_METHOD = "pacemaker.auth.method";
+
+    /**
+     * Max no.of seconds group mapping service will cache user groups
+     */
+    @isInteger
+    public static final String STORM_GROUP_MAPPING_SERVICE_CACHE_DURATION_SECS = "storm.group.mapping.service.cache.duration.secs";
+
+    /**
+     * List of DRPC servers so that the DRPCSpout knows who to talk to.
+     */
+    @isStringList
+    public static final String DRPC_SERVERS = "drpc.servers";
+
+    /**
+     * This port on Storm DRPC is used by DRPC topologies to receive function invocations and send results back.
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String DRPC_INVOCATIONS_PORT = "drpc.invocations.port";
+
+    /**
+     * The number of times to retry a Nimbus operation.
+     */
+    @isNumber
+    public static final String STORM_NIMBUS_RETRY_TIMES="storm.nimbus.retry.times";
+
+    /**
+     * The starting interval between exponential backoff retries of a Nimbus operation.
+     */
+    @isNumber
+    public static final String STORM_NIMBUS_RETRY_INTERVAL="storm.nimbus.retry.interval.millis";
+
+    /**
+     * The ceiling of the interval between retries of a client connect to Nimbus operation.
+     */
+    @isNumber
+    public static final String STORM_NIMBUS_RETRY_INTERVAL_CEILING="storm.nimbus.retry.intervalceiling.millis";
+
+    /**
+     * The Nimbus transport plug-in for Thrift client/server communication
      */
     @isString
-    public static final String STORM_CGROUP_HIERARCHY_NAME = "storm.cgroup.hierarchy.name";
+    public static final String NIMBUS_THRIFT_TRANSPORT_PLUGIN = "nimbus.thrift.transport";
 
     /**
-     * flag to determine whether to use a resource isolation plugin
-     * Also determines whether the unit tests for cgroup runs.
-     * If storm.resource.isolation.plugin.enable is set to false the unit tests for cgroups will not run
+     * Which port the Thrift interface of Nimbus should run on. Clients should
+     * connect to this port to upload jars and submit topologies.
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String NIMBUS_THRIFT_PORT = "nimbus.thrift.port";
+
+    /**
+     * Nimbus thrift server queue size, default is 100000. This is the request queue size , when there are more requests
+     * than number of threads to serve the requests, those requests will be queued to this queue. If the request queue
+     * size > this config, then the incoming requests will be rejected.
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String NIMBUS_QUEUE_SIZE = "nimbus.queue.size";
+
+    /**
+     * The number of threads that should be used by the nimbus thrift server.
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String NIMBUS_THRIFT_THREADS = "nimbus.thrift.threads";
+
+    /**
+     * The maximum buffer size thrift should use when reading messages.
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String NIMBUS_THRIFT_MAX_BUFFER_SIZE = "nimbus.thrift.max_buffer_size";
+
+    /**
+     * How long before a Thrift Client socket hangs before timeout
+     * and restart the socket.
+     */
+    @isInteger
+    public static final String STORM_THRIFT_SOCKET_TIMEOUT_MS = "storm.thrift.socket.timeout.ms";
+
+    /**
+     * The DRPC transport plug-in for Thrift client/server communication
+     */
+    @isString
+    public static final String DRPC_THRIFT_TRANSPORT_PLUGIN = "drpc.thrift.transport";
+
+    /**
+     * This port is used by Storm DRPC for receiving DPRC requests from clients.
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String DRPC_PORT = "drpc.port";
+
+    /**
+     * DRPC thrift server queue size
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String DRPC_QUEUE_SIZE = "drpc.queue.size";
+
+    /**
+     * DRPC thrift server worker threads
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String DRPC_WORKER_THREADS = "drpc.worker.threads";
+
+    /**
+     * The maximum buffer size thrift should use when reading messages for DRPC.
+     */
+    @isNumber
+    @isPositiveNumber
+    public static final String DRPC_MAX_BUFFER_SIZE = "drpc.max_buffer_size";
+
+    /**
+     * The DRPC invocations transport plug-in for Thrift client/server communication
+     */
+    @isString
+    public static final String DRPC_INVOCATIONS_THRIFT_TRANSPORT_PLUGIN = "drpc.invocations.thrift.transport";
+
+    /**
+     * DRPC invocations thrift server worker threads
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String DRPC_INVOCATIONS_THREADS = "drpc.invocations.threads";
+
+    /**
+     * The default transport plug-in for Thrift client/server communication
+     */
+    @isString
+    public static final String STORM_THRIFT_TRANSPORT_PLUGIN = "storm.thrift.transport";
+
+    /**
+     * How long a worker can go without heartbeating before the supervisor tries to
+     * restart the worker process.
+     */
+    @isInteger
+    @isPositiveNumber
+    @NotNull
+    public static final String SUPERVISOR_WORKER_TIMEOUT_SECS = "supervisor.worker.timeout.secs";
+
+    /**
+     * A list of hosts of ZooKeeper servers used to manage the cluster.
+     */
+    @isStringList
+    public static final String STORM_ZOOKEEPER_SERVERS = "storm.zookeeper.servers";
+
+    /**
+     * The port Storm will use to connect to each of the ZooKeeper servers.
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String STORM_ZOOKEEPER_PORT = "storm.zookeeper.port";
+
+    /**
+     * This is part of a temporary workaround to a ZK bug, it is the 'scheme:acl' for
+     * the user Nimbus and Supervisors use to authenticate with ZK.
+     */
+    @isString
+    public static final String STORM_ZOOKEEPER_SUPERACL = "storm.zookeeper.superACL";
+
+    /**
+     * The topology Zookeeper authentication scheme to use, e.g. "digest". Defaults to no authentication.
+     */
+    @isString
+    public static final String STORM_ZOOKEEPER_TOPOLOGY_AUTH_SCHEME="storm.zookeeper.topology.auth.scheme";
+
+    /**
+     * The delegate for serializing metadata, should be used for serialized objects stored in zookeeper and on disk.
+     * This is NOT used for compressing serialized tuples sent between topologies.
+     */
+    @isString
+    public static final String STORM_META_SERIALIZATION_DELEGATE = "storm.meta.serialization.delegate";
+
+    /**
+     * What blobstore implementation the storm client should use.
+     */
+    @isString
+    public static final String CLIENT_BLOBSTORE = "client.blobstore.class";
+
+
+    /**
+     * The blobstore super user has all read/write/admin permissions to all blobs - user running
+     * the blobstore.
+     */
+    @isString
+    public static final String BLOBSTORE_SUPERUSER = "blobstore.superuser";
+
+    /**
+     * What directory to use for the blobstore. The directory is expected to be an
+     * absolute path when using HDFS blobstore, for LocalFsBlobStore it could be either
+     * absolute or relative.
+     */
+    @isString
+    public static final String BLOBSTORE_DIR = "blobstore.dir";
+
+    /**
+     * Enable the blobstore cleaner. Certain blobstores may only want to run the cleaner
+     * on one daemon. Currently Nimbus handles setting this.
      */
     @isBoolean
-    public static final String STORM_RESOURCE_ISOLATION_PLUGIN_ENABLE = "storm.resource.isolation.plugin.enable";
+    public static final String BLOBSTORE_CLEANUP_ENABLE = "blobstore.cleanup.enable";
 
     /**
-     * root directory for cgoups
+     * principal for nimbus/supervisor to use to access secure hdfs for the blobstore.
      */
     @isString
-    public static String STORM_SUPERVISOR_CGROUP_ROOTDIR = "storm.supervisor.cgroup.rootdir";
+    public static final String BLOBSTORE_HDFS_PRINCIPAL = "blobstore.hdfs.principal";
 
     /**
-     * the manually set memory limit (in MB) for each CGroup on supervisor node
-     */
-    @isPositiveNumber
-    public static String STORM_WORKER_CGROUP_MEMORY_MB_LIMIT = "storm.worker.cgroup.memory.mb.limit";
-
-    /**
-     * the manually set cpu share for each CGroup on supervisor node
-     */
-    @isPositiveNumber
-    public static String STORM_WORKER_CGROUP_CPU_LIMIT = "storm.worker.cgroup.cpu.limit";
-
-    /**
-     * full path to cgexec command
+     * keytab for nimbus/supervisor to use to access secure hdfs for the blobstore.
      */
     @isString
-    public static String STORM_CGROUP_CGEXEC_CMD = "storm.cgroup.cgexec.cmd";
+    public static final String BLOBSTORE_HDFS_KEYTAB = "blobstore.hdfs.keytab";
 
     /**
-     * The amount of memory a worker can exceed its allocation before cgroup will kill it
+     *  Set replication factor for a blob in HDFS Blobstore Implementation
      */
     @isPositiveNumber
-    public static String STORM_CGROUP_MEMORY_LIMIT_TOLERANCE_MARGIN_MB = "storm.cgroup.memory.limit.tolerance.margin.mb";
+    @isInteger
+    public static final String STORM_BLOBSTORE_REPLICATION_FACTOR = "storm.blobstore.replication.factor";
+
+    /**
+     * The hostname the supervisors/workers should report to nimbus. If unset, Storm will
+     * get the hostname to report by calling <code>InetAddress.getLocalHost().getCanonicalHostName()</code>.
+     *
+     * You should set this config when you don't have a DNS which supervisors/workers
+     * can utilize to find each other based on hostname got from calls to
+     * <code>InetAddress.getLocalHost().getCanonicalHostName()</code>.
+     */
+    @isString
+    public static final String STORM_LOCAL_HOSTNAME = "storm.local.hostname";
+
+    /**
+     * The host that the master server is running on, added only for backward compatibility,
+     * the usage deprecated in favor of nimbus.seeds config.
+     */
+    @Deprecated
+    @isString
+    public static final String NIMBUS_HOST = "nimbus.host";
+
+    /**
+     * List of seed nimbus hosts to use for leader nimbus discovery.
+     */
+    @isStringList
+    public static final String NIMBUS_SEEDS = "nimbus.seeds";
+
+    /**
+     * A list of users that are the only ones allowed to run user operation on storm cluster.
+     * To use this set nimbus.authorizer to org.apache.storm.security.auth.authorizer.SimpleACLAuthorizer
+     */
+    @isStringList
+    public static final String NIMBUS_USERS = "nimbus.users";
+
+    /**
+     * A list of groups , users belong to these groups are the only ones allowed to run user operation on storm cluster.
+     * To use this set nimbus.authorizer to org.apache.storm.security.auth.authorizer.SimpleACLAuthorizer
+     */
+    @isStringList
+    public static final String NIMBUS_GROUPS = "nimbus.groups";
+
+    /**
+     * The mode this Storm cluster is running in. Either "distributed" or "local".
+     */
+    @isString
+    public static final String STORM_CLUSTER_MODE = "storm.cluster.mode";
+
+    /**
+     * The root location at which Storm stores data in ZooKeeper.
+     */
+    @isString
+    public static final String STORM_ZOOKEEPER_ROOT = "storm.zookeeper.root";
+
+    /**
+     * A string representing the payload for topology Zookeeper authentication. It gets serialized using UTF-8 encoding during authentication.
+     */
+    @isString
+    public static final String STORM_ZOOKEEPER_TOPOLOGY_AUTH_PAYLOAD="storm.zookeeper.topology.auth.payload";
+
+    /**
+     * The cluster Zookeeper authentication scheme to use, e.g. "digest". Defaults to no authentication.
+     */
+    @isString
+    public static final String STORM_ZOOKEEPER_AUTH_SCHEME="storm.zookeeper.auth.scheme";
+
+    /**
+     * A string representing the payload for cluster Zookeeper authentication.
+     * It gets serialized using UTF-8 encoding during authentication.
+     * Note that if this is set to something with a secret (as when using
+     * digest authentication) then it should only be set in the
+     * storm-cluster-auth.yaml file.
+     * This file storm-cluster-auth.yaml should then be protected with
+     * appropriate permissions that deny access from workers.
+     */
+    @isString
+    public static final String STORM_ZOOKEEPER_AUTH_PAYLOAD="storm.zookeeper.auth.payload";
+
+    /**
+     * What Network Topography detection classes should we use.
+     * Given a list of supervisor hostnames (or IP addresses), this class would return a list of
+     * rack names that correspond to the supervisors. This information is stored in Cluster.java, and
+     * is used in the resource aware scheduler.
+     */
+    @NotNull
+    @isImplementationOfClass(implementsClass = org.apache.storm.networktopography.DNSToSwitchMapping.class)
+    public static final String STORM_NETWORK_TOPOGRAPHY_PLUGIN = "storm.network.topography.plugin";
+
+    /**
+     * The jvm opts provided to workers launched by this supervisor for GC. All "%ID%" substrings are replaced
+     * with an identifier for this worker.  Because the JVM complains about multiple GC opts the topology
+     * can override this default value by setting topology.worker.gc.childopts.
+     */
+    @isStringOrStringList
+    public static final String WORKER_GC_CHILDOPTS = "worker.gc.childopts";
+
+    /**
+     * The jvm opts provided to workers launched by this supervisor.
+     * All "%ID%", "%WORKER-ID%", "%TOPOLOGY-ID%",
+     * "%WORKER-PORT%" and "%HEAP-MEM%" substrings are replaced with:
+     * %ID%          -> port (for backward compatibility),
+     * %WORKER-ID%   -> worker-id,
+     * %TOPOLOGY-ID%    -> topology-id,
+     * %WORKER-PORT% -> port.
+     * %HEAP-MEM% -> mem-onheap.
+     */
+    @isStringOrStringList
+    public static final String WORKER_CHILDOPTS = "worker.childopts";
+
+    /**
+     * The default heap memory size in MB per worker, used in the jvm -Xmx opts for launching the worker
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String WORKER_HEAP_MEMORY_MB = "worker.heap.memory.mb";
+
+    /**
+     * The total amount of memory (in MiB) a supervisor is allowed to give to its workers.
+     *  A default value will be set for this config if user does not override
+     */
+    @isPositiveNumber
+    public static final String SUPERVISOR_MEMORY_CAPACITY_MB = "supervisor.memory.capacity.mb";
+
+    /**
+     * The total amount of CPU resources a supervisor is allowed to give to its workers.
+     * By convention 1 cpu core should be about 100, but this can be adjusted if needed
+     * using 100 makes it simple to set the desired value to the capacity measurement
+     * for single threaded bolts.  A default value will be set for this config if user does not override
+     */
+    @isPositiveNumber
+    public static final String SUPERVISOR_CPU_CAPACITY = "supervisor.cpu.capacity";
+
+    /**
+     * Whether or not to use ZeroMQ for messaging in local mode. If this is set
+     * to false, then Storm will use a pure-Java messaging system. The purpose
+     * of this flag is to make it easy to run Storm in local mode by eliminating
+     * the need for native dependencies, which can be difficult to install.
+     *
+     * Defaults to false.
+     */
+    @isBoolean
+    public static final String STORM_LOCAL_MODE_ZMQ = "storm.local.mode.zmq";
+
+    /**
+     * The transporter for communication among Storm tasks
+     */
+    @isString
+    public static final String STORM_MESSAGING_TRANSPORT = "storm.messaging.transport";
+
+    /**
+     * Netty based messaging: Is authentication required for Netty messaging from client worker process to server worker process.
+     */
+    @isBoolean
+    public static final String STORM_MESSAGING_NETTY_AUTHENTICATION = "storm.messaging.netty.authentication";
+
+    /**
+     * Netty based messaging: The buffer size for send/recv buffer
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String STORM_MESSAGING_NETTY_BUFFER_SIZE = "storm.messaging.netty.buffer_size";
+
+    /**
+     * Netty based messaging: Sets the backlog value to specify when the channel binds to a local address
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String STORM_MESSAGING_NETTY_SOCKET_BACKLOG = "storm.messaging.netty.socket.backlog";
+
+    /**
+     * Netty based messaging: The # of worker threads for the server.
+     */
+    @isInteger
+    @isPositiveNumber(includeZero = true)
+    public static final String STORM_MESSAGING_NETTY_SERVER_WORKER_THREADS = "storm.messaging.netty.server_worker_threads";
+
+    /**
+     * If the Netty messaging layer is busy, the Netty client will try to batch message as more as possible up to the size of STORM_NETTY_MESSAGE_BATCH_SIZE bytes
+     */
+    @isInteger
+    public static final String STORM_NETTY_MESSAGE_BATCH_SIZE = "storm.messaging.netty.transfer.batch.size";
+
+    /**
+     * Netty based messaging: The max # of retries that a peer will perform when a remote is not accessible
+     *@deprecated "Since netty clients should never stop reconnecting - this does not make sense anymore.
+     */
+    @Deprecated
+    @isInteger
+    public static final String STORM_MESSAGING_NETTY_MAX_RETRIES = "storm.messaging.netty.max_retries";
+
+    /**
+     * Netty based messaging: The min # of milliseconds that a peer will wait.
+     */
+    @isInteger
+    @isPositiveNumber(includeZero = true)
+    public static final String STORM_MESSAGING_NETTY_MIN_SLEEP_MS = "storm.messaging.netty.min_wait_ms";
+
+    /**
+     * Netty based messaging: The max # of milliseconds that a peer will wait.
+     */
+    @isInteger
+    @isPositiveNumber(includeZero = true)
+    public static final String STORM_MESSAGING_NETTY_MAX_SLEEP_MS = "storm.messaging.netty.max_wait_ms";
+
+    /**
+     * Netty based messaging: The # of worker threads for the client.
+     */
+    @isInteger
+    public static final String STORM_MESSAGING_NETTY_CLIENT_WORKER_THREADS = "storm.messaging.netty.client_worker_threads";
+
+    /**
+     * Should the supervior try to run the worker as the lauching user or not.  Defaults to false.
+     */
+    @isBoolean
+    public static final String SUPERVISOR_RUN_WORKER_AS_USER = "supervisor.run.worker.as.user";
+
+    /**
+     * On some systems (windows for example) symlinks require special privileges that not everyone wants to
+     * grant a headless user.  You can completely disable the use of symlinks by setting this config to true, but
+     * by doing so you may also lose some features from storm.  For example the blobstore feature
+     * does not currently work without symlinks enabled.
+     */
+    @isBoolean
+    public static final String DISABLE_SYMLINKS = "storm.disable.symlinks";
+
+    /**
+     * The plugin that will convert a principal to a local user.
+     */
+    @isString
+    public static final String STORM_PRINCIPAL_TO_LOCAL_PLUGIN = "storm.principal.tolocal";
+
+    /**
+     * The plugin that will provide user groups service
+     */
+    @isString
+    public static final String STORM_GROUP_MAPPING_SERVICE_PROVIDER_PLUGIN = "storm.group.mapping.service";
+
+    /**
+     * A list of credential renewers that nimbus should load.
+     */
+    @isStringList
+    public static final String NIMBUS_CREDENTIAL_RENEWERS = "nimbus.credential.renewers.classes";
+
+    /**
+     * A list of plugins that nimbus should load during submit topology to populate
+     * credentials on user's behalf.
+     */
+    @isStringList
+    public static final String NIMBUS_AUTO_CRED_PLUGINS = "nimbus.autocredential.plugins.classes";
+
+    /**
+     * Class name of the HTTP credentials plugin for the UI.
+     */
+    @isString
+    public static final String UI_HTTP_CREDS_PLUGIN = "ui.http.creds.plugin";
+
+    /**
+     * Class name of the HTTP credentials plugin for DRPC.
+     */
+    @isString
+    public static final String DRPC_HTTP_CREDS_PLUGIN = "drpc.http.creds.plugin";
+
+    /**
+     * A list of users that run the supervisors and should be authorized to interact with
+     * nimbus as a supervisor would.  To use this set
+     * nimbus.authorizer to org.apache.storm.security.auth.authorizer.SimpleACLAuthorizer
+     */
+    @isStringList
+    public static final String NIMBUS_SUPERVISOR_USERS = "nimbus.supervisor.users";
+
+    /**
+     * A list of users that are cluster admins and can run any command.  To use this set
+     * nimbus.authorizer to org.apache.storm.security.auth.authorizer.SimpleACLAuthorizer
+     */
+    @isStringList
+    public static final String NIMBUS_ADMINS = "nimbus.admins";
+
+    /**
+     *  For secure mode we would want to turn on this config
+     *  By default this is turned off assuming the default is insecure
+     */
+    @isBoolean
+    public static final String STORM_BLOBSTORE_ACL_VALIDATION_ENABLED = "storm.blobstore.acl.validation.enabled";
+
+    /**
+     * What buffer size to use for the blobstore uploads.
+     */
+    @isPositiveNumber
+    @isInteger
+    public static final String STORM_BLOBSTORE_INPUTSTREAM_BUFFER_SIZE_BYTES = "storm.blobstore.inputstream.buffer.size.bytes";
+
+    /**
+     * FQCN of a class that implements {@code ISubmitterHook} @see ISubmitterHook for details.
+     */
+    @isString
+    public static final String STORM_TOPOLOGY_SUBMISSION_NOTIFIER_PLUGIN = "storm.topology.submission.notifier.plugin.class";
+
+    /**
+     * Impersonation user ACL config entries.
+     */
+    @isMapEntryCustom(keyValidatorClasses = {ConfigValidation.StringValidator.class}, valueValidatorClasses = {ConfigValidation.ImpersonationAclUserEntryValidator.class})
+    public static final String NIMBUS_IMPERSONATION_ACL = "nimbus.impersonation.acl";
+
+    /**
+     * Full path to the worker-laucher executable that will be used to lauch workers when
+     * SUPERVISOR_RUN_WORKER_AS_USER is set to true.
+     */
+    @isString
+    public static final String SUPERVISOR_WORKER_LAUNCHER = "supervisor.worker.launcher";
+
+    /**
+     * A directory on the local filesystem used by Storm for any local
+     * filesystem usage it needs. The directory must exist and the Storm daemons must
+     * have permission to read/write from this location.
+     */
+    @isString
+    public static final String STORM_LOCAL_DIR = "storm.local.dir";
+
+    /**
+     * The workers-artifacts directory (where we place all workers' logs), can be either absolute or relative.
+     * By default, ${storm.log.dir}/workers-artifacts is where worker logs go.
+     * If the setting is a relative directory, it is relative to storm.log.dir.
+     */
+    @isString
+    public static final String STORM_WORKERS_ARTIFACTS_DIR = "storm.workers.artifacts.dir";
+
+    /**
+     * A list of hosts of Exhibitor servers used to discover/maintain connection to ZooKeeper cluster.
+     * Any configured ZooKeeper servers will be used for the curator/exhibitor backup connection string.
+     */
+    @isStringList
+    public static final String STORM_EXHIBITOR_SERVERS = "storm.exhibitor.servers";
+
+    /**
+     * The port Storm will use to connect to each of the exhibitor servers.
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String STORM_EXHIBITOR_PORT = "storm.exhibitor.port";
+
+    /*
+ * How often to poll Exhibitor cluster in millis.
+ */
+    @isString
+    public static final String STORM_EXHIBITOR_URIPATH="storm.exhibitor.poll.uripath";
+
+    /**
+     * How often to poll Exhibitor cluster in millis.
+     */
+    @isInteger
+    public static final String STORM_EXHIBITOR_POLL="storm.exhibitor.poll.millis";
+
+    /**
+     * The number of times to retry an Exhibitor operation.
+     */
+    @isInteger
+    public static final String STORM_EXHIBITOR_RETRY_TIMES="storm.exhibitor.retry.times";
+
+    /**
+     * The interval between retries of an Exhibitor operation.
+     */
+    @isInteger
+    public static final String STORM_EXHIBITOR_RETRY_INTERVAL="storm.exhibitor.retry.interval";
+
+    /**
+     * The ceiling of the interval between retries of an Exhibitor operation.
+     */
+    @isInteger
+    public static final String STORM_EXHIBITOR_RETRY_INTERVAL_CEILING="storm.exhibitor.retry.intervalceiling.millis";
+
+    /**
+     * The connection timeout for clients to ZooKeeper.
+     */
+    @isInteger
+    public static final String STORM_ZOOKEEPER_CONNECTION_TIMEOUT = "storm.zookeeper.connection.timeout";
+
+    /**
+     * The session timeout for clients to ZooKeeper.
+     */
+    @isInteger
+    public static final String STORM_ZOOKEEPER_SESSION_TIMEOUT = "storm.zookeeper.session.timeout";
+
+    /**
+     * The interval between retries of a Zookeeper operation.
+     */
+    @isInteger
+    public static final String STORM_ZOOKEEPER_RETRY_INTERVAL="storm.zookeeper.retry.interval";
+
+    /**
+     * The ceiling of the interval between retries of a Zookeeper operation.
+     */
+    @isInteger
+    public static final String STORM_ZOOKEEPER_RETRY_INTERVAL_CEILING="storm.zookeeper.retry.intervalceiling.millis";
+
+    /**
+     * The number of times to retry a Zookeeper operation.
+     */
+    @isInteger
+    public static final String STORM_ZOOKEEPER_RETRY_TIMES="storm.zookeeper.retry.times";
+
+    /**
+     * The ClusterState factory that worker will use to create a ClusterState
+     * to store state in. Defaults to ZooKeeper.
+     */
+    @isString
+    public static final String STORM_CLUSTER_STATE_STORE = "storm.cluster.state.store";
+
+    /**
+     * How often this worker should heartbeat to the supervisor.
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String WORKER_HEARTBEAT_FREQUENCY_SECS = "worker.heartbeat.frequency.secs";
+
+    /**
+     * How often a task should heartbeat its status to the master.
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String TASK_HEARTBEAT_FREQUENCY_SECS = "task.heartbeat.frequency.secs";
+
+    /**
+     * How often a task should sync its connections with other tasks (if a task is
+     * reassigned, the other tasks sending messages to it need to refresh their connections).
+     * In general though, when a reassignment happens other tasks will be notified
+     * almost immediately. This configuration is here just in case that notification doesn't
+     * come through.
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String TASK_REFRESH_POLL_SECS = "task.refresh.poll.secs";
+
+    /**
+     * The Access Control List for the DRPC Authorizer.
+     * @see org.apache.storm.security.auth.authorizer.DRPCSimpleACLAuthorizer
+     */
+    @isType(type=Map.class)
+    public static final String DRPC_AUTHORIZER_ACL = "drpc.authorizer.acl";
+
+    /**
+     * File name of the DRPC Authorizer ACL.
+     * @see org.apache.storm.security.auth.authorizer.DRPCSimpleACLAuthorizer
+     */
+    @isString
+    public static final String DRPC_AUTHORIZER_ACL_FILENAME = "drpc.authorizer.acl.filename";
+
+    /**
+     * Whether the DRPCSimpleAclAuthorizer should deny requests for operations
+     * involving functions that have no explicit ACL entry. When set to false
+     * (the default) DRPC functions that have no entry in the ACL will be
+     * permitted, which is appropriate for a development environment. When set
+     * to true, explicit ACL entries are required for every DRPC function, and
+     * any request for functions will be denied.
+     * @see org.apache.storm.security.auth.authorizer.DRPCSimpleACLAuthorizer
+     */
+    @isBoolean
+    public static final String DRPC_AUTHORIZER_ACL_STRICT = "drpc.authorizer.acl.strict";
 
     public static void setClasspath(Map conf, String cp) {
         conf.put(Config.TOPOLOGY_CLASSPATH, cp);
@@ -2569,23 +1681,4 @@ public class Config extends HashMap<String, Object> {
         }
     }
 
-    public static String getCgroupRootDir(Map conf) {
-        return (String) conf.get(STORM_SUPERVISOR_CGROUP_ROOTDIR);
-    }
-
-    public static String getCgroupStormHierarchyDir(Map conf) {
-        return (String) conf.get(Config.STORM_CGROUP_HIERARCHY_DIR);
-    }
-
-    public static ArrayList<String> getCgroupStormResources(Map conf) {
-        ArrayList<String> ret = new ArrayList<String>();
-        for (String entry : ((Iterable<String>) conf.get(Config.STORM_CGROUP_RESOURCES))) {
-            ret.add(entry);
-        }
-        return ret;
-    }
-
-    public static String getCgroupStormHierarchyName(Map conf) {
-        return (String) conf.get(Config.STORM_CGROUP_HIERARCHY_NAME);
-    }
 }

@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.container.ResourceIsolationInterface;
 import org.apache.storm.generated.LSWorkerHeartbeat;
 import org.apache.storm.generated.LocalAssignment;
@@ -343,8 +344,8 @@ public abstract class Container implements Killable {
         data.put("worker-id", _workerId);
 
         Set<String> logsGroups = new HashSet<>();
-        if (_topoConf.get(Config.LOGS_GROUPS) != null) {
-            List<String> groups = (List<String>) _topoConf.get(Config.LOGS_GROUPS);
+        if (_topoConf.get(DaemonConfig.LOGS_GROUPS) != null) {
+            List<String> groups = (List<String>) _topoConf.get(DaemonConfig.LOGS_GROUPS);
             for (String group : groups){
                 logsGroups.add(group);
             }
@@ -353,11 +354,11 @@ public abstract class Container implements Killable {
             List<String> topGroups = (List<String>) _topoConf.get(Config.TOPOLOGY_GROUPS);
             logsGroups.addAll(topGroups);
         }
-        data.put(Config.LOGS_GROUPS, logsGroups.toArray());
+        data.put(DaemonConfig.LOGS_GROUPS, logsGroups.toArray());
 
         Set<String> logsUsers = new HashSet<>();
-        if (_topoConf.get(Config.LOGS_USERS) != null) {
-            List<String> logUsers = (List<String>) _topoConf.get(Config.LOGS_USERS);
+        if (_topoConf.get(DaemonConfig.LOGS_USERS) != null) {
+            List<String> logUsers = (List<String>) _topoConf.get(DaemonConfig.LOGS_USERS);
             for (String logUser : logUsers){
                 logsUsers.add(logUser);
             }
@@ -368,7 +369,7 @@ public abstract class Container implements Killable {
                 logsUsers.add(logUser);
             }
         }
-        data.put(Config.LOGS_USERS, logsUsers.toArray());
+        data.put(DaemonConfig.LOGS_USERS, logsUsers.toArray());
 
         File file = ConfigUtils.getLogMetaDataFile(_conf, _topologyId, _port);
 

@@ -18,6 +18,7 @@
 package org.apache.storm.command;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.utils.ClientConfigUtils;
 import org.apache.storm.utils.ConfigUtils;
 import org.slf4j.Logger;
@@ -76,7 +77,7 @@ public class HealthCheck {
         Thread interruptThread = null;
         try {
             Process process = Runtime.getRuntime().exec(script);
-            final long timeout = (long) (conf.get(Config.STORM_HEALTH_CHECK_TIMEOUT_MS));
+            final long timeout = (long) (conf.get(DaemonConfig.STORM_HEALTH_CHECK_TIMEOUT_MS));
             final Thread curThread = Thread.currentThread();
             // kill process when timeout
             interruptThread = new Thread(new Runnable() {
@@ -120,7 +121,7 @@ public class HealthCheck {
     }
 
     public static void main(String[] args) {
-        Map conf = ClientConfigUtils.readStormConfig();
+        Map conf = ConfigUtils.readStormConfig();
         System.exit(healthCheck(conf));
     }
 

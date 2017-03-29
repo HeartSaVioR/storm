@@ -18,6 +18,7 @@
 package org.apache.storm.pacemaker.codec;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.messaging.netty.ISaslServer;
 import org.apache.storm.messaging.netty.IServer;
 import org.apache.storm.messaging.netty.KerberosSaslServerHandler;
@@ -77,7 +78,7 @@ public class ThriftNettyServerCodec {
                     try {
                         LOG.debug("Adding KerberosSaslServerHandler to pacemaker server pipeline.");
                         ArrayList<String> authorizedUsers = new ArrayList(1);
-                        authorizedUsers.add((String)storm_conf.get(Config.NIMBUS_DAEMON_USER));
+                        authorizedUsers.add((String)storm_conf.get(DaemonConfig.NIMBUS_DAEMON_USER));
                         pipeline.addLast(KERBEROS_HANDLER, new KerberosSaslServerHandler((ISaslServer)server,
                                                                                          storm_conf,
                                                                                          AuthUtils.LOGIN_CONTEXT_PACEMAKER_SERVER,

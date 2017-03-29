@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.daemon.supervisor.AdvancedFSOps;
 import org.apache.storm.utils.ClientConfigUtils;
 import org.apache.storm.utils.ConfigUtils;
@@ -62,7 +63,7 @@ public class AsyncLocalizerTest {
         final File fStormRoot = new File(stormRoot);
         ClientBlobStore blobStore = mock(ClientBlobStore.class);
         Map<String, Object> conf = new HashMap<>();
-        conf.put(Config.SUPERVISOR_BLOBSTORE, ClientBlobStore.class.getName());
+        conf.put(DaemonConfig.SUPERVISOR_BLOBSTORE, ClientBlobStore.class.getName());
         conf.put(Config.STORM_PRINCIPAL_TO_LOCAL_PLUGIN, DefaultPrincipalToLocal.class.getName());
         conf.put(Config.STORM_CLUSTER_MODE, "distributed");
         conf.put(Config.STORM_LOCAL_DIR, stormLocal);

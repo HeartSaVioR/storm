@@ -380,12 +380,11 @@ public class LocalCluster implements ILocalClusterTrackedTopologyAware {
             this.tmpDirs.add(nimbusTmp);
             Map<String, Object> conf = ClientConfigUtils.readStormConfig();
             conf.put(Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS, true);
-            conf.put(Config.ZMQ_LINGER_MILLIS, 0);
             conf.put(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS, false);
             conf.put(Config.TOPOLOGY_TRIDENT_BATCH_EMIT_INTERVAL_MILLIS, 50);
             conf.put(Config.STORM_CLUSTER_MODE, "local");
-            conf.put(Config.BLOBSTORE_SUPERUSER, System.getProperty("user.name"));
-            conf.put(Config.BLOBSTORE_DIR, nimbusTmp.getPath());
+            conf.put(DaemonConfig.BLOBSTORE_SUPERUSER, System.getProperty("user.name"));
+            conf.put(DaemonConfig.BLOBSTORE_DIR, nimbusTmp.getPath());
         
             InProcessZookeeper zookeeper = null;
             if (!builder.daemonConf.containsKey(Config.STORM_ZOOKEEPER_SERVERS)) {
@@ -738,7 +737,7 @@ public class LocalCluster implements ILocalClusterTrackedTopologyAware {
             superConf.putAll(conf);
         }
         superConf.put(Config.STORM_LOCAL_DIR, tmpDir.getPath());
-        superConf.put(Config.SUPERVISOR_SLOTS_PORTS, portNumbers);
+        superConf.put(DaemonConfig.SUPERVISOR_SLOTS_PORTS, portNumbers);
         
         final String superId = id == null ? ClientUtils.uuid() : id;
         ISupervisor isuper = new StandaloneSupervisor() {

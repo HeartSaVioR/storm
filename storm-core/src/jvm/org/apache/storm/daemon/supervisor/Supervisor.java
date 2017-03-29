@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.StormTimer;
 import org.apache.storm.cluster.ClusterStateContext;
 import org.apache.storm.cluster.ClusterUtils;
@@ -204,7 +205,7 @@ public class Supervisor implements DaemonCommon, AutoCloseable {
         SupervisorHeartbeat hb = new SupervisorHeartbeat(conf, this);
         hb.run();
         // should synchronize supervisor so it doesn't launch anything after being down (optimization)
-        Integer heartbeatFrequency = ObjectReader.getInt(conf.get(Config.SUPERVISOR_HEARTBEAT_FREQUENCY_SECS));
+        Integer heartbeatFrequency = ObjectReader.getInt(conf.get(DaemonConfig.SUPERVISOR_HEARTBEAT_FREQUENCY_SECS));
         heartbeatTimer.scheduleRecurring(0, heartbeatFrequency, hb);
 
         this.eventManager = new EventManagerImp(false);
@@ -219,7 +220,7 @@ public class Supervisor implements DaemonCommon, AutoCloseable {
 
         UpdateBlobs updateBlobsThread = new UpdateBlobs(this);
 
-        if ((Boolean) conf.get(Config.SUPERVISOR_ENABLE)) {
+        if ((Boolean) conf.get(DaemonConfig.SUPERVISOR_ENABLE)) {
             // This isn't strictly necessary, but it doesn't hurt and ensures that the machine stays up
             // to date even if callbacks don't all work exactly right
             eventTimer.scheduleRecurring(0, 10, new EventManagerPushCallback(readState, eventManager));
@@ -300,7 +301,7 @@ public class Supervisor implements DaemonCommon, AutoCloseable {
                 LOG.error("Error trying to kill {}", workerId, e);
             }
         }
-        int shutdownSleepSecs = ObjectReader.getInt(conf.get(Config.SUPERVISOR_WORKER_SHUTDOWN_SLEEP_SECS), 1);
+        int shutdownSleepSecs = ObjectReader.getInt(conf.get(DaemonConfig.SUPERVISOR_WORKER_SHUTDOWN_SLEEP_SECS), 1);
         if (!containers.isEmpty()) {
             Time.sleepSecs(shutdownSleepSecs);
         }

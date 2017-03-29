@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.Validate;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
@@ -53,7 +54,7 @@ public class IsolationScheduler implements IScheduler {
 
     @Override
     public void prepare(Map conf) {
-        this.isoMachines = (Map<String, Number>) conf.get(Config.ISOLATION_SCHEDULER_MACHINES);
+        this.isoMachines = (Map<String, Number>) conf.get(DaemonConfig.ISOLATION_SCHEDULER_MACHINES);
         Validate.notEmpty(isoMachines);
     }
 

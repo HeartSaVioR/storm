@@ -18,6 +18,7 @@
 package org.apache.storm.daemon.supervisor;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.scheduler.ISupervisor;
 import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.LocalState;
@@ -60,7 +61,7 @@ public class StandaloneSupervisor implements ISupervisor {
 
     @Override
     public Object getMetadata() {
-        Object ports = conf.get(Config.SUPERVISOR_SLOTS_PORTS);
+        Object ports = conf.get(DaemonConfig.SUPERVISOR_SLOTS_PORTS);
         return ports;
     }
 

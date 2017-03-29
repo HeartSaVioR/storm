@@ -18,6 +18,7 @@
 package org.apache.storm.daemon.supervisor.timer;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.cluster.IStormClusterState;
 import org.apache.storm.daemon.supervisor.Supervisor;
 import org.apache.storm.generated.SupervisorInfo;
@@ -63,7 +64,7 @@ public class SupervisorHeartbeat implements Runnable {
         }
 
         supervisorInfo.set_meta(portList);
-        supervisorInfo.set_scheduler_meta((Map<String, String>) conf.get(Config.SUPERVISOR_SCHEDULER_META));
+        supervisorInfo.set_scheduler_meta((Map<String, String>) conf.get(DaemonConfig.SUPERVISOR_SCHEDULER_META));
         supervisorInfo.set_uptime_secs(supervisor.getUpTime().upTime());
         supervisorInfo.set_version(supervisor.getStormVersion());
         supervisorInfo.set_resources_map(mkSupervisorCapacities(conf));

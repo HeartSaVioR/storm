@@ -19,6 +19,7 @@
 package org.apache.storm.scheduler.resource;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.scheduler.resource.strategies.eviction.IEvictionStrategy;
 import org.apache.storm.scheduler.resource.strategies.priority.ISchedulingPriorityStrategy;
 import org.apache.storm.scheduler.resource.strategies.scheduling.IStrategy;
@@ -76,10 +77,10 @@ public class ResourceAwareScheduler implements IScheduler {
 
             if (schedulingPrioritystrategy == null) {
                 try {
-                    schedulingPrioritystrategy = (ISchedulingPriorityStrategy) ReflectionUtils.newInstance((String) this.conf.get(Config.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY));
+                    schedulingPrioritystrategy = (ISchedulingPriorityStrategy) ReflectionUtils.newInstance((String) this.conf.get(DaemonConfig.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY));
                 } catch (RuntimeException ex) {
                     LOG.error(String.format("failed to create instance of priority strategy: %s with error: %s! No topologies will be scheduled.",
-                                    this.conf.get(Config.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY), ex.getMessage()), ex);
+                                    this.conf.get(DaemonConfig.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY), ex.getMessage()), ex);
                     break;
                 }
             }
@@ -176,10 +177,10 @@ public class ResourceAwareScheduler implements IScheduler {
                         if (result.getStatus() == SchedulingStatus.FAIL_NOT_ENOUGH_RESOURCES) {
                             if (evictionStrategy == null) {
                                 try {
-                                    evictionStrategy = (IEvictionStrategy) ReflectionUtils.newInstance((String) this.conf.get(Config.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY));
+                                    evictionStrategy = (IEvictionStrategy) ReflectionUtils.newInstance((String) this.conf.get(DaemonConfig.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY));
                                 } catch (RuntimeException e) {
                                     LOG.error("failed to create instance of eviction strategy: {} with error: {}! No topology eviction will be done.",
-                                            this.conf.get(Config.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY), e.getMessage());
+                                            this.conf.get(DaemonConfig.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY), e.getMessage());
                                     topologySubmitter.moveTopoFromPendingToAttempted(td);
                                     break;
                                 }
@@ -384,7 +385,7 @@ public class ResourceAwareScheduler implements IScheduler {
      * {userid->{resourceType->amountGuaranteed}}
      */
     private Map<String, Map<String, Double>> getUserResourcePools() {
-        Object raw = this.conf.get(Config.RESOURCE_AWARE_SCHEDULER_USER_POOLS);
+        Object raw = this.conf.get(DaemonConfig.RESOURCE_AWARE_SCHEDULER_USER_POOLS);
         Map<String, Map<String, Double>> ret = new HashMap<String, Map<String, Double>>();
 
         if (raw != null) {
@@ -398,7 +399,7 @@ public class ResourceAwareScheduler implements IScheduler {
         }
 
         Map fromFile = ClientUtils.findAndReadConfigFile("user-resource-pools.yaml", false);
-        Map<String, Map<String, Number>> tmp = (Map<String, Map<String, Number>>) fromFile.get(Config.RESOURCE_AWARE_SCHEDULER_USER_POOLS);
+        Map<String, Map<String, Number>> tmp = (Map<String, Map<String, Number>>) fromFile.get(DaemonConfig.RESOURCE_AWARE_SCHEDULER_USER_POOLS);
         if (tmp != null) {
             for (Map.Entry<String, Map<String, Number>> userPoolEntry : tmp.entrySet()) {
                 String user = userPoolEntry.getKey();

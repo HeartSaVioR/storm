@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -131,27 +131,6 @@ public class TestConfigValidate {
     }
 
     @Test
-    public void testIsolationSchedulerMachinesIsMap() throws InvocationTargetException, NoSuchMethodException, NoSuchFieldException, InstantiationException, IllegalAccessException {
-        Map<String, Object> conf = new HashMap<String, Object>();
-        Map<String, Integer> isolationMap = new HashMap<String, Integer>();
-        conf.put(Config.ISOLATION_SCHEDULER_MACHINES, isolationMap);
-        ConfigValidation.validateFields(conf);
-
-        isolationMap.put("host0", 1);
-        isolationMap.put("host1", 2);
-
-        conf.put(Config.ISOLATION_SCHEDULER_MACHINES, isolationMap);
-        ConfigValidation.validateFields(conf);
-
-        conf.put(Config.ISOLATION_SCHEDULER_MACHINES, 42);
-        try {
-            ConfigValidation.validateFields(conf);
-            Assert.fail("Expected Exception not Thrown");
-        } catch (IllegalArgumentException ex) {
-        }
-    }
-
-    @Test
     public void testWorkerChildoptsIsStringOrStringList() throws InvocationTargetException, NoSuchMethodException, NoSuchFieldException, InstantiationException, IllegalAccessException {
         Map<String, Object> conf = new HashMap<String, Object>();
         Collection<Object> passCases = new LinkedList<Object>();
@@ -191,41 +170,6 @@ public class TestConfigValidate {
         for (Object value : failCases) {
             try {
                 conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, value);
-                ConfigValidation.validateFields(conf);
-                Assert.fail("Expected Exception not Thrown for value: " + value);
-            } catch (IllegalArgumentException Ex) {
-            }
-        }
-    }
-
-    @Test
-    public void testSupervisorSlotsPorts() throws InvocationTargetException, NoSuchMethodException, NoSuchFieldException, InstantiationException, IllegalAccessException {
-        Map<String, Object> conf = new HashMap<String, Object>();
-        Collection<Object> passCases = new LinkedList<Object>();
-        Collection<Object> failCases = new LinkedList<Object>();
-
-        Integer[] test1 = {1233, 1234, 1235};
-        Integer[] test2 = {1233};
-        passCases.add(Arrays.asList(test1));
-        passCases.add(Arrays.asList(test2));
-
-        String[] test3 = {"1233", "1234", "1235"};
-        //duplicate case
-        Integer[] test4 = {1233, 1233, 1235};
-        failCases.add(test3);
-        failCases.add(test4);
-        failCases.add(null);
-        failCases.add("1234");
-        failCases.add(1234);
-
-        for (Object value : passCases) {
-            conf.put(Config.SUPERVISOR_SLOTS_PORTS, value);
-            ConfigValidation.validateFields(conf);
-        }
-
-        for (Object value : failCases) {
-            try {
-                conf.put(Config.SUPERVISOR_SLOTS_PORTS, value);
                 ConfigValidation.validateFields(conf);
                 Assert.fail("Expected Exception not Thrown for value: " + value);
             } catch (IllegalArgumentException Ex) {

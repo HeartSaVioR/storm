@@ -24,6 +24,7 @@ import java.io.FileReader;
 import java.util.Map;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.container.cgroup.CgroupCenter;
 import org.apache.storm.container.cgroup.CgroupCoreFactory;
 import org.apache.storm.container.cgroup.SubSystemType;
@@ -59,9 +60,9 @@ public abstract class CGroupMetricsBase<T> implements IMetric {
             return;
         }
         
-        String hierarchyDir = (String)conf.get(Config.STORM_CGROUP_HIERARCHY_DIR);
+        String hierarchyDir = (String)conf.get(DaemonConfig.STORM_CGROUP_HIERARCHY_DIR);
         if (hierarchyDir == null || hierarchyDir.isEmpty()) {
-            LOG.warn("{} is disabled {} is not set", simpleName, Config.STORM_CGROUP_HIERARCHY_DIR);
+            LOG.warn("{} is disabled {} is not set", simpleName, DaemonConfig.STORM_CGROUP_HIERARCHY_DIR);
             return;
         }
 

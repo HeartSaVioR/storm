@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.daemon.drpc.webapp.DRPCApplication;
 import org.apache.storm.daemon.drpc.webapp.ReqContextFilter;
 import org.apache.storm.generated.DistributedRPC;
@@ -33,8 +34,8 @@ import org.apache.storm.security.auth.ThriftConnectionType;
 import org.apache.storm.security.auth.ThriftServer;
 import org.apache.storm.ui.FilterConfiguration;
 import org.apache.storm.ui.UIHelpers;
-import org.apache.storm.utils.ClientConfigUtils;
 import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ConfigUtils;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.shade.org.eclipse.jetty.server.Server;
 import org.apache.storm.shade.org.eclipse.jetty.servlet.FilterHolder;
@@ -74,25 +75,25 @@ public class DRPCServer implements AutoCloseable {
     }
     
     private static Server mkHttpServer(Map<String, Object> conf, DRPC drpc) {
-        Integer drpcHttpPort = (Integer) conf.get(Config.DRPC_HTTP_PORT);
+        Integer drpcHttpPort = (Integer) conf.get(DaemonConfig.DRPC_HTTP_PORT);
         Server ret = null;
         if (drpcHttpPort != null && drpcHttpPort > 0) {
             LOG.info("Starting RPC HTTP servers...");
-            String filterClass = (String) (conf.get(Config.DRPC_HTTP_FILTER));
+            String filterClass = (String) (conf.get(DaemonConfig.DRPC_HTTP_FILTER));
             @SuppressWarnings("unchecked")
-            Map<String, String> filterParams = (Map<String, String>) (conf.get(Config.DRPC_HTTP_FILTER_PARAMS));
+            Map<String, String> filterParams = (Map<String, String>) (conf.get(DaemonConfig.DRPC_HTTP_FILTER_PARAMS));
             FilterConfiguration filterConfiguration = new FilterConfiguration(filterClass, filterParams);
             final List<FilterConfiguration> filterConfigurations = Arrays.asList(filterConfiguration);
-            final Integer httpsPort = ObjectReader.getInt(conf.get(Config.DRPC_HTTPS_PORT), 0);
-            final String httpsKsPath = (String) (conf.get(Config.DRPC_HTTPS_KEYSTORE_PATH));
-            final String httpsKsPassword = (String) (conf.get(Config.DRPC_HTTPS_KEYSTORE_PASSWORD));
-            final String httpsKsType = (String) (conf.get(Config.DRPC_HTTPS_KEYSTORE_TYPE));
-            final String httpsKeyPassword = (String) (conf.get(Config.DRPC_HTTPS_KEY_PASSWORD));
-            final String httpsTsPath = (String) (conf.get(Config.DRPC_HTTPS_TRUSTSTORE_PATH));
-            final String httpsTsPassword = (String) (conf.get(Config.DRPC_HTTPS_TRUSTSTORE_PASSWORD));
-            final String httpsTsType = (String) (conf.get(Config.DRPC_HTTPS_TRUSTSTORE_TYPE));
-            final Boolean httpsWantClientAuth = (Boolean) (conf.get(Config.DRPC_HTTPS_WANT_CLIENT_AUTH));
-            final Boolean httpsNeedClientAuth = (Boolean) (conf.get(Config.DRPC_HTTPS_NEED_CLIENT_AUTH));
+            final Integer httpsPort = ObjectReader.getInt(conf.get(DaemonConfig.DRPC_HTTPS_PORT), 0);
+            final String httpsKsPath = (String) (conf.get(DaemonConfig.DRPC_HTTPS_KEYSTORE_PATH));
+            final String httpsKsPassword = (String) (conf.get(DaemonConfig.DRPC_HTTPS_KEYSTORE_PASSWORD));
+            final String httpsKsType = (String) (conf.get(DaemonConfig.DRPC_HTTPS_KEYSTORE_TYPE));
+            final String httpsKeyPassword = (String) (conf.get(DaemonConfig.DRPC_HTTPS_KEY_PASSWORD));
+            final String httpsTsPath = (String) (conf.get(DaemonConfig.DRPC_HTTPS_TRUSTSTORE_PATH));
+            final String httpsTsPassword = (String) (conf.get(DaemonConfig.DRPC_HTTPS_TRUSTSTORE_PASSWORD));
+            final String httpsTsType = (String) (conf.get(DaemonConfig.DRPC_HTTPS_TRUSTSTORE_TYPE));
+            final Boolean httpsWantClientAuth = (Boolean) (conf.get(DaemonConfig.DRPC_HTTPS_WANT_CLIENT_AUTH));
+            final Boolean httpsNeedClientAuth = (Boolean) (conf.get(DaemonConfig.DRPC_HTTPS_NEED_CLIENT_AUTH));
 
             //TODO a better way to do this would be great.
             DRPCApplication.setup(drpc);
@@ -171,7 +172,7 @@ public class DRPCServer implements AutoCloseable {
     
     public static void main(String [] args) throws Exception {
         ClientUtils.setupDefaultUncaughtExceptionHandler();
-        Map<String, Object> conf = ClientConfigUtils.readStormConfig();
+        Map<String, Object> conf = ConfigUtils.readStormConfig();
         try (DRPCServer server = new DRPCServer(conf)) {
             ClientUtils.addShutdownHookWithForceKillIn1Sec(() -> server.close());
             StormMetricsRegistry.startMetricsReporters(conf);

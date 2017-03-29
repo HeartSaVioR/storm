@@ -18,6 +18,7 @@
 package org.apache.storm.daemon.metrics;
 
 import org.apache.storm.Config;
+import org.apache.storm.DaemonConfig;
 import org.apache.storm.daemon.metrics.reporters.JmxPreparableReporter;
 import org.apache.storm.daemon.metrics.reporters.PreparableReporter;
 import org.apache.storm.utils.ClientConfigUtils;
@@ -38,7 +39,7 @@ public class MetricsUtils {
     private final static Logger LOG = LoggerFactory.getLogger(MetricsUtils.class);
 
     public static List<PreparableReporter> getPreparableReporters(Map stormConf) {
-        List<String> clazzes = (List<String>) stormConf.get(Config.STORM_DAEMON_METRICS_REPORTER_PLUGINS);
+        List<String> clazzes = (List<String>) stormConf.get(DaemonConfig.STORM_DAEMON_METRICS_REPORTER_PLUGINS);
         List<PreparableReporter> reporterList = new ArrayList<>();
 
         if (clazzes != null) {
@@ -62,7 +63,7 @@ public class MetricsUtils {
     }
 
     public static Locale getMetricsReporterLocale(Map stormConf) {
-        String languageTag = ObjectReader.getString(stormConf.get(Config.STORM_DAEMON_METRICS_REPORTER_PLUGIN_LOCALE), null);
+        String languageTag = ObjectReader.getString(stormConf.get(DaemonConfig.STORM_DAEMON_METRICS_REPORTER_PLUGIN_LOCALE), null);
         if (languageTag != null) {
             return Locale.forLanguageTag(languageTag);
         }
@@ -70,11 +71,11 @@ public class MetricsUtils {
     }
 
     public static TimeUnit getMetricsRateUnit(Map stormConf) {
-        return getTimeUnitForCofig(stormConf, Config.STORM_DAEMON_METRICS_REPORTER_PLUGIN_RATE_UNIT);
+        return getTimeUnitForCofig(stormConf, DaemonConfig.STORM_DAEMON_METRICS_REPORTER_PLUGIN_RATE_UNIT);
     }
 
     public static TimeUnit getMetricsDurationUnit(Map stormConf) {
-        return getTimeUnitForCofig(stormConf, Config.STORM_DAEMON_METRICS_REPORTER_PLUGIN_DURATION_UNIT);
+        return getTimeUnitForCofig(stormConf, DaemonConfig.STORM_DAEMON_METRICS_REPORTER_PLUGIN_DURATION_UNIT);
     }
 
     private static TimeUnit getTimeUnitForCofig(Map stormConf, String configName) {
@@ -86,7 +87,7 @@ public class MetricsUtils {
     }
 
     public static File getCsvLogDir(Map stormConf) {
-        String csvMetricsLogDirectory = ObjectReader.getString(stormConf.get(Config.STORM_DAEMON_METRICS_REPORTER_CSV_LOG_DIR), null);
+        String csvMetricsLogDirectory = ObjectReader.getString(stormConf.get(DaemonConfig.STORM_DAEMON_METRICS_REPORTER_CSV_LOG_DIR), null);
         if (csvMetricsLogDirectory == null) {
             csvMetricsLogDirectory = ClientConfigUtils.absoluteStormLocalDir(stormConf);
             csvMetricsLogDirectory = csvMetricsLogDirectory + ConfigUtils.FILE_SEPARATOR + "csvmetrics";

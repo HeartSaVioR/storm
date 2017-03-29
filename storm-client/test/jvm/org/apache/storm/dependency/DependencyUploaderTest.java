@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,7 +20,6 @@ package org.apache.storm.dependency;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import org.apache.storm.blobstore.AtomicOutputStream;
-import org.apache.storm.blobstore.BlobStoreUtils;
 import org.apache.storm.blobstore.ClientBlobStore;
 import org.apache.storm.generated.KeyNotFoundException;
 import org.apache.storm.generated.ReadableBlobMeta;

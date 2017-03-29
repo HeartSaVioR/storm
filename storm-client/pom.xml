@@ -101,6 +101,10 @@
             <artifactId>commons-lang</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
 
         <!-- disruptor -->
         <dependency>
@@ -168,6 +172,21 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
+        </dependency>
+
+        <!-- test -->
+        <!-- hamcrest-core dependency is shaded inside the mockito-all and junit depends on newer version of hamcrest-core.
+        To give higher precedence to classes from newer version of hamcrest-core, Junit has been placed above mockito.
+         -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -25,7 +25,7 @@ import org.apache.storm.topology.FailedException;
 import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class BatchBoltExecutor implements IRichBolt, FinishedCallback, TimeoutCa
     BatchOutputCollectorImpl _collector;
     
     public BatchBoltExecutor(IBatchBolt bolt) {
-        _boltSer = ClientUtils.javaSerialize(bolt);
+        _boltSer = Utils.javaSerialize(bolt);
     }
     
     @Override
@@ -104,6 +104,6 @@ public class BatchBoltExecutor implements IRichBolt, FinishedCallback, TimeoutCa
     }
     
     private IBatchBolt newTransactionalBolt() {
-        return ClientUtils.javaDeserialize(_boltSer, IBatchBolt.class);
+        return Utils.javaDeserialize(_boltSer, IBatchBolt.class);
     }
 }

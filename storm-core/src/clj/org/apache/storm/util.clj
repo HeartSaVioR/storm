@@ -21,8 +21,8 @@
   (:import [java.nio.file Paths])
   (:import [org.apache.storm Config])
  (:import [org.apache.storm.generated ErrorInfo])
-  (:import [org.apache.storm.utils Time ClojureTimerTask Utils
-                                   MutableObject ClientUtils])
+  (:import [org.apache.storm.utils Time ClojureTimerTask DaemonUtils
+                                   MutableObject Utils])
   (:import [org.apache.storm.security.auth NimbusPrincipal])
   (:import [javax.security.auth Subject])
   (:import [java.util UUID Random ArrayList List Collections Set])
@@ -99,7 +99,7 @@
      ~@body
      false
      (catch Throwable t#
-       (let [tc# (ClientUtils/exceptionCauseIsInstanceOf ~klass t#)]
+       (let [tc# (Utils/exceptionCauseIsInstanceOf ~klass t#)]
          (if (not tc#) (log-error t# "Exception did not match " ~klass))
          tc#))))
 

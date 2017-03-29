@@ -20,7 +20,7 @@ package org.apache.storm.streams;
 import org.apache.storm.topology.IBasicBolt;
 import org.apache.storm.topology.IComponent;
 import org.apache.storm.topology.IRichBolt;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 /**
  * Sink node holds IRich or IBasic bolts that are passed
@@ -30,7 +30,7 @@ class SinkNode extends Node {
     private final IComponent bolt;
 
     SinkNode(IComponent bolt) {
-        super(ClientUtils.DEFAULT_STREAM_ID, getOutputFields(bolt, ClientUtils.DEFAULT_STREAM_ID));
+        super(Utils.DEFAULT_STREAM_ID, getOutputFields(bolt, Utils.DEFAULT_STREAM_ID));
         if (bolt instanceof IRichBolt || bolt instanceof IBasicBolt) {
             this.bolt = bolt;
         } else {

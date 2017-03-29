@@ -22,7 +22,7 @@ import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.RotatingMap;
 import org.apache.storm.utils.TupleUtils;
 import org.slf4j.Logger;
@@ -54,7 +54,7 @@ public class Acker implements IBolt {
 
         // val xor value
         public void updateAck(Long value) {
-            val = ClientUtils.bitXor(val, value);
+            val = Utils.bitXor(val, value);
         }
     }
 

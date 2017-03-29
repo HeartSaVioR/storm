@@ -27,11 +27,11 @@ import org.apache.storm.tuple.Values;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 
 public class PrepareRequest extends BaseBasicBolt {
-    public static final String ARGS_STREAM = ClientUtils.DEFAULT_STREAM_ID;
+    public static final String ARGS_STREAM = Utils.DEFAULT_STREAM_ID;
     public static final String RETURN_STREAM = "ret";
     public static final String ID_STREAM = "id";
 

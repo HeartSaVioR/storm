@@ -20,7 +20,7 @@ package org.apache.storm.perf.utils;
 
 import org.apache.storm.LocalCluster;
 import org.apache.storm.generated.Nimbus;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.log4j.Logger;
 
 import java.io.PrintWriter;
@@ -238,7 +238,7 @@ public class BasicMetricsCollector  {
         }
 
         writer.println("\n------------------------------------------------------------------------------------------------------------------");
-        String str = ClientUtils.join(header, ",");
+        String str = Utils.join(header, ",");
         writer.println(str);
         writer.println("------------------------------------------------------------------------------------------------------------------");
         writer.flush();
@@ -249,7 +249,7 @@ public class BasicMetricsCollector  {
         for (String h : header) {
             line.add(metrics.get(h));
         }
-        String str = ClientUtils.join(line, ",");
+        String str = Utils.join(line, ",");
         writer.println(str);
         writer.flush();
     }

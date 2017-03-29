@@ -18,7 +18,7 @@
 package org.apache.storm.task;
 
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -72,7 +72,7 @@ public class OutputCollector implements IOutputCollector {
      * @return the list of task ids that this new tuple was sent to
      */
     public List<Integer> emit(Collection<Tuple> anchors, List<Object> tuple) {
-        return emit(ClientUtils.DEFAULT_STREAM_ID, anchors, tuple);
+        return emit(Utils.DEFAULT_STREAM_ID, anchors, tuple);
     }
 
 
@@ -85,7 +85,7 @@ public class OutputCollector implements IOutputCollector {
      * @return the list of task ids that this new tuple was sent to
      */
     public List<Integer> emit(Tuple anchor, List<Object> tuple) {
-        return emit(ClientUtils.DEFAULT_STREAM_ID, anchor, tuple);
+        return emit(Utils.DEFAULT_STREAM_ID, anchor, tuple);
     }
 
     /**
@@ -98,7 +98,7 @@ public class OutputCollector implements IOutputCollector {
      * @return the list of task ids that this new tuple was sent to
      */
     public List<Integer> emit(List<Object> tuple) {
-        return emit(ClientUtils.DEFAULT_STREAM_ID, tuple);
+        return emit(Utils.DEFAULT_STREAM_ID, tuple);
     }
 
     /**
@@ -152,7 +152,7 @@ public class OutputCollector implements IOutputCollector {
      * @param tuple the new output tuple from this bolt
      */
     public void emitDirect(int taskId, Collection<Tuple> anchors, List<Object> tuple) {
-        emitDirect(taskId, ClientUtils.DEFAULT_STREAM_ID, anchors, tuple);
+        emitDirect(taskId, Utils.DEFAULT_STREAM_ID, anchors, tuple);
     }
 
     /**
@@ -172,7 +172,7 @@ public class OutputCollector implements IOutputCollector {
      * @param tuple the new output tuple from this bolt
      */
     public void emitDirect(int taskId, Tuple anchor, List<Object> tuple) {
-        emitDirect(taskId, ClientUtils.DEFAULT_STREAM_ID, anchor, tuple);
+        emitDirect(taskId, Utils.DEFAULT_STREAM_ID, anchor, tuple);
     }
 
 
@@ -195,7 +195,7 @@ public class OutputCollector implements IOutputCollector {
      * @param tuple the new output tuple from this bolt
      */
     public void emitDirect(int taskId, List<Object> tuple) {
-        emitDirect(taskId, ClientUtils.DEFAULT_STREAM_ID, tuple);
+        emitDirect(taskId, Utils.DEFAULT_STREAM_ID, tuple);
     }
 
     @Override

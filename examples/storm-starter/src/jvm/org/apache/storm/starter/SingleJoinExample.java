@@ -24,7 +24,7 @@ import org.apache.storm.testing.FeederSpout;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.starter.bolt.SingleJoinBolt;
 
 /** Example of using a simple custom join bolt
@@ -63,7 +63,7 @@ public class SingleJoinExample {
         ageSpout.feed(new Values(i, i + 20));
       }
 
-      ClientUtils.sleep(2000);
+      Utils.sleep(2000);
     }
   }
 }

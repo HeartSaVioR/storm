@@ -17,10 +17,8 @@
  */
 package org.apache.storm.command;
 
-import org.apache.storm.Config;
 import org.apache.storm.DaemonConfig;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.DaemonConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +40,7 @@ public class HealthCheck {
     private static final String FAILED_WITH_EXIT_CODE = "failed_with_exit_code";
 
     public static int healthCheck(Map conf) {
-        String healthDir = ConfigUtils.absoluteHealthCheckDir(conf);
+        String healthDir = DaemonConfigUtils.absoluteHealthCheckDir(conf);
         List<String> results = new ArrayList<>();
         if (healthDir != null) {
             File parentFile = new File(healthDir);
@@ -121,7 +119,7 @@ public class HealthCheck {
     }
 
     public static void main(String[] args) {
-        Map conf = ConfigUtils.readStormConfig();
+        Map conf = DaemonConfigUtils.readStormConfig();
         System.exit(healthCheck(conf));
     }
 

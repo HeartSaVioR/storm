@@ -31,11 +31,10 @@ import java.util.TreeMap;
 
 import org.apache.commons.lang.Validate;
 import org.apache.storm.DaemonConfig;
-import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.DaemonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.storm.Config;
 
 // for each isolated topology:
 //   compute even distribution of executors -> workers on the number of workers specified for the topology
@@ -196,7 +195,7 @@ public class IsolationScheduler implements IScheduler {
         Map<String, List<AssignmentInfo>> hostAssignments = new HashMap<String, List<AssignmentInfo>>();
 
         for (SchedulerAssignment sa : assignmentValues) {
-            Map<WorkerSlot, List<ExecutorDetails>> slotExecutors = ClientUtils.reverseMap(sa.getExecutorToSlot());
+            Map<WorkerSlot, List<ExecutorDetails>> slotExecutors = Utils.reverseMap(sa.getExecutorToSlot());
             Set<Map.Entry<WorkerSlot, List<ExecutorDetails>>> entries = slotExecutors.entrySet();
             for (Map.Entry<WorkerSlot, List<ExecutorDetails>> entry : entries) {
                 WorkerSlot slot = entry.getKey();
@@ -216,7 +215,7 @@ public class IsolationScheduler implements IScheduler {
     }
 
     private Set<Set<ExecutorDetails>> computeWorkerSpecs(TopologyDetails topology) {
-        Map<String, List<ExecutorDetails>> compExecutors = ClientUtils.reverseMap(topology.getExecutorToComponent());
+        Map<String, List<ExecutorDetails>> compExecutors = Utils.reverseMap(topology.getExecutorToComponent());
 
         List<ExecutorDetails> allExecutors = new ArrayList<ExecutorDetails>();
         Collection<List<ExecutorDetails>> values = compExecutors.values();
@@ -251,7 +250,7 @@ public class IsolationScheduler implements IScheduler {
     private Map<Integer, Integer> machineDistribution(TopologyDetails topology) {
         int machineNum = isoMachines.get(topology.getName()).intValue();
         int workerNum = topology.getNumWorkers();
-        TreeMap<Integer, Integer> distribution = Utils.integerDivided(workerNum, machineNum);
+        TreeMap<Integer, Integer> distribution = DaemonUtils.integerDivided(workerNum, machineNum);
 
         if (distribution.containsKey(0)) {
             distribution.remove(0);

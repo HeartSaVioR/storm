@@ -36,7 +36,7 @@ import org.apache.storm.trident.windowing.WindowsStoreFactory;
 import org.apache.storm.trident.windowing.config.*;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +86,7 @@ public class TridentWindowingInmemoryStoreTopology {
             for (WindowConfig windowConfig : list) {
                 try (LocalCluster cluster = new LocalCluster();
                      LocalTopology topo = cluster.submitTopology("wordCounter", conf, buildTopology(mapState, windowConfig));) {
-                    ClientUtils.sleep(60 * 1000);
+                    Utils.sleep(60 * 1000);
                 }
             }
             System.exit(0);

@@ -21,7 +21,7 @@
   (:use [org.apache.storm log config])
   (:use [org.apache.storm.internal clojure])
   (:import [org.apache.storm LocalCluster$Builder Testing Thrift])
-  (:import [org.apache.storm.utils Utils ClientUtils]
+  (:import [org.apache.storm.utils DaemonUtils Utils]
            (org.apache.storm.daemon GrouperFactory)))
 
 (def shuffle-grouping (Grouping/shuffle (NullStruct. )))
@@ -87,7 +87,7 @@
                     {"1" (Thrift/prepareSpoutDetails
                            (TestWordSpout. true) (Integer. spout-phint))}
                     {"2" (Thrift/prepareBoltDetails
-                           {(ClientUtils/getGlobalStreamId "1" nil)
+                           {(Utils/getGlobalStreamId "1" nil)
                             (Thrift/prepareFieldsGrouping ["word"])}
                            (TestWordBytesCounter.) (Integer. spout-phint))
                      })
@@ -115,7 +115,7 @@
                     {"1" (Thrift/prepareSpoutDetails
                            (TestWordSpout. true) (Integer. spout-phint))}
                     {"2" (Thrift/prepareBoltDetails
-                           {(ClientUtils/getGlobalStreamId "1" nil)
+                           {(Utils/getGlobalStreamId "1" nil)
                             (Thrift/prepareFieldsGrouping ["word"])}
                            (TestWordBytesCounter.) (Integer. bolt-phint))
                      })
@@ -145,12 +145,12 @@
                      {"1" (Thrift/prepareSpoutDetails
                            (TestWordSpout. true))}
                      {"2" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareCustomStreamGrouping (NGrouping. (Integer. 2)))}
                             id-bolt
                             (Integer. 4))
                       "3" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareCustomJavaObjectGrouping
                                (JavaObject. "org.apache.storm.testing.NGrouping"
                                             [(JavaObjectArg/int_arg 3)]))}

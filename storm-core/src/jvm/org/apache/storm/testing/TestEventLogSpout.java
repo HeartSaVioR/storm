@@ -17,7 +17,7 @@
  */
 package org.apache.storm.testing;
 
-import static org.apache.storm.utils.ClientUtils.get;
+import static org.apache.storm.utils.Utils.get;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 
 import java.util.HashMap;

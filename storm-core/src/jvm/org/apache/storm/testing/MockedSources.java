@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 public class MockedSources {
 	/**
@@ -59,7 +59,7 @@ public class MockedSources {
     }
     
     public void addMockData(String spoutId, Values... valueses) {
-        this.addMockData(spoutId, ClientUtils.DEFAULT_STREAM_ID, valueses);
+        this.addMockData(spoutId, Utils.DEFAULT_STREAM_ID, valueses);
     }
     
     public Map<String, List<FixedTuple>> getData() {

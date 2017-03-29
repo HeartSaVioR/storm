@@ -24,7 +24,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.storm.generated.SubmitOptions;
 import org.apache.storm.generated.TopologyInitialStatus;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -53,7 +53,7 @@ public class StormSqlRunner {
         List<String> stmts = Files.readAllLines(Paths.get(filePath), StandardCharsets.UTF_8);
         StormSql sql = StormSql.construct();
         @SuppressWarnings("unchecked")
-        Map<String, ?> conf = ClientUtils.readStormConfig();
+        Map<String, ?> conf = Utils.readStormConfig();
 
         if (commandLine.hasOption(OPTION_SQL_EXPLAIN_LONG)) {
             sql.explain(stmts);

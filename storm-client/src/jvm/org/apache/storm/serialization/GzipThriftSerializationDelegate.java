@@ -19,7 +19,7 @@ package org.apache.storm.serialization;
 
 import java.util.Map;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.thrift.TBase;
 import org.apache.thrift.TDeserializer;
 import org.apache.thrift.TException;
@@ -38,7 +38,7 @@ public class GzipThriftSerializationDelegate implements SerializationDelegate {
     @Override
     public byte[] serialize(Object object) {
         try {
-            return ClientUtils.gzip(new TSerializer().serialize((TBase) object));
+            return Utils.gzip(new TSerializer().serialize((TBase) object));
         } catch (TException e) {
             throw new RuntimeException(e);
         }
@@ -48,7 +48,7 @@ public class GzipThriftSerializationDelegate implements SerializationDelegate {
     public <T> T deserialize(byte[] bytes, Class<T> clazz) {
         try {
             TBase instance = (TBase) clazz.newInstance();
-            new TDeserializer().deserialize(instance, ClientUtils.gunzip(bytes));
+            new TDeserializer().deserialize(instance, Utils.gunzip(bytes));
             return (T)instance;
         } catch (Exception e) {
             throw new RuntimeException(e);

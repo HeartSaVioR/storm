@@ -48,7 +48,7 @@ import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.IBasicBolt;
 import org.apache.storm.topology.IRichSpout;
 import org.apache.storm.topology.SpoutDeclarer;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,7 +167,7 @@ public class Thrift {
     }
 
     public static Grouping prepareCustomStreamGrouping(Object obj) {
-        return Grouping.custom_serialized(ClientUtils.javaSerialize(obj));
+        return Grouping.custom_serialized(Utils.javaSerialize(obj));
     }
 
     public static Grouping prepareCustomJavaObjectGrouping(JavaObject obj) {
@@ -240,14 +240,14 @@ public class Thrift {
     }
 
     public static ComponentObject serializeComponentObject(Object obj) {
-        return ComponentObject.serialized_java(ClientUtils.javaSerialize(obj));
+        return ComponentObject.serialized_java(Utils.javaSerialize(obj));
     }
 
     public static Object deserializeComponentObject(ComponentObject obj) {
         if (obj.getSetField() != ComponentObject._Fields.SERIALIZED_JAVA) {
             throw new RuntimeException("Cannot deserialize non-java-serialized object");
         }
-        return ClientUtils.javaDeserialize(obj.get_serialized_java(), Serializable.class);
+        return Utils.javaDeserialize(obj.get_serialized_java(), Serializable.class);
     }
 
     public static ComponentCommon prepareComponentCommon(Map<GlobalStreamId, Grouping> inputs, Map<String,
@@ -277,13 +277,13 @@ public class Thrift {
 
     public static SpoutSpec prepareSerializedSpoutDetails(IRichSpout spout, Map<String, StreamInfo> outputs) {
         return new SpoutSpec(ComponentObject.serialized_java
-                (ClientUtils.javaSerialize(spout)), prepareComponentCommon(new HashMap<>(), outputs, null, null));
+                (Utils.javaSerialize(spout)), prepareComponentCommon(new HashMap<>(), outputs, null, null));
     }
 
     public static Bolt prepareSerializedBoltDetails(Map<GlobalStreamId, Grouping> inputs, IBolt bolt, Map<String, StreamInfo> outputs,
                                                     Integer parallelismHint, Map conf) {
         ComponentCommon common = prepareComponentCommon(inputs, outputs, parallelismHint, conf);
-        return new Bolt(ComponentObject.serialized_java(ClientUtils.javaSerialize(bolt)), common);
+        return new Bolt(ComponentObject.serialized_java(Utils.javaSerialize(bolt)), common);
     }
 
     public static BoltDetails prepareBoltDetails(Map<GlobalStreamId, Grouping> inputs, Object bolt) {

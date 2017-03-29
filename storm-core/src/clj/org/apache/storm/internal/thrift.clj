@@ -23,7 +23,7 @@
             ComponentCommon Grouping$_Fields SpoutSpec NullStruct StreamInfo
             GlobalStreamId ComponentObject ComponentObject$_Fields
             ShellComponent SupervisorInfo])
-  (:import [org.apache.storm.utils Utils NimbusClient ConfigUtils ClientUtils ClientConfigUtils])
+  (:import [org.apache.storm.utils DaemonUtils NimbusClient DaemonConfigUtils Utils ConfigUtils])
   (:import [org.apache.storm Constants])
   (:import [org.apache.storm.security.auth ReqContext])
   (:import [org.apache.storm.grouping CustomStreamGrouping])
@@ -52,7 +52,7 @@
 
 (defmacro with-configured-nimbus-connection
   [client-sym & body]
-  `(let [conf# (clojurify-structure (ClientConfigUtils/readStormConfig))
+  `(let [conf# (clojurify-structure (ConfigUtils/readStormConfig))
          context# (ReqContext/context)
          user# (if (.principal context#) (.getName (.principal context#)))
          nimbusClient# (NimbusClient/getConfiguredClientAs conf# user#)
@@ -69,7 +69,7 @@
   [output-spec]
   (let [output-spec (if (map? output-spec)
                       output-spec
-                      {ClientUtils/DEFAULT_STREAM_ID output-spec})]
+                      {Utils/DEFAULT_STREAM_ID output-spec})]
     (map-val
       (fn [out]
         (if (instance? StreamInfo out)

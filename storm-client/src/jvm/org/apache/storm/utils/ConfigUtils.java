@@ -32,23 +32,23 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
-public class ClientConfigUtils {
+public class ConfigUtils {
     public static final String FILE_SEPARATOR = File.separator;
     public final static String RESOURCES_SUBDIR = "resources";
 
     // A singleton instance allows us to mock delegated static methods in our
     // tests by subclassing.
-    private static ClientConfigUtils _instance = new ClientConfigUtils();
+    private static ConfigUtils _instance = new ConfigUtils();
 
     /**
      * Provide an instance of this class for delegates to use.  To mock out
      * delegated methods, provide an instance of a subclass that overrides the
      * implementation of the delegated method.
-     * @param u a ClientConfigUtils instance
+     * @param u a ConfigUtils instance
      * @return the previously set instance
      */
-    public static ClientConfigUtils setInstance(ClientConfigUtils u) {
-        ClientConfigUtils oldInstance = _instance;
+    public static ConfigUtils setInstance(ConfigUtils u) {
+        ConfigUtils oldInstance = _instance;
         _instance = u;
         return oldInstance;
     }
@@ -199,7 +199,7 @@ public class ClientConfigUtils {
     }
 
     public static StormTopology readSupervisorStormCodeGivenPath(String stormCodePath, AdvancedFSOps ops) throws IOException {
-        return ClientUtils.deserialize(ops.slurp(new File(stormCodePath)), StormTopology.class);
+        return Utils.deserialize(ops.slurp(new File(stormCodePath)), StormTopology.class);
     }
 
     public static String supervisorStormResourcesPath(String stormRoot) {
@@ -234,7 +234,7 @@ public class ClientConfigUtils {
 
     public static Map<String, Object> readSupervisorStormConfGivenPath(Map<String, Object> conf, String stormConfPath) throws IOException {
         Map<String, Object> ret = new HashMap<>(conf);
-        ret.putAll(ClientUtils.fromCompressedJsonConf(FileUtils.readFileToByteArray(new File(stormConfPath))));
+        ret.putAll(Utils.fromCompressedJsonConf(FileUtils.readFileToByteArray(new File(stormConfPath))));
         return ret;
     }
 
@@ -265,7 +265,7 @@ public class ClientConfigUtils {
     }
 
     public Map<String, Object> readStormConfigImpl() {
-        Map<String, Object> conf = ClientUtils.readStormConfig();
+        Map<String, Object> conf = Utils.readStormConfig();
         ConfigValidation.validateFields(conf);
         return conf;
     }

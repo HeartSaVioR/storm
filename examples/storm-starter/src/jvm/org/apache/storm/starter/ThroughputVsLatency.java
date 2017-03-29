@@ -34,7 +34,7 @@ import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.NimbusClient;
 
 import java.util.Collection;
@@ -68,7 +68,7 @@ public class ThroughputVsLatency {
     Nimbus.Client _client = null;
 
     public C(Map conf) throws Exception {
-      Map clusterConf = ClientUtils.readStormConfig();
+      Map clusterConf = Utils.readStormConfig();
       if (conf != null) {
         clusterConf.putAll(conf);
       }

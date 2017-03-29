@@ -20,7 +20,7 @@ package org.apache.storm.cluster;
 import java.util.List;
 import java.util.Map;
 import org.apache.storm.pacemaker.PacemakerClientPool;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.zookeeper.data.ACL;
 
 public class PaceMakerStateStorageFactory implements StateStorageFactory {
@@ -31,7 +31,7 @@ public class PaceMakerStateStorageFactory implements StateStorageFactory {
             IStateStorage zkState = zkfact.mkStore(config, auth_conf, acls, context);
             return new PaceMakerStateStorage(new PacemakerClientPool(config), zkState);
         } catch (Exception e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
     }
 }

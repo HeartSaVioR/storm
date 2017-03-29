@@ -21,7 +21,7 @@ package org.apache.storm.pmml.runner.jpmml;
 import org.apache.storm.pmml.model.ModelOutputs;
 import org.apache.storm.pmml.runner.ModelRunner;
 import org.apache.storm.pmml.runner.ModelRunnerFactory;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.dmg.pmml.IOUtil;
 import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.Evaluator;
@@ -64,7 +64,7 @@ public class JpmmlFactory {
      * Uses Storm config as returned by {@code Utils.readStormConfig()} to get the Blobstore client
      */
     public static PMML newPmml(String blobKey) throws JAXBException, SAXException, IOException {
-        return newPmml(blobKey, ClientUtils.readStormConfig());
+        return newPmml(blobKey, Utils.readStormConfig());
     }
 
     /**
@@ -84,7 +84,7 @@ public class JpmmlFactory {
      * @param blobKey key of PMML model in Blobstore
      */
     public static InputStream getPmmlModelBlob(String blobKey) {
-        return getPmmlModelBlob(blobKey, ClientUtils.readStormConfig());
+        return getPmmlModelBlob(blobKey, Utils.readStormConfig());
     }
 
     /**
@@ -96,7 +96,7 @@ public class JpmmlFactory {
         Objects.requireNonNull(blobKey);
         Objects.requireNonNull(config);
         try {
-            return ClientUtils.getClientBlobStore(config).getBlob(blobKey);
+            return Utils.getClientBlobStore(config).getBlob(blobKey);
         } catch (Exception e) {
             throw new RuntimeException("Failed to download PMML Model from Blobstore using blob key [" + blobKey + "]", e);
         }
@@ -135,7 +135,7 @@ public class JpmmlFactory {
      */
     public static Evaluator newEvaluator(String blobKey) throws IOException, JAXBException, SAXException {
         Objects.requireNonNull(blobKey);
-        return newEvaluator(blobKey, ClientUtils.readStormConfig());
+        return newEvaluator(blobKey, Utils.readStormConfig());
     }
 
     /**
@@ -188,7 +188,7 @@ public class JpmmlFactory {
          * @param blobKey key of PMML model in Blobstore
          */
         public ModelRunnerFromBlobStore(String blobKey, ModelOutputs modelOutputs) {
-            this(blobKey, modelOutputs, ClientUtils.readStormConfig());
+            this(blobKey, modelOutputs, Utils.readStormConfig());
         }
 
         /**

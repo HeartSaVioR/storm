@@ -17,7 +17,7 @@
  */
 package org.apache.storm.kafka;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import kafka.api.OffsetRequest;
 import kafka.javaapi.consumer.SimpleConsumer;
 import kafka.javaapi.message.ByteBufferMessageSet;
@@ -88,9 +88,9 @@ public class TestUtils {
         Message kafkaMessage = messageAndOffset.message();
         ByteBuffer messageKeyBuffer = kafkaMessage.key();
         String keyString = null;
-        String messageString = new String(ClientUtils.toByteArray(kafkaMessage.payload()));
+        String messageString = new String(Utils.toByteArray(kafkaMessage.payload()));
         if (messageKeyBuffer != null) {
-            keyString = new String(ClientUtils.toByteArray(messageKeyBuffer));
+            keyString = new String(Utils.toByteArray(messageKeyBuffer));
         }
         assertEquals(key, keyString);
         assertEquals(message, messageString);

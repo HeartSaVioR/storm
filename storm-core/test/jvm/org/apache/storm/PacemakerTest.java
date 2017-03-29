@@ -22,7 +22,7 @@ import org.apache.storm.generated.HBMessageData;
 import org.apache.storm.generated.HBPulse;
 import org.apache.storm.generated.HBServerMessageType;
 import org.apache.storm.pacemaker.Pacemaker;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -72,7 +72,7 @@ public class PacemakerTest {
         Pacemaker handler = new Pacemaker(new ConcurrentHashMap());
         HBPulse hbPulse = new HBPulse();
         hbPulse.set_id(path);
-        hbPulse.set_details(ClientUtils.javaSerialize(dataString));
+        hbPulse.set_details(Utils.javaSerialize(dataString));
         messageWithRandId(HBServerMessageType.SEND_PULSE, HBMessageData.pulse(hbPulse));
         handler.handleMessage(hbMessage, true);
 
@@ -94,7 +94,7 @@ public class PacemakerTest {
         Pacemaker handler = new Pacemaker(new ConcurrentHashMap());
         HBPulse hbPulse = new HBPulse();
         hbPulse.set_id(path);
-        hbPulse.set_details(ClientUtils.javaSerialize(dataString));
+        hbPulse.set_details(Utils.javaSerialize(dataString));
         messageWithRandId(HBServerMessageType.SEND_PULSE, HBMessageData.pulse(hbPulse));
         HBMessage sendResponse = handler.handleMessage(hbMessage, true);
         Assert.assertEquals(mid, sendResponse.get_message_id());
@@ -105,7 +105,7 @@ public class PacemakerTest {
         HBMessage response = handler.handleMessage(hbMessage, true);
         Assert.assertEquals(mid, response.get_message_id());
         Assert.assertEquals(HBServerMessageType.GET_PULSE_RESPONSE, response.get_type());
-        Assert.assertEquals(dataString, ClientUtils.javaDeserialize(response.get_data().get_pulse().get_details(), String.class));
+        Assert.assertEquals(dataString, Utils.javaDeserialize(response.get_data().get_pulse().get_details(), String.class));
     }
 
     @Test
@@ -179,7 +179,7 @@ public class PacemakerTest {
         Assert.assertEquals(mid, goodResponse.get_message_id());
         Assert.assertEquals(HBServerMessageType.GET_PULSE_RESPONSE, goodResponse.get_type());
         Assert.assertEquals("/some-root/GET_PULSE", goodPulse.get_id());
-        Assert.assertEquals("nothing", ClientUtils.javaDeserialize(goodPulse.get_details(), String.class));
+        Assert.assertEquals("nothing", Utils.javaDeserialize(goodPulse.get_details(), String.class));
     }
 
     @Test
@@ -235,7 +235,7 @@ public class PacemakerTest {
     private HBMessage makeNode(Pacemaker handler, String path) {
         HBPulse hbPulse = new HBPulse();
         hbPulse.set_id(path);
-        hbPulse.set_details(ClientUtils.javaSerialize("nothing"));
+        hbPulse.set_details(Utils.javaSerialize("nothing"));
         HBMessage message = new HBMessage(HBServerMessageType.SEND_PULSE, HBMessageData.pulse(hbPulse));
         return handler.handleMessage(message, true);
     }

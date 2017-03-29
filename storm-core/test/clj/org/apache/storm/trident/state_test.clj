@@ -17,12 +17,12 @@
   (:use [clojure test])
   (:import [org.apache.storm.trident.operation.builtin Count])
   (:import [org.apache.storm.trident.state OpaqueValue])
-  (:import [org.apache.storm.utils Utils])
+  (:import [org.apache.storm.utils DaemonUtils])
   (:import [org.apache.storm.trident.state CombinerValueUpdater])
   (:import [org.apache.storm.trident.topology.state TransactionalState TestTransactionalState])
   (:import [org.apache.storm.trident.state.map TransactionalMap OpaqueMap])
   (:import [org.apache.storm.trident.testing MemoryBackingMap MemoryMapState])
-  (:import [org.apache.storm.utils ZookeeperAuthInfo ClientUtils])
+  (:import [org.apache.storm.utils ZookeeperAuthInfo Utils])
   (:import [org.apache.curator.framework CuratorFramework])
   (:import [org.apache.curator.framework.api CreateBuilder ProtectACLCreateModePathAndBytesable])
   (:import [org.apache.zookeeper CreateMode ZooDefs ZooDefs$Ids])
@@ -127,7 +127,7 @@
           e)))))))
 
 (deftest test-memory-map-state-remove
-  (let [map (MemoryMapState. (ClientUtils/uuid))]
+  (let [map (MemoryMapState. (Utils/uuid))]
     (.beginCommit map 1)
     (single-put map "a" 1)
     (single-put map "b" 2)

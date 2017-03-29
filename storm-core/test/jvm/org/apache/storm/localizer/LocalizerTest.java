@@ -29,8 +29,8 @@ import org.apache.storm.generated.AuthorizationException;
 import org.apache.storm.generated.KeyNotFoundException;
 import org.apache.storm.generated.ReadableBlobMeta;
 import org.apache.storm.generated.SettableBlobMeta;
-import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.DaemonUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import com.google.common.base.Joiner;
@@ -172,13 +172,13 @@ public class LocalizerTest {
     String archive1 = "archive1";
     String archive2 = "archive2";
 
-    File user1file1 = new File(expectedFileDir1, key1 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
-    File user1file2 = new File(expectedFileDir1, key2 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
-    File user2file3 = new File(expectedFileDir2, key3 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
-    File user2file4 = new File(expectedFileDir2, key4 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File user1file1 = new File(expectedFileDir1, key1 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File user1file2 = new File(expectedFileDir1, key2 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File user2file3 = new File(expectedFileDir2, key3 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File user2file4 = new File(expectedFileDir2, key4 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
 
-    File user1archive1 = new File(expectedArchiveDir1, archive1 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
-    File user2archive2 = new File(expectedArchiveDir2, archive2 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File user1archive1 = new File(expectedArchiveDir1, archive1 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File user2archive2 = new File(expectedArchiveDir2, archive2 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
     File user1archive1file = new File(user1archive1, "file1");
     File user2archive2file = new File(user2archive2, "file2");
 
@@ -261,7 +261,7 @@ public class LocalizerTest {
 
   // archive passed in must contain symlink named tmptestsymlink if not a zip file
   public void testArchives(String archivePath, boolean supportSymlinks, int size) throws Exception {
-    if (ClientUtils.isOnWindows()) {
+    if (Utils.isOnWindows()) {
       // Windows should set this to false cause symlink in compressed file doesn't work properly.
       supportSymlinks = false;
     }
@@ -370,7 +370,7 @@ public class LocalizerTest {
     String expectedFileDir = joinPath(expectedUserDir, Localizer.FILECACHE, Localizer.FILESDIR);
     assertTrue("user filecache dir not created", new File(expectedFileDir).exists());
     File keyFile = new File(expectedFileDir, key1);
-    File keyFileCurrentSymlink = new File(expectedFileDir, key1 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File keyFileCurrentSymlink = new File(expectedFileDir, key1 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
 
     assertTrue("blob not created", keyFileCurrentSymlink.exists());
 
@@ -442,9 +442,9 @@ public class LocalizerTest {
     String expectedFileDir = joinPath(baseDir.toString(), Localizer.USERCACHE, user1,
         Localizer.FILECACHE, Localizer.FILESDIR);
     assertTrue("user filecache dir not created", new File(expectedFileDir).exists());
-    File keyFile = new File(expectedFileDir, key1 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
-    File keyFile2 = new File(expectedFileDir, key2 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
-    File keyFile3 = new File(expectedFileDir, key3 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File keyFile = new File(expectedFileDir, key1 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File keyFile2 = new File(expectedFileDir, key2 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File keyFile3 = new File(expectedFileDir, key3 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
 
     assertTrue("blob not created", keyFile.exists());
     assertTrue("blob not created", keyFile2.exists());
@@ -523,7 +523,7 @@ public class LocalizerTest {
 
   @Test(expected = KeyNotFoundException.class)
   public void testKeyNotFoundException() throws Exception {
-    Map conf = ClientUtils.readStormConfig();
+    Map conf = Utils.readStormConfig();
     String key1 = "key1";
     conf.put(Config.STORM_LOCAL_DIR, "target");
     LocalFsBlobStore bs = new LocalFsBlobStore();
@@ -584,10 +584,10 @@ public class LocalizerTest {
     assertTrue("user filecache dir user2 not created", new File(expectedFileDirUser2).exists());
     assertTrue("user filecache dir user3 not created", new File(expectedFileDirUser3).exists());
 
-    File keyFile = new File(expectedFileDirUser1, key1 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
-    File keyFile2 = new File(expectedFileDirUser2, key2 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
-    File keyFile3 = new File(expectedFileDirUser3, key3 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
-    File keyFile1user3 = new File(expectedFileDirUser3, key1 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File keyFile = new File(expectedFileDirUser1, key1 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File keyFile2 = new File(expectedFileDirUser2, key2 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File keyFile3 = new File(expectedFileDirUser3, key3 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File keyFile1user3 = new File(expectedFileDirUser3, key1 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
 
     assertTrue("blob not created", keyFile.exists());
     assertTrue("blob not created", keyFile2.exists());
@@ -644,11 +644,11 @@ public class LocalizerTest {
     String expectedFileDir = joinPath(expectedUserDir, Localizer.FILECACHE, Localizer.FILESDIR);
     assertTrue("user filecache dir not created", new File(expectedFileDir).exists());
     File keyFile = new File(expectedFileDir, key1);
-    File keyFileCurrentSymlink = new File(expectedFileDir, key1 + Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
+    File keyFileCurrentSymlink = new File(expectedFileDir, key1 + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
     assertTrue("blob not created", keyFileCurrentSymlink.exists());
-    File versionFile = new File(expectedFileDir, key1 + Utils.DEFAULT_BLOB_VERSION_SUFFIX);
+    File versionFile = new File(expectedFileDir, key1 + DaemonUtils.DEFAULT_BLOB_VERSION_SUFFIX);
     assertTrue("blob version file not created", versionFile.exists());
-    assertEquals("blob version not correct", 1, Utils.localVersionOfBlob(keyFile.toString()));
+    assertEquals("blob version not correct", 1, DaemonUtils.localVersionOfBlob(keyFile.toString()));
 
     LocalizedResourceSet lrsrcSet = localizer.getUserResources().get(user1);
     assertEquals("local resource set size wrong", 1, lrsrcSet.getSize());
@@ -658,7 +658,7 @@ public class LocalizerTest {
 
     localizer.getBlob(new LocalResource(key1, false), user1, topo2, user1Dir);
     assertTrue("blob version file not created", versionFile.exists());
-    assertEquals("blob version not correct", 2, Utils.localVersionOfBlob(keyFile.toString()));
+    assertEquals("blob version not correct", 2, DaemonUtils.localVersionOfBlob(keyFile.toString()));
     assertTrue("blob file with version 2 not created", new File(keyFile + ".2").exists());
 
     // now test regular updateBlob
@@ -668,7 +668,7 @@ public class LocalizerTest {
     arr.add(new LocalResource(key1, false));
     localizer.updateBlobs(arr, user1);
     assertTrue("blob version file not created", versionFile.exists());
-    assertEquals("blob version not correct", 3, Utils.localVersionOfBlob(keyFile.toString()));
+    assertEquals("blob version not correct", 3, DaemonUtils.localVersionOfBlob(keyFile.toString()));
     assertTrue("blob file with version 3 not created", new File(keyFile + ".3").exists());
   }
 }

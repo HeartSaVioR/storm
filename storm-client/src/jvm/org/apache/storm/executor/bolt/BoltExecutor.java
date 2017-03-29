@@ -32,8 +32,8 @@ import org.apache.storm.task.IOutputCollector;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.TupleImpl;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.DisruptorQueue;
 import org.apache.storm.utils.Time;
 import org.slf4j.Logger;
@@ -50,12 +50,12 @@ public class BoltExecutor extends Executor {
 
     public BoltExecutor(WorkerState workerData, List<Long> executorId, Map<String, String> credentials) {
         super(workerData, executorId, credentials);
-        this.executeSampler = ClientConfigUtils.mkStatsSampler(stormConf);
+        this.executeSampler = ConfigUtils.mkStatsSampler(stormConf);
     }
 
     public void init(Map<Integer, Task> idToTask) {
         while (!stormActive.get()) {
-            ClientUtils.sleep(100);
+            Utils.sleep(100);
         }
 
         LOG.info("Preparing bolt {}:{}", componentId, idToTask.keySet());

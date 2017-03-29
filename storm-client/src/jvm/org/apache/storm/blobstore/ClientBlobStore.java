@@ -23,8 +23,8 @@ import org.apache.storm.generated.ReadableBlobMeta;
 import org.apache.storm.generated.SettableBlobMeta;
 import org.apache.storm.generated.KeyAlreadyExistsException;
 import org.apache.storm.generated.KeyNotFoundException;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.NimbusClient;
 
 import java.util.Iterator;
@@ -57,8 +57,8 @@ public abstract class ClientBlobStore implements Shutdownable {
     }
 
     public static void withConfiguredClient(WithBlobstore withBlobstore) throws Exception {
-        Map<String, Object> conf = ClientConfigUtils.readStormConfig();
-        ClientBlobStore blobStore = ClientUtils.getClientBlobStore(conf);
+        Map<String, Object> conf = ConfigUtils.readStormConfig();
+        ClientBlobStore blobStore = Utils.getClientBlobStore(conf);
 
         try {
             withBlobstore.run(blobStore);

@@ -29,7 +29,7 @@ import org.apache.storm.metric.api.ReducedMetric;
 import org.apache.storm.metric.api.CombinedMetric;
 import org.apache.storm.state.ISubscribedState;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -122,7 +122,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
      * @return Returns the ISubscribedState object provided
      */
     public <T extends ISubscribedState> T setSubscribedState(String componentId, T obj) {
-        return setSubscribedState(componentId, ClientUtils.DEFAULT_STREAM_ID, obj);
+        return setSubscribedState(componentId, Utils.DEFAULT_STREAM_ID, obj);
     }
 
     /**

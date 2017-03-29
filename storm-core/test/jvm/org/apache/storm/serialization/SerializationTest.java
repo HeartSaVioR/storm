@@ -20,7 +20,7 @@ package org.apache.storm.serialization;
 import com.google.common.collect.Lists;
 import org.apache.storm.Config;
 import org.apache.storm.testing.TestSerObject;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -79,7 +79,7 @@ public class SerializationTest {
     }
 
     private Map mkConf(Map extra) {
-        Map config = ClientUtils.readDefaultConfig();
+        Map config = Utils.readDefaultConfig();
         config.putAll(extra);
         return config;
     }

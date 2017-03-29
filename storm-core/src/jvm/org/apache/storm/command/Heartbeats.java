@@ -23,8 +23,8 @@ import org.apache.storm.cluster.ClusterUtils;
 import org.apache.storm.cluster.IStateStorage;
 import org.apache.storm.generated.ClusterWorkerHeartbeat;
 import org.apache.storm.stats.StatsUtil;
-import org.apache.storm.utils.ClientUtils;
-import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.DaemonConfigUtils;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public class Heartbeats {
         String command = args[0];
         String path = args[1];
 
-        Map<String, Object> conf = ConfigUtils.readStormConfig();
+        Map<String, Object> conf = DaemonConfigUtils.readStormConfig();
         IStateStorage cluster = ClusterUtils.mkStateStorage(conf, conf, null, new ClusterStateContext());
 
         LOG.info("Command: [{}]", command);
@@ -79,7 +79,7 @@ public class Heartbeats {
         String message;
         byte[] hb = cluster.get_worker_hb(path, false);
         if (hb != null) {
-            Map<String, Object> heartbeatMap = StatsUtil.convertZkWorkerHb(ClientUtils.deserialize(hb, ClusterWorkerHeartbeat.class));
+            Map<String, Object> heartbeatMap = StatsUtil.convertZkWorkerHb(Utils.deserialize(hb, ClusterWorkerHeartbeat.class));
             message = JSONValue.toJSONString(heartbeatMap);
         } else {
             message = "No Heartbeats found";

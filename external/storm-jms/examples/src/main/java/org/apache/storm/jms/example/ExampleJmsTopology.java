@@ -34,7 +34,7 @@ import org.apache.storm.jms.spout.JmsSpout;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.ITuple;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 public class ExampleJmsTopology {
     public static final String JMS_QUEUE_SPOUT = "JMS_QUEUE_SPOUT";
@@ -123,7 +123,7 @@ public class ExampleJmsTopology {
 
             try (LocalCluster cluster = new LocalCluster();
                  LocalTopology topo = cluster.submitTopology("storm-jms-example", conf, builder.createTopology());) {
-                ClientUtils.sleep(60000);
+                Utils.sleep(60000);
             }
         }
     }

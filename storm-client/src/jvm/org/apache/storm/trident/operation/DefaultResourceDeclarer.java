@@ -20,7 +20,7 @@ package org.apache.storm.trident.operation;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.storm.Config;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.topology.ResourceDeclarer;
 
 /**
@@ -30,7 +30,7 @@ import org.apache.storm.topology.ResourceDeclarer;
 public class DefaultResourceDeclarer<T extends DefaultResourceDeclarer> implements ResourceDeclarer<T>, ITridentResource {
 
     private Map<String, Number> resources = new HashMap<>();
-    private static Map conf = ClientUtils.readStormConfig();
+    private static Map conf = Utils.readStormConfig();
 
     @Override
     public T setMemoryLoad(Number onHeap) {

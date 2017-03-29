@@ -22,7 +22,7 @@ import org.apache.storm.generated.StormTopology;
 import org.apache.storm.grouping.CustomStreamGrouping;
 import org.apache.storm.topology.*;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.flux.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,7 +189,7 @@ public class FluxBuilder {
 
             GroupingDef grouping = stream.getGrouping();
             // if the streamId is defined, use it for the grouping, otherwise assume storm's default stream
-            String streamId = (grouping.getStreamId() == null ? ClientUtils.DEFAULT_STREAM_ID : grouping.getStreamId());
+            String streamId = (grouping.getStreamId() == null ? Utils.DEFAULT_STREAM_ID : grouping.getStreamId());
 
 
             switch (grouping.getType()) {

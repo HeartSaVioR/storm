@@ -25,7 +25,7 @@ import org.apache.storm.streams.Pair;
 import org.apache.storm.streams.StreamBuilder;
 import org.apache.storm.streams.operations.mappers.ValueMapper;
 import org.apache.storm.streams.windowing.TumblingWindows;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.util.Arrays;
 
@@ -72,7 +72,7 @@ public class WindowedWordCount {
         } else {
             try (LocalCluster cluster = new LocalCluster();
                  LocalCluster.LocalTopology topo = cluster.submitTopology("test", config, builder.build())) {
-                ClientUtils.sleep(60_000);
+                Utils.sleep(60_000);
             }
         }
     }

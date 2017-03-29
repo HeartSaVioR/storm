@@ -84,8 +84,8 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-public class ClientUtils {
-    public static final Logger LOG = LoggerFactory.getLogger(ClientUtils.class);
+public class Utils {
+    public static final Logger LOG = LoggerFactory.getLogger(Utils.class);
     public static final String DEFAULT_STREAM_ID = "default";
 
     public static final String FILE_PATH_SEPARATOR = System.getProperty("file.separator");
@@ -104,7 +104,7 @@ public class ClientUtils {
 
     // A singleton instance allows us to mock delegated static methods in our
     // tests by subclassing.
-    private static ClientUtils _instance = new ClientUtils();
+    private static Utils _instance = new Utils();
 
     /**
      * Provide an instance of this class for delegates to use.  To mock out
@@ -113,20 +113,20 @@ public class ClientUtils {
      * @param u a Utils instance
      * @return the previously set instance
      */
-    public static ClientUtils setInstance(ClientUtils u) {
-        ClientUtils oldInstance = _instance;
+    public static Utils setInstance(Utils u) {
+        Utils oldInstance = _instance;
         _instance = u;
         return oldInstance;
     }
 
     @VisibleForTesting
     public static void setClassLoaderForJavaDeSerialize(ClassLoader cl) {
-        ClientUtils.cl = cl;
+        Utils.cl = cl;
     }
 
     @VisibleForTesting
     public static void resetClassLoaderForJavaDeSerialize() {
-        ClientUtils.cl = ClassLoader.getSystemClassLoader();
+        Utils.cl = ClassLoader.getSystemClassLoader();
     }
 
     public static List<URL> findResources(String name) {
@@ -446,11 +446,11 @@ public class ClientUtils {
         try {
             ByteArrayInputStream bis = new ByteArrayInputStream(serialized);
             ObjectInputStream ois = null;
-            if (null == ClientUtils.cl) {
+            if (null == Utils.cl) {
                 ois = new ObjectInputStream(bis);
             } else {
                 // Use custom class loader set in testing environment
-                ois = new ClassLoaderObjectInputStream(ClientUtils.cl, bis);
+                ois = new ClassLoaderObjectInputStream(Utils.cl, bis);
             }
             Object ret = ois.readObject();
             ois.close();

@@ -29,14 +29,14 @@ import org.apache.storm.cluster.ClusterUtils;
 import org.apache.storm.cluster.DaemonType;
 import org.apache.storm.cluster.IStormClusterState;
 import org.apache.storm.nimbus.NimbusInfo;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.DaemonUtils;
 import org.apache.storm.zookeeper.ClientZookeeper;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.ACL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.DaemonConfigUtils;
 
 import java.util.*;
 
@@ -67,12 +67,12 @@ public class AdminCommands {
     }
 
     private static void initialize() {
-        conf = ConfigUtils.readStormConfig();
-        nimbusBlobStore = Utils.getNimbusBlobStore (conf, NimbusInfo.fromConf(conf));
+        conf = DaemonConfigUtils.readStormConfig();
+        nimbusBlobStore = DaemonUtils.getNimbusBlobStore (conf, NimbusInfo.fromConf(conf));
         List<String> servers = (List<String>) conf.get(Config.STORM_ZOOKEEPER_SERVERS);
         Object port = conf.get(Config.STORM_ZOOKEEPER_PORT);
         List<ACL> acls = null;
-        if (Utils.isZkAuthenticationConfiguredStormServer(conf)) {
+        if (DaemonUtils.isZkAuthenticationConfiguredStormServer(conf)) {
             acls = adminZkAcls();
         }
         try {
@@ -94,10 +94,10 @@ public class AdminCommands {
 
     private static Set<String> getKeyListFromId( String corruptId) {
         Set<String> keyLists = new HashSet<>();
-        keyLists.add(ConfigUtils.masterStormCodeKey(corruptId));
-        keyLists.add(ConfigUtils.masterStormConfKey(corruptId));
-        if(!ClientConfigUtils.isLocalMode(conf)) {
-            ConfigUtils.masterStormJarKey(corruptId);
+        keyLists.add(DaemonConfigUtils.masterStormCodeKey(corruptId));
+        keyLists.add(DaemonConfigUtils.masterStormConfKey(corruptId));
+        if(!ConfigUtils.isLocalMode(conf)) {
+            DaemonConfigUtils.masterStormJarKey(corruptId);
         }
         return keyLists;
     }
@@ -120,7 +120,7 @@ public class AdminCommands {
         Set<String> blobStoreTopologyIds = nimbusBlobStore.filterAndListKeys(new KeyFilter<String>() {
             @Override
             public String filter(String key) {
-                return ConfigUtils.getIdFromBlobKey(key);
+                return DaemonConfigUtils.getIdFromBlobKey(key);
             }
         });
         Set<String> activeTopologyIds = new HashSet<>(stormClusterState.activeStorms());

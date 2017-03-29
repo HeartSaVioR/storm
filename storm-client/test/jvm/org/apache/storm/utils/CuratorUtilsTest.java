@@ -39,7 +39,7 @@ public class CuratorUtilsTest {
         final int expectedRetries = 10;
         final int expectedCeiling = 3000;
 
-        Map<String, Object> config = ClientUtils.readDefaultConfig();
+        Map<String, Object> config = Utils.readDefaultConfig();
         config.put(Config.STORM_ZOOKEEPER_RETRY_INTERVAL, expectedInterval);
         config.put(Config.STORM_ZOOKEEPER_RETRY_TIMES, expectedRetries);
         config.put(Config.STORM_ZOOKEEPER_RETRY_INTERVAL_CEILING, expectedCeiling);

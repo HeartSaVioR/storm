@@ -28,7 +28,7 @@ import org.apache.storm.scheduler.Topologies;
 import org.apache.storm.scheduler.TopologyDetails;
 import org.apache.storm.scheduler.resource.ResourceAwareScheduler;
 import org.apache.storm.scheduler.resource.TestUtilsForResourceAwareScheduler;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -52,7 +52,7 @@ public class TestDefaultEvictionStrategy {
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1000.0);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(4, 4, resourceMap);
         Config config = new Config();
-        config.putAll(ClientUtils.readDefaultConfig());
+        config.putAll(Utils.readDefaultConfig());
         config.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());
@@ -171,7 +171,7 @@ public class TestDefaultEvictionStrategy {
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1000.0);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(4, 4, resourceMap);
         Config config = new Config();
-        config.putAll(ClientUtils.readDefaultConfig());
+        config.putAll(Utils.readDefaultConfig());
         config.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());
@@ -278,7 +278,7 @@ public class TestDefaultEvictionStrategy {
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1000.0);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(4, 4, resourceMap);
         Config config = new Config();
-        config.putAll(ClientUtils.readDefaultConfig());
+        config.putAll(Utils.readDefaultConfig());
         config.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());
@@ -454,7 +454,7 @@ public class TestDefaultEvictionStrategy {
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1000.0);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(4, 4, resourceMap);
         Config config = new Config();
-        config.putAll(ClientUtils.readDefaultConfig());
+        config.putAll(Utils.readDefaultConfig());
         config.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());
@@ -611,7 +611,7 @@ public class TestDefaultEvictionStrategy {
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1000.0);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(4, 4, resourceMap);
         Config config = new Config();
-        config.putAll(ClientUtils.readDefaultConfig());
+        config.putAll(Utils.readDefaultConfig());
         config.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());

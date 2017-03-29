@@ -22,11 +22,11 @@
   (:import [org.apache.storm Testing Config ILocalClusterTrackedTopologyAware]
            [org.apache.storm.generated GlobalStreamId])
   (:import [org.apache.storm.tuple Values Tuple])
-  (:import [org.apache.storm.utils Time Utils])
+  (:import [org.apache.storm.utils Time DaemonUtils])
   (:import [org.apache.storm.testing MkClusterParam TestJob MockedSources TestWordSpout FeederSpout
             TestWordCounter TestGlobalCount TestAggregatesCounter CompleteTopologyParam
             AckFailMapTracker MkTupleParam])
-  (:import [org.apache.storm.utils Utils ClientUtils])
+  (:import [org.apache.storm.utils DaemonUtils Utils])
   (:import [org.apache.storm Thrift ILocalCluster]))
 
 (deftest test-with-simulated-time
@@ -67,15 +67,15 @@
          (let [topology (Thrift/buildTopology
                          {"1" (Thrift/prepareSpoutDetails (TestWordSpout. true) (Integer. 3))}
                          {"2" (Thrift/prepareBoltDetails
-                                {(GlobalStreamId. "1" ClientUtils/DEFAULT_STREAM_ID)
+                                {(GlobalStreamId. "1" Utils/DEFAULT_STREAM_ID)
                                  (Thrift/prepareFieldsGrouping ["word"])}
                                 (TestWordCounter.) (Integer. 4))
                           "3" (Thrift/prepareBoltDetails
-                                {(GlobalStreamId. "1" ClientUtils/DEFAULT_STREAM_ID)
+                                {(GlobalStreamId. "1" Utils/DEFAULT_STREAM_ID)
                                  (Thrift/prepareGlobalGrouping)}
                                 (TestGlobalCount.))
                           "4" (Thrift/prepareBoltDetails
-                                {(GlobalStreamId. "2" ClientUtils/DEFAULT_STREAM_ID)
+                                {(GlobalStreamId. "2" Utils/DEFAULT_STREAM_ID)
                                  (Thrift/prepareGlobalGrouping)}
                                 (TestAggregatesCounter.))})
                mocked-sources (doto (MockedSources.)
@@ -124,17 +124,17 @@
                       (Thrift/buildTopology
                        {"1" (Thrift/prepareSpoutDetails feeder)}
                        {"2" (Thrift/prepareBoltDetails
-                              {(GlobalStreamId. "1" ClientUtils/DEFAULT_STREAM_ID)
+                              {(GlobalStreamId. "1" Utils/DEFAULT_STREAM_ID)
                                (Thrift/prepareShuffleGrouping)}
                               it/identity-bolt)
                         "3" (Thrift/prepareBoltDetails
-                              {(GlobalStreamId. "1" ClientUtils/DEFAULT_STREAM_ID)
+                              {(GlobalStreamId. "1" Utils/DEFAULT_STREAM_ID)
                                (Thrift/prepareShuffleGrouping)}
                               it/identity-bolt)
                         "4" (Thrift/prepareBoltDetails
-                             {(GlobalStreamId. "2" ClientUtils/DEFAULT_STREAM_ID)
+                             {(GlobalStreamId. "2" Utils/DEFAULT_STREAM_ID)
                               (Thrift/prepareShuffleGrouping)
-                              (GlobalStreamId. "3" ClientUtils/DEFAULT_STREAM_ID)
+                              (GlobalStreamId. "3" Utils/DEFAULT_STREAM_ID)
                               (Thrift/prepareShuffleGrouping)}
                              (it/agg-bolt 4))}))]
          (.submitTopology cluster
@@ -165,7 +165,7 @@
                topology (Thrift/buildTopology
                          {"1" (Thrift/prepareSpoutDetails feeder)}
                          {"2" (Thrift/prepareBoltDetails
-                                {(GlobalStreamId. "1" ClientUtils/DEFAULT_STREAM_ID)
+                                {(GlobalStreamId. "1" Utils/DEFAULT_STREAM_ID)
                                  (Thrift/prepareGlobalGrouping)}
                                 it/ack-every-other)})
                storm-conf (doto (Config.)
@@ -199,7 +199,7 @@
                 topology (Thrift/buildTopology
                            {"1" (Thrift/prepareSpoutDetails feeder)}
                            {"2" (Thrift/prepareBoltDetails
-                                  {(GlobalStreamId. "1" ClientUtils/DEFAULT_STREAM_ID)
+                                  {(GlobalStreamId. "1" Utils/DEFAULT_STREAM_ID)
                                    (Thrift/prepareGlobalGrouping)}
                                   it/ack-every-other)})
                 storm-conf (doto (Config.)
@@ -223,7 +223,7 @@
   (testing "one-param signature"
     (let [tuple (Testing/testTuple ["james" "bond"])]
       (is (= ["james" "bond"] (.getValues tuple)))
-      (is (= ClientUtils/DEFAULT_STREAM_ID (.getSourceStreamId tuple)))
+      (is (= Utils/DEFAULT_STREAM_ID (.getSourceStreamId tuple)))
       (is (= ["field1" "field2"] (-> tuple .getFields .toList)))
       (is (= "component" (.getSourceComponent tuple)))))
    (testing "two-params signature"

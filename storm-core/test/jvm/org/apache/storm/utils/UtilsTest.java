@@ -18,8 +18,6 @@
 
 package org.apache.storm.utils;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import org.junit.Test;
@@ -30,7 +28,7 @@ import org.apache.thrift.transport.TTransportException;
 
 public class UtilsTest {
     public void getConfiguredClientThrowsRuntimeExceptionOnBadArgsTest () throws TTransportException {
-        Map config = ClientConfigUtils.readStormConfig();
+        Map config = ConfigUtils.readStormConfig();
         config.put(Config.STORM_NIMBUS_RETRY_TIMES, 0);
 
         try {
@@ -39,7 +37,7 @@ public class UtilsTest {
         } catch (RuntimeException e){
             Assert.assertTrue(
                 "Cause is not TTransportException " + e,  
-                ClientUtils.exceptionCauseIsInstanceOf(TTransportException.class, e));
+                Utils.exceptionCauseIsInstanceOf(TTransportException.class, e));
         }
     }
 
@@ -61,19 +59,19 @@ public class UtilsTest {
     public void isZkAuthenticationConfiguredStormServerTest() {
         Assert.assertFalse(
             "Returns false if given null config",
-            Utils.isZkAuthenticationConfiguredStormServer(null));
+            DaemonUtils.isZkAuthenticationConfiguredStormServer(null));
 
         Assert.assertFalse(
             "Returns false if scheme key is missing",
-            Utils.isZkAuthenticationConfiguredStormServer(emptyMockMap()));
+            DaemonUtils.isZkAuthenticationConfiguredStormServer(emptyMockMap()));
 
         Assert.assertFalse(
             "Returns false if scheme value is null",
-            Utils.isZkAuthenticationConfiguredStormServer(serverMockMap(null)));
+            DaemonUtils.isZkAuthenticationConfiguredStormServer(serverMockMap(null)));
 
         Assert.assertTrue(
             "Returns true if scheme value is string",
-            Utils.isZkAuthenticationConfiguredStormServer(serverMockMap("foobar")));
+            DaemonUtils.isZkAuthenticationConfiguredStormServer(serverMockMap("foobar")));
     }
 
     @Test
@@ -82,7 +80,7 @@ public class UtilsTest {
         String oldValue = System.getProperty(key);
         try {
             System.setProperty("java.security.auth.login.config", "anything");
-            Assert.assertTrue(Utils.isZkAuthenticationConfiguredStormServer(emptyMockMap()));
+            Assert.assertTrue(DaemonUtils.isZkAuthenticationConfiguredStormServer(emptyMockMap()));
         } finally {
             // reset property
             if (oldValue == null) {

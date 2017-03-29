@@ -17,7 +17,7 @@
  */
 package org.apache.storm.pacemaker.codec;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.Channel;
@@ -52,7 +52,7 @@ public class ThriftDecoder extends FrameDecoder {
 
         byte serialized[] = new byte[thriftLen];
         buf.readBytes(serialized, 0, thriftLen);
-        HBMessage m = (HBMessage) ClientUtils.thriftDeserialize(HBMessage.class, serialized);
+        HBMessage m = (HBMessage) Utils.thriftDeserialize(HBMessage.class, serialized);
 
         if(m.get_type() == HBServerMessageType.CONTROL_MESSAGE) {
             ControlMessage cm = ControlMessage.read(m.get_data().get_message_blob());

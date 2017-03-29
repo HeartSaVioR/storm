@@ -27,7 +27,7 @@ import org.apache.storm.task.TopologyContext;
 import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.apache.storm.utils.ClientUtils.tuple;
+import static org.apache.storm.utils.Utils.tuple;
 
 
 public class TestAggregatesCounter extends BaseRichBolt {

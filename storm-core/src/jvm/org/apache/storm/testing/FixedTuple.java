@@ -17,7 +17,7 @@
  */
 package org.apache.storm.testing;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.io.Serializable;
 import java.util.List;
@@ -27,7 +27,7 @@ public class FixedTuple implements Serializable {
     public List<Object> values;
 
     public FixedTuple(List<Object> values) {
-        this.stream = ClientUtils.DEFAULT_STREAM_ID;
+        this.stream = Utils.DEFAULT_STREAM_ID;
         this.values = values;
     }
 

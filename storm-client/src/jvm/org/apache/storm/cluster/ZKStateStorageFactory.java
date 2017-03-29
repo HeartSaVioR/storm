@@ -17,7 +17,7 @@
  */
 package org.apache.storm.cluster;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.zookeeper.data.ACL;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class ZKStateStorageFactory implements StateStorageFactory {
         try {
             return new ZKStateStorage(config, auth_conf, acls, context);
         } catch (Exception e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
     }
 }

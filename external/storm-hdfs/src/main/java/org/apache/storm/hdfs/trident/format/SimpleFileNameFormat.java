@@ -22,7 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 public class SimpleFileNameFormat implements FileNameFormat {
 
@@ -56,7 +56,7 @@ public class SimpleFileNameFormat implements FileNameFormat {
     public void prepare(Map conf, int partitionIndex, int numPartitions) {
         this.partitionIndex = partitionIndex;
         try {
-            this.host = ClientUtils.localHostname();
+            this.host = Utils.localHostname();
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }

@@ -61,7 +61,7 @@ public class ExtendedThreadPoolExecutor extends ThreadPoolExecutor{
       }
     }
     if (t != null) {
-      ClientUtils.handleUncaughtException(t);
+      Utils.handleUncaughtException(t);
     }
   }
 }

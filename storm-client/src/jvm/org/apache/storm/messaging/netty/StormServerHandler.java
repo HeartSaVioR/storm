@@ -17,7 +17,7 @@
  */
 package org.apache.storm.messaging.netty;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
@@ -68,7 +68,7 @@ public class StormServerHandler extends SimpleChannelUpstreamHandler  {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
         LOG.error("server errors in handling the request", e.getCause());
-        ClientUtils.handleUncaughtException(e.getCause());
+        Utils.handleUncaughtException(e.getCause());
         server.closeChannel(e.getChannel());
     }
 }

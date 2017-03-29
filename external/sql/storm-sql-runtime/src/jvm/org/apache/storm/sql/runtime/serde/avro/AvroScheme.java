@@ -26,7 +26,7 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.storm.spout.Scheme;
 import org.apache.storm.sql.runtime.utils.SerdeUtils;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -52,7 +52,7 @@ public class AvroScheme implements Scheme {
     try {
       Schema schema = schemas.getSchema(schemaString);
       DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
-      BinaryDecoder decoder = DecoderFactory.get().binaryDecoder(ClientUtils.toByteArray(ser), null);
+      BinaryDecoder decoder = DecoderFactory.get().binaryDecoder(Utils.toByteArray(ser), null);
       GenericRecord record = reader.read(null, decoder);
 
       ArrayList<Object> list = new ArrayList<>(fieldNames.size());

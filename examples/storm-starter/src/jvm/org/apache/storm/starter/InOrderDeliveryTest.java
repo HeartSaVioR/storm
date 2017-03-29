@@ -31,7 +31,7 @@ import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.NimbusClient;
 
 import java.util.HashMap;
@@ -159,8 +159,8 @@ public class InOrderDeliveryTest {
     conf.setNumWorkers(1);
     StormSubmitter.submitTopologyWithProgressBar(name, conf, builder.createTopology());
 
-    Map clusterConf = ClientUtils.readStormConfig();
-    clusterConf.putAll(ClientUtils.readCommandLineOpts());
+    Map clusterConf = Utils.readStormConfig();
+    clusterConf.putAll(Utils.readCommandLineOpts());
     Nimbus.Client client = NimbusClient.getConfiguredClient(clusterConf).getClient();
 
     //Sleep for 50 mins

@@ -29,7 +29,7 @@ import org.apache.storm.topology.base.BaseWindowedBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.windowing.TupleWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +101,7 @@ public class SlidingWindowTopology {
         } else {
             try (LocalCluster cluster = new LocalCluster();
                  LocalTopology topo = cluster.submitTopology("test", conf, builder.createTopology());) {
-                ClientUtils.sleep(40000);
+                Utils.sleep(40000);
             }
         }
     }

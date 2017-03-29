@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
@@ -115,7 +115,7 @@ public class JsonSerializer implements ISerializer {
 
         String stream = (String) msg.get("stream");
         if (stream == null)
-            stream = ClientUtils.DEFAULT_STREAM_ID;
+            stream = Utils.DEFAULT_STREAM_ID;
         shellMsg.setStream(stream);
 
         Object taskObj = msg.get("task");

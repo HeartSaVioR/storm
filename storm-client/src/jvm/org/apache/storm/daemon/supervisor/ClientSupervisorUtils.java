@@ -20,8 +20,8 @@ package org.apache.storm.daemon.supervisor;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.storm.Config;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ObjectReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,17 +37,17 @@ public class ClientSupervisorUtils {
     private static final Logger LOG = LoggerFactory.getLogger(ClientSupervisorUtils.class);
 
     static boolean doRequiredTopoFilesExist(Map<String, Object> conf, String stormId) throws IOException {
-        String stormroot = ClientConfigUtils.supervisorStormDistRoot(conf, stormId);
-        String stormjarpath = ClientConfigUtils.supervisorStormJarPath(stormroot);
-        String stormcodepath = ClientConfigUtils.supervisorStormCodePath(stormroot);
-        String stormconfpath = ClientConfigUtils.supervisorStormConfPath(stormroot);
-        if (!ClientUtils.checkFileExists(stormroot))
+        String stormroot = ConfigUtils.supervisorStormDistRoot(conf, stormId);
+        String stormjarpath = ConfigUtils.supervisorStormJarPath(stormroot);
+        String stormcodepath = ConfigUtils.supervisorStormCodePath(stormroot);
+        String stormconfpath = ConfigUtils.supervisorStormConfPath(stormroot);
+        if (!Utils.checkFileExists(stormroot))
             return false;
-        if (!ClientUtils.checkFileExists(stormcodepath))
+        if (!Utils.checkFileExists(stormcodepath))
             return false;
-        if (!ClientUtils.checkFileExists(stormconfpath))
+        if (!Utils.checkFileExists(stormconfpath))
             return false;
-        if (ClientConfigUtils.isLocalMode(conf) || ClientUtils.checkFileExists(stormjarpath))
+        if (ConfigUtils.isLocalMode(conf) || Utils.checkFileExists(stormjarpath))
             return true;
         return false;
     }
@@ -57,7 +57,7 @@ public class ClientSupervisorUtils {
         int ret = 0;
         Process process = processLauncher(conf, user, null, args, environment, logPreFix, null, null);
         if (StringUtils.isNotBlank(logPreFix))
-            ClientUtils.readAndLogStream(logPreFix, process.getInputStream());
+            Utils.readAndLogStream(logPreFix, process.getInputStream());
         try {
             process.waitFor();
         } catch (InterruptedException e) {
@@ -73,7 +73,7 @@ public class ClientSupervisorUtils {
             throw new IllegalArgumentException("User cannot be blank when calling processLauncher.");
         }
         String wlinitial = (String) (conf.get(Config.SUPERVISOR_WORKER_LAUNCHER));
-        String stormHome = ClientConfigUtils.concatIfNotNull(System.getProperty("storm.home"));
+        String stormHome = ConfigUtils.concatIfNotNull(System.getProperty("storm.home"));
         String wl;
         if (StringUtils.isNotBlank(wlinitial)) {
             wl = wlinitial;
@@ -123,10 +123,10 @@ public class ClientSupervisorUtils {
         }
         final Process process = builder.start();
         if (logPrefix != null || exitCodeCallback != null) {
-            ClientUtils.asyncLoop(new Callable<Object>() {
+            Utils.asyncLoop(new Callable<Object>() {
                 public Object call() {
                     if (logPrefix != null ) {
-                        ClientUtils.readAndLogStream(logPrefix,
+                        Utils.readAndLogStream(logPrefix,
                                 process.getInputStream());
                     }
                     if (exitCodeCallback != null) {

@@ -31,7 +31,7 @@ import org.apache.storm.security.auth.ReqContext;
 import org.apache.storm.security.auth.AuthUtils;
 import org.apache.storm.security.auth.IPrincipalToLocal;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +71,7 @@ public class DRPCSimpleACLAuthorizer extends DRPCAuthorizerBase {
         long now = System.currentTimeMillis();
         if ((now - 5000) > _lastUpdate || _acl == null) {
             Map<String,AclFunctionEntry> acl = new HashMap<>();
-            Map conf = ClientUtils.findAndReadConfigFile(_aclFileName);
+            Map conf = Utils.findAndReadConfigFile(_aclFileName);
             if (conf.containsKey(Config.DRPC_AUTHORIZER_ACL)) {
                 Map<String,Map<String,?>> confAcl =
                     (Map<String,Map<String,?>>)

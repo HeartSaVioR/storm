@@ -80,7 +80,7 @@ import org.apache.storm.trident.windowing.config.TumblingCountWindow;
 import org.apache.storm.trident.windowing.config.TumblingDurationWindow;
 import org.apache.storm.trident.windowing.config.WindowConfig;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -214,7 +214,7 @@ public class Stream implements IAggregatableStream, ResourceDeclarer<Stream> {
      * @return
      */
     public Stream partition(CustomStreamGrouping partitioner) {
-        return partition(Grouping.custom_serialized(ClientUtils.javaSerialize(partitioner)));
+        return partition(Grouping.custom_serialized(Utils.javaSerialize(partitioner)));
     }
 
     /**

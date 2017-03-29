@@ -17,7 +17,7 @@
  */
 package org.apache.storm.daemon.supervisor;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +26,6 @@ public class DefaultUncaughtExceptionHandler implements Thread.UncaughtException
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         LOG.error("Error when processing event", e);
-        ClientUtils.exitProcess(20, "Error when processing an event");
+        Utils.exitProcess(20, "Error when processing an event");
     }
 }

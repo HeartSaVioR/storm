@@ -30,31 +30,30 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ConfigUtils {
-    private final static Logger LOG = LoggerFactory.getLogger(ConfigUtils.class);
+public class DaemonConfigUtils {
+    private final static Logger LOG = LoggerFactory.getLogger(DaemonConfigUtils.class);
     public final static String RESOURCES_SUBDIR = "resources";
     public final static String NIMBUS_DO_NOT_REASSIGN = "NIMBUS-DO-NOT-REASSIGN";
     public static final String FILE_SEPARATOR = File.separator;
 
     // A singleton instance allows us to mock delegated static methods in our
     // tests by subclassing.
-    private static ConfigUtils _instance = new ConfigUtils();
+    private static DaemonConfigUtils _instance = new DaemonConfigUtils();
 
     /**
      * Provide an instance of this class for delegates to use.  To mock out
      * delegated methods, provide an instance of a subclass that overrides the
      * implementation of the delegated method.
-     * @param u a Utils instance
+     * @param u a DaemonConfigUtils instance
      * @return the previously set instance
      */
-    public static ConfigUtils setInstance(ConfigUtils u) {
-        ConfigUtils oldInstance = _instance;
+    public static DaemonConfigUtils setInstance(DaemonConfigUtils u) {
+        DaemonConfigUtils oldInstance = _instance;
         _instance = u;
         return oldInstance;
     }
@@ -88,7 +87,7 @@ public class ConfigUtils {
     }
 
     public static Map<String, Object> readYamlConfig(String name, boolean mustExist) {
-        Map<String, Object> conf = ClientUtils.findAndReadConfigFile(name, mustExist);
+        Map<String, Object> conf = Utils.findAndReadConfigFile(name, mustExist);
         ConfigValidation.validateFields(conf);
         return conf;
     }
@@ -103,7 +102,7 @@ public class ConfigUtils {
     }
 
     public Map<String, Object> readStormConfigImpl() {
-        Map<String, Object> conf = ClientUtils.readStormConfig();
+        Map<String, Object> conf = Utils.readStormConfig();
         ConfigValidation.validateFields(conf, DaemonConfig.class);
         return conf;
     }
@@ -141,7 +140,7 @@ public class ConfigUtils {
     }
 
     public static String masterStormDistRoot(Map conf) throws IOException {
-        String ret = ClientConfigUtils.stormDistPath(masterLocalDir(conf));
+        String ret = ConfigUtils.stormDistPath(masterLocalDir(conf));
         FileUtils.forceMkdir(new File(ret));
         return ret;
     }
@@ -165,11 +164,11 @@ public class ConfigUtils {
     }
 
     public static String supervisorIsupervisorDir(Map conf) throws IOException {
-        return (ClientConfigUtils.supervisorLocalDir(conf) + FILE_SEPARATOR + "isupervisor");
+        return (ConfigUtils.supervisorLocalDir(conf) + FILE_SEPARATOR + "isupervisor");
     }
 
     public static String supervisorTmpDir(Map conf) throws IOException {
-        String ret = ClientConfigUtils.supervisorLocalDir(conf) + FILE_SEPARATOR + "tmp";
+        String ret = ConfigUtils.supervisorLocalDir(conf) + FILE_SEPARATOR + "tmp";
         FileUtils.forceMkdir(new File(ret));
         return ret;
     }
@@ -180,7 +179,7 @@ public class ConfigUtils {
     }
 
     public LocalState supervisorStateImpl(Map conf) throws IOException {
-        return new LocalState((ClientConfigUtils.supervisorLocalDir(conf) + FILE_SEPARATOR + "localstate"));
+        return new LocalState((ConfigUtils.supervisorLocalDir(conf) + FILE_SEPARATOR + "localstate"));
     }
 
     // we use this "weird" wrapper pattern temporarily for mocking in clojure test
@@ -193,7 +192,7 @@ public class ConfigUtils {
     }
 
     public static String workerUserRoot(Map conf) {
-        return (ClientConfigUtils.absoluteStormLocalDir(conf) + FILE_SEPARATOR + "workers-users");
+        return (ConfigUtils.absoluteStormLocalDir(conf) + FILE_SEPARATOR + "workers-users");
     }
 
     public static String workerUserFile(Map conf, String workerId) {
@@ -221,11 +220,11 @@ public class ConfigUtils {
         String[] subStrings = fname.split(FILE_SEPARATOR); // TODO: does this work well on windows?
         String id = subStrings[0];
         Integer port = Integer.parseInt(subStrings[1]);
-        return getLogMetaDataFile(ClientUtils.readStormConfig(), id, port);
+        return getLogMetaDataFile(Utils.readStormConfig(), id, port);
     }
 
     public static File getLogMetaDataFile(Map conf, String id, Integer port) {
-        String fname = ClientConfigUtils.workerArtifactsRoot(conf, id, port) + FILE_SEPARATOR + "worker.yaml";
+        String fname = ConfigUtils.workerArtifactsRoot(conf, id, port) + FILE_SEPARATOR + "worker.yaml";
         return new File(fname);
     }
 
@@ -234,12 +233,12 @@ public class ConfigUtils {
     }
 
     public static String workerTmpRoot(Map conf, String id) {
-        return (ClientConfigUtils.workerRoot(conf, id) + FILE_SEPARATOR + "tmp");
+        return (ConfigUtils.workerRoot(conf, id) + FILE_SEPARATOR + "tmp");
     }
 
 
     public static String workerPidPath(Map<String, Object> conf, String id, long pid) {
-        return ClientConfigUtils.workerPidPath(conf, id, String.valueOf(pid));
+        return ConfigUtils.workerPidPath(conf, id, String.valueOf(pid));
     }
 
     /* TODO: make sure test these two functions in manual tests */

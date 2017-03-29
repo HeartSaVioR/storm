@@ -26,7 +26,7 @@ import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.storm.callback.DefaultWatcherCallBack;
 import org.apache.storm.callback.WatcherCallBack;
 import org.apache.storm.cluster.VersionedData;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.CuratorUtils;
 import org.apache.storm.utils.ZookeeperAuthInfo;
 import org.apache.zookeeper.KeeperException;
@@ -99,7 +99,7 @@ public class ClientZookeeper {
             String npath = normalizePath(path);
             ret = zk.create().creatingParentsIfNeeded().withMode(mode).withACL(acls).forPath(npath, data);
         } catch (Exception e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
         return ret;
     }
@@ -146,7 +146,7 @@ public class ClientZookeeper {
                 stat = zk.checkExists().forPath(normalizePath(path));
             }
         } catch (Exception e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
         return stat != null;
     }
@@ -158,11 +158,11 @@ public class ClientZookeeper {
                 zk.delete().deletingChildrenIfNeeded().forPath(normalizePath(path));
             }
         } catch (Exception e) {
-            if (ClientUtils.exceptionCauseIsInstanceOf(KeeperException.NodeExistsException.class, e)) {
+            if (Utils.exceptionCauseIsInstanceOf(KeeperException.NodeExistsException.class, e)) {
                 // do nothing
                 LOG.info("delete {} failed.", path, e);
             } else {
-                throw ClientUtils.wrapInRuntime(e);
+                throw Utils.wrapInRuntime(e);
             }
         }
     }
@@ -185,7 +185,7 @@ public class ClientZookeeper {
             String npath = normalizePath(path);
             return zk.setData().forPath(npath, data);
         } catch (Exception e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
     }
 
@@ -211,7 +211,7 @@ public class ClientZookeeper {
                 return zk.getChildren().forPath(npath);
             }
         } catch (Exception e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
     }
 
@@ -226,10 +226,10 @@ public class ClientZookeeper {
                 }
             }
         } catch (Exception e) {
-            if (ClientUtils.exceptionCauseIsInstanceOf(KeeperException.NoNodeException.class, e)) {
+            if (Utils.exceptionCauseIsInstanceOf(KeeperException.NoNodeException.class, e)) {
                 // this is fine b/c we still have a watch from the successful exists call
             } else {
-                throw ClientUtils.wrapInRuntime(e);
+                throw Utils.wrapInRuntime(e);
             }
         }
         return null;
@@ -260,10 +260,10 @@ public class ClientZookeeper {
                 }
             }
         } catch (Exception e) {
-            if (ClientUtils.exceptionCauseIsInstanceOf(KeeperException.NoNodeException.class, e)) {
+            if (Utils.exceptionCauseIsInstanceOf(KeeperException.NoNodeException.class, e)) {
                 // this is fine b/c we still have a watch from the successful exists call
             } else {
-                ClientUtils.wrapInRuntime(e);
+                Utils.wrapInRuntime(e);
             }
         }
         return data;
@@ -277,7 +277,7 @@ public class ClientZookeeper {
         try {
             zk.sync().forPath(normalizePath(path));
         } catch (Exception e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
     }
 
@@ -294,7 +294,7 @@ public class ClientZookeeper {
         try {
             ClientZookeeper.createNode(zk, npath, byteArray, org.apache.zookeeper.CreateMode.PERSISTENT, acls);
         } catch (Exception e) {
-            if (ClientUtils.exceptionCauseIsInstanceOf(KeeperException.NodeExistsException.class, e)) {
+            if (Utils.exceptionCauseIsInstanceOf(KeeperException.NodeExistsException.class, e)) {
                 // this can happen when multiple clients doing mkdir at same time
             }
         }

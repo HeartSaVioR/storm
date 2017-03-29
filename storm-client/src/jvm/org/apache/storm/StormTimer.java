@@ -18,7 +18,7 @@
 
 package org.apache.storm;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.Time;
 
 import java.nio.channels.ClosedByInterruptException;
@@ -98,8 +98,8 @@ public class StormTimer implements AutoCloseable {
                         Time.sleep(1000);
                     }
                 } catch (Throwable e) {
-                    if (!(ClientUtils.exceptionCauseIsInstanceOf(InterruptedException.class, e))
-                            && !(ClientUtils.exceptionCauseIsInstanceOf(ClosedByInterruptException.class, e))) {
+                    if (!(Utils.exceptionCauseIsInstanceOf(InterruptedException.class, e))
+                            && !(Utils.exceptionCauseIsInstanceOf(ClosedByInterruptException.class, e))) {
                         this.onKill.uncaughtException(this, e);
                         this.setActive(false);
                     }
@@ -164,7 +164,7 @@ public class StormTimer implements AutoCloseable {
         if (checkActive) {
             checkActive();
         }
-        String id = ClientUtils.uuid();
+        String id = Utils.uuid();
         long endTimeMs = Time.currentTimeMillis() + Time.secsToMillisLong(delaySecs);
         if (jitterMs > 0) {
             endTimeMs = this.task.random.nextInt(jitterMs) + endTimeMs;

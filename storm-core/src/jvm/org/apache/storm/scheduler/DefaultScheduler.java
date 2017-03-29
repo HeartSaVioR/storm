@@ -24,13 +24,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.DaemonUtils;
 
 public class DefaultScheduler implements IScheduler {
 
     private static Set<WorkerSlot> badSlots(Map<WorkerSlot, List<ExecutorDetails>> existingSlots, int numExecutors, int numWorkers) {
         if (numWorkers != 0) {
-            Map<Integer, Integer> distribution = Utils.integerDivided(numExecutors, numWorkers);
+            Map<Integer, Integer> distribution = DaemonUtils.integerDivided(numExecutors, numWorkers);
             Set<WorkerSlot> slots = new HashSet<WorkerSlot>();
 
             for (Entry<WorkerSlot, List<ExecutorDetails>> entry : existingSlots.entrySet()) {

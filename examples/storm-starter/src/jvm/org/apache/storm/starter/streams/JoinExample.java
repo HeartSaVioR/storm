@@ -31,7 +31,7 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.util.Map;
 
@@ -73,7 +73,7 @@ public class JoinExample {
         } else {
             try (LocalCluster cluster = new LocalCluster();
                  LocalCluster.LocalTopology topo = cluster.submitTopology("test", config, builder.build())) {
-                ClientUtils.sleep(60_000);
+                Utils.sleep(60_000);
             }
         }
 
@@ -95,7 +95,7 @@ public class JoinExample {
 
         @Override
         public void nextTuple() {
-            ClientUtils.sleep(990);
+            Utils.sleep(990);
             collector.emit(new Values(i, function.apply(i)));
             i++;
         }

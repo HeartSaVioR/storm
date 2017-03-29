@@ -24,7 +24,7 @@ import org.apache.storm.Config;
 import org.apache.storm.callback.DefaultWatcherCallBack;
 import org.apache.storm.callback.WatcherCallBack;
 import org.apache.storm.callback.ZKStateChangedCallback;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.zookeeper.ClientZookeeper;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -146,7 +146,7 @@ public class ZKStateStorage implements IStateStorage {
             try {
                 ClientZookeeper.setData(zkWriter, path, data);
             } catch (RuntimeException e) {
-                if (ClientUtils.exceptionCauseIsInstanceOf(KeeperException.NoNodeException.class, e)) {
+                if (Utils.exceptionCauseIsInstanceOf(KeeperException.NoNodeException.class, e)) {
                     ClientZookeeper.createNode(zkWriter, path, data, CreateMode.EPHEMERAL, acls);
                 } else {
                     throw e;
@@ -192,7 +192,7 @@ public class ZKStateStorage implements IStateStorage {
             try {
                 ClientZookeeper.createNode(zkWriter, path, data, CreateMode.PERSISTENT, acls);
             } catch (RuntimeException e) {
-                if (ClientUtils.exceptionCauseIsInstanceOf(KeeperException.NodeExistsException.class, e)) {
+                if (Utils.exceptionCauseIsInstanceOf(KeeperException.NodeExistsException.class, e)) {
                     ClientZookeeper.setData(zkWriter, path, data);
                 } else {
                     throw e;

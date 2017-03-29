@@ -17,7 +17,7 @@
  */
 package org.apache.storm.pacemaker.codec;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.Channel;
@@ -93,7 +93,7 @@ public class ThriftEncoder extends OneToOneEncoder {
         }
 
         try {
-            byte serialized[] = ClientUtils.thriftSerialize(m);
+            byte serialized[] = Utils.thriftSerialize(m);
             ChannelBuffer ret = ChannelBuffers.directBuffer(serialized.length + 4);
 
             ret.writeInt(serialized.length);

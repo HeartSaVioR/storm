@@ -53,12 +53,12 @@ import org.apache.storm.testing.TupleCaptureBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.TupleImpl;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.RegisteredGlobalState;
 import org.apache.storm.utils.Time;
 import org.apache.storm.utils.Time.SimulatedTime;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.DaemonUtils;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +116,7 @@ public class Testing {
         while (condition.exec()) {
             if (System.currentTimeMillis() > endTime) {
                 LOG.info("Condition {} not met in {} ms", condition, timeoutMs);
-                LOG.info(Utils.threadDump());
+                LOG.info(DaemonUtils.threadDump());
                 throw new AssertionError("Test timed out (" + timeoutMs + "ms) " + condition);
             }
             body.run();
@@ -319,7 +319,7 @@ public class Testing {
      */
     @Deprecated
     public static void withTrackedCluster(MkClusterParam param, TestJob code) {
-        try (LocalCluster lc = cluster(param, ClientUtils.uuid(), true)) {
+        try (LocalCluster lc = cluster(param, Utils.uuid(), true)) {
             code.run(lc);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -389,7 +389,7 @@ public class Testing {
                 }
             }
         }
-        topology.put_to_bolts(ClientUtils.uuid(), new Bolt(Thrift.serializeComponentObject(capturer),
+        topology.put_to_bolts(Utils.uuid(), new Bolt(Thrift.serializeComponentObject(capturer),
                 Thrift.prepareComponentCommon(captureBoltInputs, new HashMap<>(), null)));
         return new CapturedTopology<>(topology, capturer);
     }
@@ -425,7 +425,7 @@ public class Testing {
         topology = capTopo.topology;
         String topoName = param.getTopologyName();
         if (topoName == null) {
-            topoName = "topologytest-" + ClientUtils.uuid();
+            topoName = "topologytest-" + Utils.uuid();
         }
 
         Map<String, SpoutSpec> spouts = topology.get_spouts();
@@ -515,7 +515,7 @@ public class Testing {
      * @return a list of the tuple values.
      */
     public static List<List<Object>> readTuples(Map<String, List<FixedTuple>> results, String componentId) {
-        return readTuples(results, componentId, ClientUtils.DEFAULT_STREAM_ID);
+        return readTuples(results, componentId, Utils.DEFAULT_STREAM_ID);
     }
     
     /**
@@ -671,7 +671,7 @@ public class Testing {
     public static Tuple testTuple(List<Object> values, MkTupleParam param) {
         String stream = param.getStream();
         if (stream == null) {
-            stream = ClientUtils.DEFAULT_STREAM_ID;
+            stream = Utils.DEFAULT_STREAM_ID;
         }
         
         String component = param.getComponent();
@@ -697,7 +697,7 @@ public class Testing {
         compToStreamToFields.put(component, streamToFields);
         
         TopologyContext context= new TopologyContext(null,
-                ClientConfigUtils.readStormConfig(),
+                ConfigUtils.readStormConfig(),
                 taskToComp,
                 null,
                 compToStreamToFields,

@@ -17,7 +17,6 @@
  */
 package org.apache.storm.utils.staticmocking;
 
-import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.ReflectionUtils;
 
 public class ReflectionUtilsInstaller implements AutoCloseable {

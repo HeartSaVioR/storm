@@ -27,7 +27,7 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.TupleImpl;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.TupleUtils;
 import com.google.common.collect.ImmutableList;
 import kafka.api.OffsetRequest;
@@ -276,9 +276,9 @@ public class KafkaBoltTest {
         Message kafkaMessage = messageAndOffset.message();
         ByteBuffer messageKeyBuffer = kafkaMessage.key();
         String keyString = null;
-        String messageString = new String(ClientUtils.toByteArray(kafkaMessage.payload()));
+        String messageString = new String(Utils.toByteArray(kafkaMessage.payload()));
         if (messageKeyBuffer != null) {
-            keyString = new String(ClientUtils.toByteArray(messageKeyBuffer));
+            keyString = new String(Utils.toByteArray(messageKeyBuffer));
         }
         assertEquals(key, keyString);
         assertEquals(message, messageString);

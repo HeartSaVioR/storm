@@ -22,14 +22,14 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichSpout;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import static org.apache.storm.utils.ClientUtils.get;
+import static org.apache.storm.utils.Utils.get;
 
 public class FixedTupleSpout implements IRichSpout, CompletableSpout {
     private static final Map<String, Integer> acked = new HashMap<String, Integer>();
@@ -140,7 +140,7 @@ public class FixedTupleSpout implements IRichSpout, CompletableSpout {
             _pending.put(id, ft);
             _collector.emit(ft.stream, ft.values, id);
         } else {
-            ClientUtils.sleep(100);
+            Utils.sleep(100);
         }
     }
 

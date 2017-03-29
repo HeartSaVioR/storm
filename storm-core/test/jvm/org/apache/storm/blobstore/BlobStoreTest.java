@@ -40,7 +40,7 @@ import org.apache.storm.generated.KeyNotFoundException;
 import org.apache.storm.generated.SettableBlobMeta;
 import org.apache.storm.security.auth.NimbusPrincipal;
 import org.apache.storm.security.auth.SingleUserPrincipal;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -146,7 +146,7 @@ public class BlobStoreTest {
     Mockito.doNothing().when(spy).checkForBlobUpdate("test-empty-subject-WE");
     Mockito.doNothing().when(spy).checkForBlobUpdate("test-empty-subject-DEF");
     Mockito.doNothing().when(spy).checkForBlobUpdate("test-empty-acls");
-    Map conf = ClientUtils.readStormConfig();
+    Map conf = Utils.readStormConfig();
     conf.put(Config.STORM_LOCAL_DIR, baseFile.getAbsolutePath());
     conf.put(Config.STORM_PRINCIPAL_TO_LOCAL_PLUGIN,"org.apache.storm.security.auth.DefaultPrincipalToLocal");
     spy.prepare(conf, null, null);

@@ -26,7 +26,7 @@ import org.apache.storm.serialization.types.HashSetSerializer;
 import org.apache.storm.transactional.TransactionAttempt;
 import org.apache.storm.trident.tuple.ConsList;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ListDelegate;
 import org.apache.storm.utils.ReflectionUtils;
 import carbonite.JavaBridge;
@@ -156,7 +156,7 @@ public class SerializationFactory {
             componentNames.addAll(topology.get_state_spouts().keySet());
 
             for(String name: componentNames) {
-                ComponentCommon common = ClientUtils.getComponentCommon(topology, name);
+                ComponentCommon common = Utils.getComponentCommon(topology, name);
                 List<String> streams = new ArrayList<>(common.get_streams().keySet());
                 streamNametoId.put(name, idify(streams));
                 streamIdToName.put(name, simpleReverseMap(streamNametoId.get(name)));

@@ -25,25 +25,25 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ClientUtilsTest {
+public class UtilsTest {
 
     @Test
     public void isZkAuthenticationConfiguredTopologyTest() {
         Assert.assertFalse(
                 "Returns null if given null config",
-                ClientUtils.isZkAuthenticationConfiguredTopology(null));
+                Utils.isZkAuthenticationConfiguredTopology(null));
 
         Assert.assertFalse(
                 "Returns false if scheme key is missing",
-                ClientUtils.isZkAuthenticationConfiguredTopology(emptyMockMap()));
+                Utils.isZkAuthenticationConfiguredTopology(emptyMockMap()));
 
         Assert.assertFalse(
                 "Returns false if scheme value is null",
-                ClientUtils.isZkAuthenticationConfiguredTopology(topologyMockMap(null)));
+                Utils.isZkAuthenticationConfiguredTopology(topologyMockMap(null)));
 
         Assert.assertTrue(
                 "Returns true if scheme value is string",
-                ClientUtils.isZkAuthenticationConfiguredTopology(topologyMockMap("foobar")));
+                Utils.isZkAuthenticationConfiguredTopology(topologyMockMap("foobar")));
     }
 
 
@@ -65,22 +65,22 @@ public class ClientUtilsTest {
     public void parseJvmHeapMemByChildOptsTest() {
         Assert.assertEquals(
                 "1024K results in 1 MB",
-                ClientUtils.parseJvmHeapMemByChildOpts("Xmx1024K", 0.0).doubleValue(), 1.0, 0);
+                Utils.parseJvmHeapMemByChildOpts("Xmx1024K", 0.0).doubleValue(), 1.0, 0);
 
         Assert.assertEquals(
                 "100M results in 100 MB",
-                ClientUtils.parseJvmHeapMemByChildOpts("Xmx100M", 0.0).doubleValue(), 100.0, 0);
+                Utils.parseJvmHeapMemByChildOpts("Xmx100M", 0.0).doubleValue(), 100.0, 0);
 
         Assert.assertEquals(
                 "1G results in 1024 MB",
-                ClientUtils.parseJvmHeapMemByChildOpts("Xmx1G", 0.0).doubleValue(), 1024.0, 0);
+                Utils.parseJvmHeapMemByChildOpts("Xmx1G", 0.0).doubleValue(), 1024.0, 0);
 
         Assert.assertEquals(
                 "Unmatched value results in default",
-                ClientUtils.parseJvmHeapMemByChildOpts("Xmx1T", 123.0).doubleValue(), 123.0, 0);
+                Utils.parseJvmHeapMemByChildOpts("Xmx1T", 123.0).doubleValue(), 123.0, 0);
 
         Assert.assertEquals(
                 "Null value results in default",
-                ClientUtils.parseJvmHeapMemByChildOpts(null, 123.0).doubleValue(), 123.0, 0);
+                Utils.parseJvmHeapMemByChildOpts(null, 123.0).doubleValue(), 123.0, 0);
     }
 }

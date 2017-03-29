@@ -1,10 +1,9 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to you under the Apache License, Version
+ * 2.0 (the "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
@@ -17,21 +16,21 @@
  */
 package org.apache.storm.utils.staticmocking;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.DaemonUtils;
 
-public class ClientUtilsInstaller implements AutoCloseable {
+public class DaemonUtilsInstaller implements AutoCloseable {
 
-    private ClientUtils _oldInstance;
-    private ClientUtils _curInstance;
+    private DaemonUtils _oldInstance;
+    private DaemonUtils _curInstance;
 
-    public ClientUtilsInstaller(ClientUtils instance) {
-        _oldInstance = ClientUtils.setInstance(instance);
+    public DaemonUtilsInstaller(DaemonUtils instance) {
+        _oldInstance = DaemonUtils.setInstance(instance);
         _curInstance = instance;
     }
 
     @Override
     public void close() throws Exception {
-        if (ClientUtils.setInstance(_oldInstance) != _curInstance) {
+        if (DaemonUtils.setInstance(_oldInstance) != _curInstance) {
             throw new IllegalStateException(
                     "Instances of this resource must be closed in reverse order of opening.");
         }

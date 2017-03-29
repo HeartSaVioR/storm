@@ -32,7 +32,7 @@ import org.apache.storm.generated.SpoutSpec;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.scheduler.resource.Component;
 import org.apache.storm.scheduler.resource.ResourceUtils;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.Time;
 
@@ -193,7 +193,7 @@ public class TopologyDetails {
         if (storm_topo.get_spouts() != null) {
             for (Map.Entry<String, SpoutSpec> spoutEntry : storm_topo
                     .get_spouts().entrySet()) {
-                if (!ClientUtils.isSystemId(spoutEntry.getKey())) {
+                if (!Utils.isSystemId(spoutEntry.getKey())) {
                     Component newComp;
                     if (all_comp.containsKey(spoutEntry.getKey())) {
                         newComp = all_comp.get(spoutEntry.getKey());
@@ -228,7 +228,7 @@ public class TopologyDetails {
         if (storm_topo.get_bolts() != null) {
             for (Map.Entry<String, Bolt> boltEntry : storm_topo.get_bolts()
                     .entrySet()) {
-                if (!ClientUtils.isSystemId(boltEntry.getKey())) {
+                if (!Utils.isSystemId(boltEntry.getKey())) {
                     Component newComp;
                     if (all_comp.containsKey(boltEntry.getKey())) {
                         newComp = all_comp.get(boltEntry.getKey());

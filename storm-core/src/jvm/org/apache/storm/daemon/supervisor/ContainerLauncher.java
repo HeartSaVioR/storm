@@ -25,7 +25,7 @@ import org.apache.storm.DaemonConfig;
 import org.apache.storm.container.ResourceIsolationInterface;
 import org.apache.storm.generated.LocalAssignment;
 import org.apache.storm.messaging.IContext;
-import org.apache.storm.utils.ClientConfigUtils;
+import org.apache.storm.utils.ConfigUtils;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.LocalState;
 import org.apache.storm.utils.ReflectionUtils;
@@ -48,7 +48,7 @@ public abstract class ContainerLauncher {
      * @throws IOException on any error
      */
     public static ContainerLauncher make(Map<String, Object> conf, String supervisorId, IContext sharedContext) throws IOException {
-        if (ClientConfigUtils.isLocalMode(conf)) {
+        if (ConfigUtils.isLocalMode(conf)) {
             return new LocalContainerLauncher(conf, supervisorId, sharedContext);
         }
         

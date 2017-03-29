@@ -18,7 +18,7 @@
 package org.apache.storm.streams;
 
 import org.apache.storm.topology.IRichSpout;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 /**
  * A spout node wraps an {@link IRichSpout}.
@@ -27,10 +27,10 @@ class SpoutNode extends Node {
     private final IRichSpout spout;
 
     SpoutNode(IRichSpout spout) {
-        super(ClientUtils.DEFAULT_STREAM_ID, getOutputFields(spout, ClientUtils.DEFAULT_STREAM_ID));
+        super(Utils.DEFAULT_STREAM_ID, getOutputFields(spout, Utils.DEFAULT_STREAM_ID));
         if (outputFields.size() == 0) {
             throw new IllegalArgumentException("Spout " + spout + " does not declare any fields" +
-                    "for the stream '" + ClientUtils.DEFAULT_STREAM_ID + "'");
+                    "for the stream '" + Utils.DEFAULT_STREAM_ID + "'");
         }
         this.spout = spout;
     }

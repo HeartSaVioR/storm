@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,7 +21,7 @@ import org.apache.storm.cluster.PaceMakerStateStorage;
 import org.apache.storm.generated.*;
 import org.apache.storm.pacemaker.PacemakerClient;
 import org.apache.storm.pacemaker.PacemakerClientPool;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -81,18 +81,18 @@ public class PaceMakerStateStorageFactoryTest {
     @Test
     public void testSetWorkerHb() throws Exception {
         createPaceMakerStateStorage(HBServerMessageType.SEND_PULSE_RESPONSE, null);
-        stateStorage.set_worker_hb("/foo", ClientUtils.javaSerialize("data"), null);
+        stateStorage.set_worker_hb("/foo", Utils.javaSerialize("data"), null);
         HBMessage sent = clientProxy.checkCaptured();
         HBPulse pulse = sent.get_data().get_pulse();
         Assert.assertEquals(HBServerMessageType.SEND_PULSE, sent.get_type());
         Assert.assertEquals("/foo", pulse.get_id());
-        Assert.assertEquals("data", ClientUtils.javaDeserialize(pulse.get_details(), String.class));
+        Assert.assertEquals("data", Utils.javaDeserialize(pulse.get_details(), String.class));
     }
 
     @Test(expected = RuntimeException.class)
     public void testSetWorkerHbResponseType() throws Exception {
         createPaceMakerStateStorage(HBServerMessageType.SEND_PULSE, null);
-        stateStorage.set_worker_hb("/foo", ClientUtils.javaSerialize("data"), null);
+        stateStorage.set_worker_hb("/foo", Utils.javaSerialize("data"), null);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class PaceMakerStateStorageFactoryTest {
         HBPulse hbPulse = new HBPulse();
         hbPulse.set_id("/foo");
         ClusterWorkerHeartbeat cwh = new ClusterWorkerHeartbeat("some-storm-id", new HashMap(), 1, 1);
-        hbPulse.set_details(ClientUtils.serialize(cwh));
+        hbPulse.set_details(Utils.serialize(cwh));
         createPaceMakerStateStorage(HBServerMessageType.GET_PULSE_RESPONSE, HBMessageData.pulse(hbPulse));
         stateStorage.get_worker_hb("/foo", false);
         HBMessage sent = clientProxy.checkCaptured();

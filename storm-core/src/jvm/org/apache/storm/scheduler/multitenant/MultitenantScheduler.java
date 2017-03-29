@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.storm.DaemonConfig;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ public class MultitenantScheduler implements IScheduler {
       ret = new HashMap<>(ret);
     }
 
-    Map fromFile = ClientUtils.findAndReadConfigFile("multitenant-scheduler.yaml", false);
+    Map fromFile = Utils.findAndReadConfigFile("multitenant-scheduler.yaml", false);
     Map<String, Number> tmp = (Map<String, Number>)fromFile.get(DaemonConfig.MULTITENANT_SCHEDULER_USER_POOLS);
     if (tmp != null) {
       ret.putAll(tmp);

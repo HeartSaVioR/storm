@@ -34,7 +34,7 @@ import org.apache.storm.dependency.DependencyPropertiesParser;
 import org.apache.storm.dependency.DependencyUploader;
 import org.apache.storm.hooks.SubmitterHookException;
 import org.apache.storm.scheduler.resource.ResourceUtils;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.validation.ConfigValidation;
 import org.apache.commons.lang.StringUtils;
@@ -62,7 +62,7 @@ public class StormSubmitter {
     private static ILocalCluster localNimbus = null;
 
     private static String generateZookeeperDigestSecretPayload() {
-        return ClientUtils.secureRandomLong() + ":" + ClientUtils.secureRandomLong();
+        return Utils.secureRandomLong() + ":" + Utils.secureRandomLong();
     }
 
     public static final Pattern zkDigestPattern = Pattern.compile("\\S+:\\S+");
@@ -120,8 +120,8 @@ public class StormSubmitter {
     public static void pushCredentials(String name, Map stormConf, Map<String, String> credentials)
             throws AuthorizationException, NotAliveException, InvalidTopologyException {
         stormConf = new HashMap(stormConf);
-        stormConf.putAll(ClientUtils.readCommandLineOpts());
-        Map conf = ClientUtils.readStormConfig();
+        stormConf.putAll(Utils.readCommandLineOpts());
+        Map conf = Utils.readStormConfig();
         conf.putAll(stormConf);
         Map<String,String> fullCreds = populateCredentials(conf, credentials);
         if (fullCreds.isEmpty()) {
@@ -199,12 +199,12 @@ public class StormSubmitter {
      */
     public static void submitTopologyAs(String name, Map stormConf, StormTopology topology, SubmitOptions opts, ProgressListener progressListener, String asUser)
             throws AlreadyAliveException, InvalidTopologyException, AuthorizationException, IllegalArgumentException {
-        if(!ClientUtils.isValidConf(stormConf)) {
+        if(!Utils.isValidConf(stormConf)) {
             throw new IllegalArgumentException("Storm conf is not valid. Must be json-serializable");
         }
         stormConf = new HashMap(stormConf);
-        stormConf.putAll(ClientUtils.readCommandLineOpts());
-        Map conf = ClientUtils.readStormConfig();
+        stormConf.putAll(Utils.readCommandLineOpts());
+        Map conf = Utils.readStormConfig();
         conf.putAll(stormConf);
         stormConf.putAll(prepareZookeeperAuthentication(conf));
 
@@ -360,7 +360,7 @@ public class StormSubmitter {
                 }
 
                 ISubmitterHook submitterHook = (ISubmitterHook) Class.forName(submissionNotifierClassName).newInstance();
-                TopologyInfo topologyInfo = ClientUtils.getTopologyInfo(name, asUser, stormConf);
+                TopologyInfo topologyInfo = Utils.getTopologyInfo(name, asUser, stormConf);
                 LOG.info("Invoking the registered ISubmitterHook [{}]", submissionNotifierClassName);
                 submitterHook.notify(topologyInfo, stormConf, topology);
             }
@@ -562,7 +562,7 @@ public class StormSubmitter {
     private static void validateConfs(Map<String, Object> stormConf, StormTopology topology) throws IllegalArgumentException, InvalidTopologyException {
         ConfigValidation.validateFields(stormConf);
         validateTopologyWorkerMaxHeapSizeMBConfigs(stormConf, topology);
-        ClientUtils.validateTopologyBlobStoreMap(stormConf, getListOfKeysFromBlobStore(stormConf));
+        Utils.validateTopologyBlobStoreMap(stormConf, getListOfKeysFromBlobStore(stormConf));
     }
 
     private static void validateTopologyWorkerMaxHeapSizeMBConfigs(Map<String, Object> stormConf, StormTopology topology) {

@@ -26,8 +26,8 @@ import org.apache.storm.generated.HBPulse;
 import org.apache.storm.generated.HBNodes;
 import org.apache.storm.generated.HBServerMessageType;
 import org.apache.storm.metric.StormMetricsRegistry;
-import org.apache.storm.utils.ClientConfigUtils;
 import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.DaemonConfigUtils;
 import org.apache.storm.utils.VersionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,7 +210,7 @@ public class Pacemaker implements IServerMessageHandler {
 
     public static void main(String[] args) {
         SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
-        Map conf = ClientConfigUtils.overrideLoginConfigWithSystemProperty(ConfigUtils.readStormConfig());
+        Map conf = ConfigUtils.overrideLoginConfigWithSystemProperty(DaemonConfigUtils.readStormConfig());
         final Pacemaker serverHandler = new Pacemaker(conf);
         serverHandler.launchServer();
     }

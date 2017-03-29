@@ -21,7 +21,7 @@
   (:import [org.mockito Mockito])
   (:import [org.mockito.exceptions.base MockitoAssertionError])
   (:import [org.apache.curator.framework CuratorFramework CuratorFrameworkFactory CuratorFrameworkFactory$Builder])
-  (:import [org.apache.storm.utils Time Time$SimulatedTime Utils ZookeeperAuthInfo ConfigUtils ClientConfigUtils ClientUtils CuratorUtils])
+  (:import [org.apache.storm.utils Time Time$SimulatedTime DaemonUtils ZookeeperAuthInfo DaemonConfigUtils ConfigUtils Utils CuratorUtils])
   (:import [org.apache.storm.cluster IStateStorage ZKStateStorage ClusterStateContext StormClusterStateImpl ClusterUtils])
   (:import [org.apache.storm.zookeeper Zookeeper ClientZookeeper])
   (:import [org.apache.storm.callback ZKStateChangedCallback])
@@ -34,7 +34,7 @@
   (:use [org.apache.storm.internal thrift]))
 
 (defn mk-config [zk-port]
-  (merge (clojurify-structure (ClientConfigUtils/readStormConfig))
+  (merge (clojurify-structure (ConfigUtils/readStormConfig))
     {STORM-ZOOKEEPER-PORT zk-port
      STORM-ZOOKEEPER-SERVERS ["localhost"]}))
 
@@ -272,17 +272,17 @@
   (with-open [zk (InProcessZookeeper. )]
     (with-open [_ (Time$SimulatedTime. )]
       (let [state (mk-storm-state (.getPort zk))]
-        (.reportError state "a" "1" (ClientUtils/localHostname) 6700  (RuntimeException.))
+        (.reportError state "a" "1" (Utils/localHostname) 6700 (RuntimeException.))
         (validate-errors! state "a" "1" ["RuntimeException"])
         (Time/advanceTimeSecs 1)
-        (.reportError state "a" "1" (ClientUtils/localHostname) 6700 (IllegalArgumentException.))
+        (.reportError state "a" "1" (Utils/localHostname) 6700 (IllegalArgumentException.))
         (validate-errors! state "a" "1" ["IllegalArgumentException" "RuntimeException"])
         (doseq [i (range 10)]
-          (.reportError state "a" "2" (ClientUtils/localHostname) 6700 (RuntimeException.))
+          (.reportError state "a" "2" (Utils/localHostname) 6700 (RuntimeException.))
           (Time/advanceTimeSecs 2))
         (validate-errors! state "a" "2" (repeat 10 "RuntimeException"))
         (doseq [i (range 5)]
-          (.reportError state "a" "2" (ClientUtils/localHostname) 6700 (IllegalArgumentException.))
+          (.reportError state "a" "2" (Utils/localHostname) 6700 (IllegalArgumentException.))
           (Time/advanceTimeSecs 2))
         (validate-errors! state "a" "2" (concat (repeat 5 "IllegalArgumentException")
                                           (repeat 5 "RuntimeException")

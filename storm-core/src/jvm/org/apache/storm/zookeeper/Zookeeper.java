@@ -37,7 +37,7 @@ import org.apache.storm.generated.StormTopology;
 import org.apache.storm.nimbus.ILeaderElector;
 import org.apache.storm.nimbus.NimbusInfo;
 import org.apache.storm.security.auth.ReqContext;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.zookeeper.server.NIOServerCnxnFactory;
 import org.apache.zookeeper.server.ZooKeeperServer;
 import org.slf4j.Logger;
@@ -215,7 +215,7 @@ public class Zookeeper {
                     try {
                         InputStreamWithMeta blob = blobStore.getBlob(activeTopologyCodeKey, subject);
                         byte[] blobContent = IOUtils.readFully(blob, new Long(blob.getFileLength()).intValue());
-                        StormTopology stormCode = ClientUtils.deserialize(blobContent, StormTopology.class);
+                        StormTopology stormCode = Utils.deserialize(blobContent, StormTopology.class);
                         if (stormCode.is_set_dependency_jars()) {
                             activeTopologyDependencies.addAll(stormCode.get_dependency_jars());
                         }

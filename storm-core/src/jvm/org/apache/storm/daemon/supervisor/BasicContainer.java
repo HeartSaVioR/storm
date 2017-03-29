@@ -17,7 +17,7 @@
  */
 package org.apache.storm.daemon.supervisor;
 
-import static org.apache.storm.utils.Utils.OR;
+import static org.apache.storm.utils.DaemonUtils.OR;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -43,12 +43,12 @@ import org.apache.storm.generated.ProfileAction;
 import org.apache.storm.generated.ProfileRequest;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.generated.WorkerResources;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ClientUtils;
-import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.ConfigUtils;
-import org.apache.storm.utils.LocalState;
 import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ObjectReader;
+import org.apache.storm.utils.DaemonConfigUtils;
+import org.apache.storm.utils.LocalState;
+import org.apache.storm.utils.DaemonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +62,7 @@ public class BasicContainer extends Container {
     private static final Logger LOG = LoggerFactory.getLogger(BasicContainer.class);
     private static final FilenameFilter jarFilter = (dir, name) -> name.endsWith(".jar");
     private static final Joiner CPJ = 
-            Joiner.on(Utils.CLASS_PATH_SEPARATOR).skipNulls();
+            Joiner.on(DaemonUtils.CLASS_PATH_SEPARATOR).skipNulls();
     
     protected final LocalState _localState;
     protected final String _profileCmd;
@@ -145,7 +145,7 @@ public class BasicContainer extends Container {
         }
 
         if (profileCmd == null) {
-            profileCmd = _stormHome + Utils.FILE_PATH_SEPARATOR + "bin" + Utils.FILE_PATH_SEPARATOR
+            profileCmd = _stormHome + DaemonUtils.FILE_PATH_SEPARATOR + "bin" + DaemonUtils.FILE_PATH_SEPARATOR
                     + conf.get(DaemonConfig.WORKER_PROFILER_COMMAND);
         }
         _profileCmd = profileCmd;
@@ -160,7 +160,7 @@ public class BasicContainer extends Container {
         _type.assertFull();
         assert(_workerId == null);
         synchronized (_localState) {
-            _workerId = ClientUtils.uuid();
+            _workerId = Utils.uuid();
             Map<String, Integer> workerToPort = _localState.getApprovedWorkers();
             if (workerToPort == null) {
                 workerToPort = new HashMap<>(1);
@@ -238,7 +238,7 @@ public class BasicContainer extends Container {
     @Override
     public boolean runProfiling(ProfileRequest request, boolean stop) throws IOException, InterruptedException {
         _type.assertFull();
-        String targetDir = ClientConfigUtils.workerArtifactsRoot(_conf, _topologyId, _port);
+        String targetDir = ConfigUtils.workerArtifactsRoot(_conf, _topologyId, _port);
 
         @SuppressWarnings("unchecked")
         Map<String, String> env = (Map<String, String>) _topoConf.get(Config.TOPOLOGY_ENVIRONMENT);
@@ -246,7 +246,7 @@ public class BasicContainer extends Container {
             env = new HashMap<String, String>();
         }
 
-        String str = ClientConfigUtils.workerArtifactsPidPath(_conf, _topologyId, _port);
+        String str = ConfigUtils.workerArtifactsPidPath(_conf, _topologyId, _port);
 
         String workerPid = _ops.slurpString(new File(str)).trim();
 
@@ -324,10 +324,10 @@ public class BasicContainer extends Container {
      * @return the java.library.path/LD_LIBRARY_PATH to use so native libraries load correctly.
      */
     protected String javaLibraryPath(String stormRoot, Map<String, Object> conf) {
-        String resourceRoot = stormRoot + Utils.FILE_PATH_SEPARATOR + ConfigUtils.RESOURCES_SUBDIR;
+        String resourceRoot = stormRoot + DaemonUtils.FILE_PATH_SEPARATOR + DaemonConfigUtils.RESOURCES_SUBDIR;
         String os = System.getProperty("os.name").replaceAll("\\s+", "_");
         String arch = System.getProperty("os.arch");
-        String archResourceRoot = resourceRoot + Utils.FILE_PATH_SEPARATOR + os + "-" + arch;
+        String archResourceRoot = resourceRoot + DaemonUtils.FILE_PATH_SEPARATOR + os + "-" + arch;
         String ret = CPJ.join(archResourceRoot, resourceRoot,
                 conf.get(DaemonConfig.JAVA_LIBRARY_PATH));
         return ret;
@@ -464,17 +464,17 @@ public class BasicContainer extends Container {
         String log4jConfigurationDir = (String) (_conf.get(DaemonConfig.STORM_LOG4J2_CONF_DIR));
 
         if (StringUtils.isNotBlank(log4jConfigurationDir)) {
-            if (!Utils.isAbsolutePath(log4jConfigurationDir)) {
-                log4jConfigurationDir = _stormHome + Utils.FILE_PATH_SEPARATOR + log4jConfigurationDir;
+            if (!DaemonUtils.isAbsolutePath(log4jConfigurationDir)) {
+                log4jConfigurationDir = _stormHome + DaemonUtils.FILE_PATH_SEPARATOR + log4jConfigurationDir;
             }
         } else {
-            log4jConfigurationDir = _stormHome + Utils.FILE_PATH_SEPARATOR + "log4j2";
+            log4jConfigurationDir = _stormHome + DaemonUtils.FILE_PATH_SEPARATOR + "log4j2";
         }
  
-        if (Utils.IS_ON_WINDOWS && !log4jConfigurationDir.startsWith("file:")) {
+        if (DaemonUtils.IS_ON_WINDOWS && !log4jConfigurationDir.startsWith("file:")) {
             log4jConfigurationDir = "file:///" + log4jConfigurationDir;
         }
-        return log4jConfigurationDir + Utils.FILE_PATH_SEPARATOR + "worker.xml";
+        return log4jConfigurationDir + DaemonUtils.FILE_PATH_SEPARATOR + "worker.xml";
     }
     
     private static class DependencyLocations {
@@ -503,7 +503,7 @@ public class BasicContainer extends Container {
             if (_data != null) {
                 return _data;
             }
-            final StormTopology stormTopology = ClientConfigUtils.readSupervisorTopology(_conf, _topologyId, _ops);
+            final StormTopology stormTopology = ConfigUtils.readSupervisorTopology(_conf, _topologyId, _ops);
             final List<String> dependencyLocations = new ArrayList<>();
             if (stormTopology.get_dependency_jars() != null) {
                 for (String dependency : stormTopology.get_dependency_jars()) {
@@ -561,7 +561,7 @@ public class BasicContainer extends Container {
      * @throws IOException on any error.
      */
     private List<String> getClassPathParams(final String stormRoot) throws IOException {
-        final String stormJar = ClientConfigUtils.supervisorStormJarPath(stormRoot);
+        final String stormJar = ConfigUtils.supervisorStormJarPath(stormRoot);
         final List<String> dependencyLocations = getDependencyLocationsFor(_conf, _topologyId, _ops, stormRoot);
         final String workerClassPath = getWorkerClassPath(stormJar, dependencyLocations);
         
@@ -577,8 +577,8 @@ public class BasicContainer extends Container {
      * @return a list of command line options
      */
     private List<String> getCommonParams() {
-        final String workersArtifacts = ClientConfigUtils.workerArtifactsRoot(_conf);
-        String stormLogDir = ClientConfigUtils.getLogDir();
+        final String workersArtifacts = ConfigUtils.workerArtifactsRoot(_conf);
+        String stormLogDir = ConfigUtils.getLogDir();
         String log4jConfigurationFile = getWorkerLoggingConfigFile();
         
         List<String> commonParams = new ArrayList<>();
@@ -620,7 +620,7 @@ public class BasicContainer extends Container {
         String ret = null;
         String javaHome = System.getenv().get("JAVA_HOME");
         if (StringUtils.isNotBlank(javaHome)) {
-            ret = javaHome + Utils.FILE_PATH_SEPARATOR + "bin" + Utils.FILE_PATH_SEPARATOR + cmd;
+            ret = javaHome + DaemonUtils.FILE_PATH_SEPARATOR + "bin" + DaemonUtils.FILE_PATH_SEPARATOR + cmd;
         } else {
             ret = cmd;
         }
@@ -638,9 +638,9 @@ public class BasicContainer extends Container {
     private List<String> mkLaunchCommand(final int memOnheap, final String stormRoot,
             final String jlp) throws IOException {
         final String javaCmd = javaCmd("java");
-        final String stormOptions = ClientConfigUtils.concatIfNotNull(System.getProperty("storm.options"));
-        final String stormConfFile = ClientConfigUtils.concatIfNotNull(System.getProperty("storm.conf.file"));
-        final String workerTmpDir = ConfigUtils.workerTmpRoot(_conf, _workerId);
+        final String stormOptions = ConfigUtils.concatIfNotNull(System.getProperty("storm.options"));
+        final String stormConfFile = ConfigUtils.concatIfNotNull(System.getProperty("storm.conf.file"));
+        final String workerTmpDir = DaemonConfigUtils.workerTmpRoot(_conf, _workerId);
         
         List<String> classPathParams = getClassPathParams(stormRoot);
         List<String> commonParams = getCommonParams();
@@ -659,7 +659,7 @@ public class BasicContainer extends Container {
         commandList.addAll(commonParams);
         commandList.addAll(substituteChildopts(_conf.get(Config.WORKER_CHILDOPTS), memOnheap));
         commandList.addAll(substituteChildopts(_topoConf.get(Config.TOPOLOGY_WORKER_CHILDOPTS), memOnheap));
-        commandList.addAll(substituteChildopts(Utils.OR(
+        commandList.addAll(substituteChildopts(DaemonUtils.OR(
                 _topoConf.get(Config.TOPOLOGY_WORKER_GC_CHILDOPTS),
                 _conf.get(Config.WORKER_GC_CHILDOPTS)), memOnheap));
         commandList.addAll(getWorkerProfilerChildOpts(memOnheap));
@@ -688,7 +688,7 @@ public class BasicContainer extends Container {
         
         final WorkerResources resources = _assignment.get_resources();
         final int memOnheap = getMemOnHeap(resources);
-        final String stormRoot = ClientConfigUtils.supervisorStormDistRoot(_conf, _topologyId);
+        final String stormRoot = ConfigUtils.supervisorStormDistRoot(_conf, _topologyId);
         final String jlp = javaLibraryPath(stormRoot, _conf);
         
         List<String> commandList = mkLaunchCommand(memOnheap, stormRoot, jlp);
@@ -714,9 +714,9 @@ public class BasicContainer extends Container {
             _resourceIsolationManager.reserveResourcesForWorker(_workerId, map);
         }
 
-        LOG.info("Launching worker with command: {}. ", Utils.shellCmd(commandList));
+        LOG.info("Launching worker with command: {}. ", DaemonUtils.shellCmd(commandList));
 
-        String workerDir = ClientConfigUtils.workerRoot(_conf, _workerId);
+        String workerDir = ConfigUtils.workerRoot(_conf, _workerId);
 
         launchWorkerProcess(commandList, topEnvironment, logPrefix, processExitCallback, new File(workerDir));
     }

@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.storm.utils.ClientUtils;
 import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.DaemonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,7 @@ public class EvenScheduler implements IScheduler {
                 }
             });
 
-            return Utils.interleaveAll(list);
+            return DaemonUtils.interleaveAll(list);
         }
 
         return null;
@@ -96,7 +96,7 @@ public class EvenScheduler implements IScheduler {
             executorToSlot = existingAssignment.getExecutorToSlot();
         }
 
-        return ClientUtils.reverseMap(executorToSlot);
+        return Utils.reverseMap(executorToSlot);
     }
 
     private static Map<ExecutorDetails, WorkerSlot> scheduleTopology(TopologyDetails topology, Cluster cluster) {
@@ -149,7 +149,7 @@ public class EvenScheduler implements IScheduler {
         for (TopologyDetails topology : needsSchedulingTopologies) {
             String topologyId = topology.getId();
             Map<ExecutorDetails, WorkerSlot> newAssignment = scheduleTopology(topology, cluster);
-            Map<WorkerSlot, List<ExecutorDetails>> nodePortToExecutors = ClientUtils.reverseMap(newAssignment);
+            Map<WorkerSlot, List<ExecutorDetails>> nodePortToExecutors = Utils.reverseMap(newAssignment);
 
             for (Map.Entry<WorkerSlot, List<ExecutorDetails>> entry : nodePortToExecutors.entrySet()) {
                 WorkerSlot nodePort = entry.getKey();

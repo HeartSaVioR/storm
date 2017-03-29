@@ -17,7 +17,7 @@
 (ns org.apache.storm.testing
   (:import [org.apache.storm LocalCluster$Builder])
   (:import [java.util.function UnaryOperator])
-  (:import [org.apache.storm.utils Time Time$SimulatedTime Utils RegisteredGlobalState ClientUtils])
+  (:import [org.apache.storm.utils Time Time$SimulatedTime DaemonUtils RegisteredGlobalState Utils])
   (:import [org.apache.storm.testing InProcessZookeeper MkTupleParam TestJob MkClusterParam 
             TrackedTopology CompleteTopologyParam MockedSources])
   (:import [org.apache.storm Thrift Testing Testing$Condition])
@@ -151,13 +151,13 @@
 
 (defn submit-local-topology
   [nimbus storm-name conf topology]
-  (when-not (ClientUtils/isValidConf conf)
+  (when-not (Utils/isValidConf conf)
     (throw (IllegalArgumentException. "Topology conf is not json-serializable")))
   (.submitTopology nimbus storm-name nil (JSONValue/toJSONString conf) topology))
 
 (defn submit-local-topology-with-opts
   [nimbus storm-name conf topology submit-opts]
-  (when-not (ClientUtils/isValidConf conf)
+  (when-not (Utils/isValidConf conf)
     (throw (IllegalArgumentException. "Topology conf is not json-serializable")))
   (.submitTopologyWithOpts nimbus storm-name nil (JSONValue/toJSONString conf) topology submit-opts))
 
@@ -252,7 +252,7 @@
 
 (defnk test-tuple
   [values
-   :stream ClientUtils/DEFAULT_STREAM_ID
+   :stream Utils/DEFAULT_STREAM_ID
    :component "component"
    :fields nil]
   (Testing/testTuple

@@ -18,7 +18,7 @@
 package org.apache.storm.security.auth;
 
 import org.apache.storm.Config;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ThrowableNestedCauseMatcher;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.Before;
@@ -35,7 +35,7 @@ public class ThriftClientTest {
 
     @Before
     public void setup() {
-        conf = ClientUtils.readDefaultConfig();
+        conf = Utils.readDefaultConfig();
         conf.put(Config.STORM_NIMBUS_RETRY_TIMES, 0);
     }
 

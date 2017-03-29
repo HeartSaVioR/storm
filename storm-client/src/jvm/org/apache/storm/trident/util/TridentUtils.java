@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.thrift.TBase;
 import org.jgrapht.DirectedGraph;
 
@@ -106,10 +106,10 @@ public class TridentUtils {
     }
     
     public static byte[] thriftSerialize(TBase t) {
-        return ClientUtils.thriftSerialize(t);
+        return Utils.thriftSerialize(t);
     }
 
     public static <T> T thriftDeserialize(Class<T> c, byte[] b) {
-        return ClientUtils.thriftDeserialize(c,b);
+        return Utils.thriftDeserialize(c,b);
     }
 }

@@ -24,7 +24,7 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.joda.time.DateTime;
 
 import java.util.LinkedHashMap;
@@ -43,7 +43,7 @@ public class SimpleSpout extends BaseRichSpout {
 
     @Override
     public void nextTuple() {
-        ClientUtils.sleep(1000);
+        Utils.sleep(1000);
         Map<String, Object> event = new LinkedHashMap<>();
         event.put("timestamp", new DateTime().toString());
         event.put("publisher", "foo.com");

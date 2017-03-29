@@ -23,7 +23,7 @@ import org.apache.storm.DaemonConfig;
 import org.apache.storm.scheduler.resource.strategies.eviction.IEvictionStrategy;
 import org.apache.storm.scheduler.resource.strategies.priority.ISchedulingPriorityStrategy;
 import org.apache.storm.scheduler.resource.strategies.scheduling.IStrategy;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -398,7 +398,7 @@ public class ResourceAwareScheduler implements IScheduler {
             }
         }
 
-        Map fromFile = ClientUtils.findAndReadConfigFile("user-resource-pools.yaml", false);
+        Map fromFile = Utils.findAndReadConfigFile("user-resource-pools.yaml", false);
         Map<String, Map<String, Number>> tmp = (Map<String, Map<String, Number>>) fromFile.get(DaemonConfig.RESOURCE_AWARE_SCHEDULER_USER_POOLS);
         if (tmp != null) {
             for (Map.Entry<String, Map<String, Number>> userPoolEntry : tmp.entrySet()) {

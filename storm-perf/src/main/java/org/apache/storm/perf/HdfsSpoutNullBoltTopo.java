@@ -24,7 +24,7 @@ import org.apache.storm.hdfs.spout.TextFileReader;
 import org.apache.storm.perf.bolt.DevNullBolt;
 import org.apache.storm.perf.utils.Helper;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.util.Map;
 
@@ -93,7 +93,7 @@ public class HdfsSpoutNullBoltTopo {
         }
 
         Integer durationSec = Integer.parseInt(args[0]);
-        Map topoConf = ClientUtils.findAndReadConfigFile(args[1]);
+        Map topoConf = Utils.findAndReadConfigFile(args[1]);
 
         // Submit to Storm cluster
         Helper.runOnClusterAndPrintMetrics(durationSec, TOPOLOGY_NAME, topoConf, getTopology(topoConf));

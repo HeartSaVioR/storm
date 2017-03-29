@@ -30,7 +30,7 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.AddressedTuple;
 import org.apache.storm.tuple.TupleImpl;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,10 +41,10 @@ public class ExecutorShutdown implements Shutdownable, IRunningExecutor {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutorShutdown.class);
     private final Executor executor;
-    private final List<ClientUtils.SmartThread> threads;
+    private final List<Utils.SmartThread> threads;
     private final Map<Integer, Task> taskDatas;
 
-    public ExecutorShutdown(Executor executor, List<ClientUtils.SmartThread> threads, Map<Integer, Task> taskDatas) {
+    public ExecutorShutdown(Executor executor, List<Utils.SmartThread> threads, Map<Integer, Task> taskDatas) {
         this.executor = executor;
         this.threads = threads;
         this.taskDatas = taskDatas;
@@ -79,10 +79,10 @@ public class ExecutorShutdown implements Shutdownable, IRunningExecutor {
             LOG.info("Shutting down executor " + executor.getComponentId() + ":" + executor.getExecutorId());
             executor.getReceiveQueue().haltWithInterrupt();
             executor.getTransferWorkerQueue().haltWithInterrupt();
-            for (ClientUtils.SmartThread t : threads) {
+            for (Utils.SmartThread t : threads) {
                 t.interrupt();
             }
-            for (ClientUtils.SmartThread t : threads) {
+            for (Utils.SmartThread t : threads) {
                 LOG.debug("Executor " + executor.getComponentId() + ":" + executor.getExecutorId() + " joining thread " + t.getName());
                 t.join();
             }
@@ -108,7 +108,7 @@ public class ExecutorShutdown implements Shutdownable, IRunningExecutor {
             }
             LOG.info("Shut down executor " + executor.getComponentId() + ":" + executor.getExecutorId());
         } catch (Exception e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
     }
 }

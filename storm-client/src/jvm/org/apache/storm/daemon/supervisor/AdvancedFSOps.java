@@ -37,7 +37,7 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.storm.Config;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ObjectReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class AdvancedFSOps implements IAdvancedFSOps {
      * @return the appropriate instance of the class for this config and environment.
      */
     public static AdvancedFSOps make(Map<String, Object> conf) {
-        if (ClientUtils.isOnWindows()) {
+        if (Utils.isOnWindows()) {
             return new AdvancedWindowsFSOps(conf);
         }
         if (ObjectReader.getBoolean(conf.get(Config.SUPERVISOR_RUN_WORKER_AS_USER), false)) {
@@ -65,7 +65,7 @@ public class AdvancedFSOps implements IAdvancedFSOps {
         
         public AdvancedRunAsUserFSOps(Map<String, Object> conf) {
             super(conf);
-            if (ClientUtils.isOnWindows()) {
+            if (Utils.isOnWindows()) {
                 throw new UnsupportedOperationException("ERROR: Windows doesn't support running workers as different users yet");
             }
             _conf = conf;
@@ -89,12 +89,12 @@ public class AdvancedFSOps implements IAdvancedFSOps {
             commands.add(absolutePath);
             ClientSupervisorUtils.processLauncherAndWait(_conf, user, commands, null, logPrefix);
 
-            if (ClientUtils.checkFileExists(absolutePath)) {
+            if (Utils.checkFileExists(absolutePath)) {
                 // It's possible that permissions were not set properly on the directory, and
                 // the user who is *supposed* to own the dir does not. In this case, try the
                 // delete as the supervisor user.
-                ClientUtils.forceDelete(absolutePath);
-                if (ClientUtils.checkFileExists(absolutePath)) {
+                Utils.forceDelete(absolutePath);
+                if (Utils.checkFileExists(absolutePath)) {
                     throw new RuntimeException(path + " was not deleted.");
                 }
             }

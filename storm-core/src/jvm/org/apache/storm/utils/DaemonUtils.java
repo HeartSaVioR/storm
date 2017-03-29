@@ -90,25 +90,25 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import clojure.lang.Keyword;
 
-public class Utils {
+public class DaemonUtils {
     // A singleton instance allows us to mock delegated static methods in our
     // tests by subclassing.
-    private static Utils _instance = new Utils();
+    private static DaemonUtils _instance = new DaemonUtils();
 
     /**
      * Provide an instance of this class for delegates to use.  To mock out
      * delegated methods, provide an instance of a subclass that overrides the
      * implementation of the delegated method.
-     * @param u a Utils instance
+     * @param u a DaemonUtils instance
      * @return the previously set instance
      */
-    public static Utils setInstance(Utils u) {
-        Utils oldInstance = _instance;
+    public static DaemonUtils setInstance(DaemonUtils u) {
+        DaemonUtils oldInstance = _instance;
         _instance = u;
         return oldInstance;
     }
 
-    public static final Logger LOG = LoggerFactory.getLogger(Utils.class);
+    public static final Logger LOG = LoggerFactory.getLogger(DaemonUtils.class);
     public static final String DEFAULT_BLOB_VERSION_SUFFIX = ".version";
     public static final String CURRENT_BLOB_SUFFIX_ID = "current";
     public static final String DEFAULT_CURRENT_BLOB_SUFFIX = "." + CURRENT_BLOB_SUFFIX_ID;
@@ -192,7 +192,7 @@ public class Utils {
     }
 
     public static boolean checkFileExists(String dir, String file) {
-        return ClientUtils.checkFileExists(dir + ClientUtils.FILE_PATH_SEPARATOR + file);
+        return Utils.checkFileExists(dir + Utils.FILE_PATH_SEPARATOR + file);
     }
 
     public void downloadResourcesAsSupervisorImpl(String key, String localFile,
@@ -203,7 +203,7 @@ public class Utils {
             if (downloadResourcesAsSupervisorAttempt(cb, key, localFile)) {
                 break;
             }
-            ClientUtils.sleep(ATTEMPTS_INTERVAL_TIME);
+            Utils.sleep(ATTEMPTS_INTERVAL_TIME);
         }
     }
 
@@ -282,11 +282,11 @@ public class Utils {
     }
 
     public static String constructBlobCurrentSymlinkName(String fileName) {
-        return fileName + Utils.DEFAULT_CURRENT_BLOB_SUFFIX;
+        return fileName + DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX;
     }
 
     public static String constructVersionFileName(String fileName) {
-        return fileName + Utils.DEFAULT_BLOB_VERSION_SUFFIX;
+        return fileName + DaemonUtils.DEFAULT_BLOB_VERSION_SUFFIX;
     }
     // only works on operating  systems that support posix
     public static void restrictPermissions(String baseDir) {
@@ -388,7 +388,7 @@ public class Utils {
         }
 
         boolean gzipped = inFile.toString().endsWith("gz");
-        if (ClientUtils.isOnWindows()) {
+        if (Utils.isOnWindows()) {
             // Tar is not native to Windows. Use simple Java based implementation for
             // tests and simple tar archives
             unTarUsingJava(inFile, untarDir, gzipped);
@@ -903,7 +903,7 @@ public class Utils {
     public static void sendSignalToProcess(long lpid, int signum) throws IOException {
         String pid = Long.toString(lpid);
         try {
-            if (ClientUtils.isOnWindows()) {
+            if (Utils.isOnWindows()) {
                 if (signum == SIGKILL) {
                     execCommand("taskkill", "/f", "/pid", pid);
                 } else {
@@ -1039,7 +1039,7 @@ public class Utils {
      */
     public static String writeScript(String dir, List<String> command,
                                      Map<String,String> environment) throws IOException {
-        String path = Utils.scriptFilePath(dir);
+        String path = DaemonUtils.scriptFilePath(dir);
         try(BufferedWriter out = new BufferedWriter(new FileWriter(path))) {
             out.write("#!/bin/bash");
             out.newLine();
@@ -1049,7 +1049,7 @@ public class Utils {
                     if (v == null) {
                         v = "";
                     }
-                    out.write(Utils.shellCmd(
+                    out.write(DaemonUtils.shellCmd(
                             Arrays.asList(
                                     "export",k+"="+v)));
                     out.write(";");
@@ -1057,7 +1057,7 @@ public class Utils {
                 }
             }
             out.newLine();
-            out.write("exec "+Utils.shellCmd(command)+";");
+            out.write("exec "+ DaemonUtils.shellCmd(command)+";");
         }
         return path;
     }

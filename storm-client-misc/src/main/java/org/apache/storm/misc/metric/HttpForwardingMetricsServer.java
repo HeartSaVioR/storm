@@ -34,7 +34,7 @@ import org.apache.storm.metric.api.IMetricsConsumer.DataPoint;
 
 import com.esotericsoftware.kryo.io.Input;
 import org.apache.storm.serialization.KryoValuesDeserializer;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -68,7 +68,7 @@ public abstract class HttpForwardingMetricsServer {
     }
 
     public HttpForwardingMetricsServer(Map conf) {
-        _conf = ClientUtils.readStormConfig();
+        _conf = Utils.readStormConfig();
         if (conf != null) {
             _conf.putAll(conf);
         }

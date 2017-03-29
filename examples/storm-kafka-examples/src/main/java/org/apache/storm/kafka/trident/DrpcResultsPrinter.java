@@ -21,7 +21,7 @@ package org.apache.storm.kafka.trident;
 import org.apache.storm.LocalDRPC;
 import org.apache.storm.generated.DistributedRPC;
 import org.apache.thrift.transport.TTransportException;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.DRPCClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ public class DrpcResultsPrinter {
      * @return remote DRPC client running on local host, on port 3772, with defaults.yaml config
      */
     public static DrpcResultsPrinter remoteClient() {
-        return remoteClient(ClientUtils.readDefaultConfig(), "localhost", 3772);
+        return remoteClient(Utils.readDefaultConfig(), "localhost", 3772);
     }
 
     /**

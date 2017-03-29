@@ -17,7 +17,7 @@
  */
 package org.apache.storm;
 import org.apache.storm.daemon.Shutdownable;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.nio.channels.ClosedByInterruptException;
 import java.util.Collection;
@@ -81,9 +81,9 @@ public class ProcessSimulator {
             try {
                 killProcess(pid);
             } catch (Exception e) {
-                if (ClientUtils.exceptionCauseIsInstanceOf(InterruptedException.class, e)) {
+                if (Utils.exceptionCauseIsInstanceOf(InterruptedException.class, e)) {
                     LOG.warn("process {} not killed (Ignoring InterruptedException)", pid, e);
-                } else if (ClientUtils.exceptionCauseIsInstanceOf(ClosedByInterruptException.class, e)) {
+                } else if (Utils.exceptionCauseIsInstanceOf(ClosedByInterruptException.class, e)) {
                     LOG.warn("process {} not killed (Ignoring ClosedByInterruptException)", pid, e);
                 } else if (e instanceof RuntimeException){
                     throw e;

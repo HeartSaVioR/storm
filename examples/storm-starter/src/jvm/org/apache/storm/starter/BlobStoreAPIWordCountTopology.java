@@ -42,7 +42,7 @@ import org.apache.storm.blobstore.BlobStoreAclHandler;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,8 +69,8 @@ public class BlobStoreAPIWordCountTopology {
 
     public static void prepare() {
         Config conf = new Config();
-        conf.putAll(ClientUtils.readStormConfig());
-        store = ClientUtils.getClientBlobStore(conf);
+        conf.putAll(Utils.readStormConfig());
+        store = Utils.getClientBlobStore(conf);
     }
 
     // Spout implementation
@@ -84,7 +84,7 @@ public class BlobStoreAPIWordCountTopology {
 
         @Override
         public void nextTuple() {
-            ClientUtils.sleep(100);
+            Utils.sleep(100);
             _collector.emit(new Values(getRandomSentence()));
         }
 
@@ -288,7 +288,7 @@ public class BlobStoreAPIWordCountTopology {
             // Updating file few times every 5 seconds
             for(int i=0; i<10; i++) {
                 updateBlobWithContent(key, store, updateFile(file));
-                ClientUtils.sleep(5000);
+                Utils.sleep(5000);
             }
         } catch (KeyAlreadyExistsException kae) {
             LOG.info("Key already exists {}", kae);

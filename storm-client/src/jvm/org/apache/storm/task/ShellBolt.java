@@ -26,7 +26,7 @@ import org.apache.storm.multilang.BoltMsg;
 import org.apache.storm.multilang.ShellMsg;
 import org.apache.storm.topology.ReportedFailedException;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.ClientConfigUtils;
+import org.apache.storm.utils.ConfigUtils;
 import org.apache.storm.utils.ShellBoltMessageQueue;
 import org.apache.storm.utils.ShellProcess;
 import clojure.lang.RT;
@@ -126,7 +126,7 @@ public class ShellBolt implements IBolt {
 
     public void prepare(Map stormConf, TopologyContext context,
                         final OutputCollector collector) {
-        if (ClientConfigUtils.isLocalMode(stormConf)) {
+        if (ConfigUtils.isLocalMode(stormConf)) {
             _isLocalMode = true;
         }
         Object maxPending = stormConf.get(Config.TOPOLOGY_SHELLBOLT_MAX_PENDING);

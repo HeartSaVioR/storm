@@ -59,8 +59,8 @@ import org.apache.storm.messaging.TaskMessage;
 import org.apache.storm.security.auth.AuthUtils;
 import org.apache.storm.security.auth.IAutoCredentials;
 import org.apache.storm.stats.StatsUtil;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.DisruptorBackpressureCallback;
 import org.apache.storm.utils.LocalState;
 import org.apache.storm.utils.ObjectReader;
@@ -127,17 +127,17 @@ public class Worker implements Shutdownable, DaemonCommon {
         // because in local mode, its not a separate
         // process. supervisor will register it in this case
         // if ConfigUtils.isLocalMode(conf) returns false then it is in distributed mode.
-        if (!ClientConfigUtils.isLocalMode(conf)) {
+        if (!ConfigUtils.isLocalMode(conf)) {
             // Distributed mode
             SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
-            String pid = ClientUtils.processPid();
-            FileUtils.touch(new File(ClientConfigUtils.workerPidPath(conf, workerId, pid)));
-            FileUtils.writeStringToFile(new File(ClientConfigUtils.workerArtifactsPidPath(conf, topologyId, port)), pid,
+            String pid = Utils.processPid();
+            FileUtils.touch(new File(ConfigUtils.workerPidPath(conf, workerId, pid)));
+            FileUtils.writeStringToFile(new File(ConfigUtils.workerArtifactsPidPath(conf, topologyId, port)), pid,
                 Charset.forName("UTF-8"));
         }
         final Map topologyConf =
-            ClientConfigUtils.overrideLoginConfigWithSystemProperty(ClientConfigUtils.readSupervisorStormConf(conf, topologyId));
-        List<ACL> acls = ClientUtils.getWorkerACL(topologyConf);
+            ConfigUtils.overrideLoginConfigWithSystemProperty(ConfigUtils.readSupervisorStormConf(conf, topologyId));
+        List<ACL> acls = Utils.getWorkerACL(topologyConf);
         IStateStorage stateStorage =
             ClusterUtils.mkStateStorage(conf, topologyConf, acls, new ClusterStateContext(DaemonType.WORKER));
         IStormClusterState stormClusterState =
@@ -190,7 +190,7 @@ public class Worker implements Shutdownable, DaemonCommon {
 
                 List<IRunningExecutor> newExecutors = new ArrayList<IRunningExecutor>();
                 for (List<Long> e : workerState.getExecutors()) {
-                    if (ClientConfigUtils.isLocalMode(topologyConf)) {
+                    if (ConfigUtils.isLocalMode(topologyConf)) {
                         newExecutors.add(
                             LocalExecutor.mkExecutor(workerState, e, initCreds)
                                 .execute());
@@ -206,7 +206,7 @@ public class Worker implements Shutdownable, DaemonCommon {
                     .sendTuplesToRemoteWorker((HashMap<Integer, ArrayList<TaskMessage>>) packets, seqId, batchEnd);
 
                 // This thread will publish the messages destined for remote tasks to remote connections
-                transferThread = ClientUtils.asyncLoop(() -> {
+                transferThread = Utils.asyncLoop(() -> {
                     workerState.transferQueue.consumeBatchWhenAvailable(tupleHandler);
                     return 0L;
                 });
@@ -261,7 +261,7 @@ public class Worker implements Shutdownable, DaemonCommon {
                 workerState.refreshActiveTimer.scheduleRecurring(0, (Integer) conf.get(Config.TASK_REFRESH_POLL_SECS),
                     workerState::refreshStormActive);
 
-                LOG.info("Worker has topology config {}", ClientUtils.redactValue(topologyConf, Config.STORM_ZOOKEEPER_TOPOLOGY_AUTH_PAYLOAD));
+                LOG.info("Worker has topology config {}", Utils.redactValue(topologyConf, Config.STORM_ZOOKEEPER_TOPOLOGY_AUTH_PAYLOAD));
                 LOG.info("Worker {} for storm {} on {}:{}  has finished loading", workerId, topologyId, assignmentId, port);
                 return this;
             };
@@ -270,7 +270,7 @@ public class Worker implements Shutdownable, DaemonCommon {
     }
 
     public void doHeartBeat() throws IOException {
-        LocalState state = ClientConfigUtils.workerState(workerState.conf, workerState.workerId);
+        LocalState state = ConfigUtils.workerState(workerState.conf, workerState.workerId);
         state.setWorkerHeartBeat(new LSWorkerHeartbeat(Time.currentTimeSecs(), workerState.topologyId,
             workerState.executors.stream()
                 .map(executor -> new ExecutorInfo(executor.get(0).intValue(), executor.get(1).intValue()))
@@ -427,7 +427,7 @@ public class Worker implements Shutdownable, DaemonCommon {
             workerState.stateStorage.close();
             LOG.info("Shut down worker {} {} {}", topologyId, assignmentId, port);
         } catch (Exception ex) {
-            throw ClientUtils.wrapInRuntime(ex);
+            throw Utils.wrapInRuntime(ex);
         }
 
     }
@@ -449,11 +449,11 @@ public class Worker implements Shutdownable, DaemonCommon {
         String assignmentId = args[1];
         String portStr = args[2];
         String workerId = args[3];
-        Map conf = ClientUtils.readStormConfig();
-        ClientUtils.setupDefaultUncaughtExceptionHandler();
+        Map conf = Utils.readStormConfig();
+        Utils.setupDefaultUncaughtExceptionHandler();
         StormCommon.validateDistributedMode(conf);
         Worker worker = new Worker(conf, null, stormId, assignmentId, Integer.parseInt(portStr), workerId);
         worker.start();
-        ClientUtils.addShutdownHookWithForceKillIn1Sec(worker::shutdown);
+        Utils.addShutdownHookWithForceKillIn1Sec(worker::shutdown);
     }
 }

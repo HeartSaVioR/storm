@@ -19,7 +19,7 @@
   (:import [org.apache.storm.messaging TransportFactory]
            [org.apache.storm Thrift Testing LocalCluster$Builder])
   (:import [org.apache.storm.testing CompleteTopologyParam MockedSources TestWordSpout TestGlobalCount])
-  (:import [org.apache.storm.utils Utils ClientUtils])
+  (:import [org.apache.storm.utils DaemonUtils Utils])
   (:use [org.apache.storm util config]))
 
 (deftest test-integration
@@ -40,7 +40,7 @@
                      {"1" (Thrift/prepareSpoutDetails
                             (TestWordSpout. true) (Integer. 4))}
                      {"2" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareShuffleGrouping)}
                             (TestGlobalCount.) (Integer. 6))})
           results (Testing/completeTopology cluster

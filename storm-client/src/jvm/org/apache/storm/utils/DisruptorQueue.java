@@ -67,7 +67,7 @@ public class DisruptorQueue implements IStatefulObject {
     private static int getNumFlusherPoolThreads() {
         int numThreads = 100;
         try {
-        	Map<String, Object> conf = ClientUtils.readStormConfig();
+        	Map<String, Object> conf = Utils.readStormConfig();
         	numThreads = ObjectReader.getInt(conf.get(Config.STORM_WORKER_DISRUPTOR_FLUSHER_MAX_POOL_SIZE), numThreads);
         } catch (Exception e) {
         	LOG.warn("Error while trying to read system config", e);

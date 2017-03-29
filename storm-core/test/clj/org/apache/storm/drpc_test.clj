@@ -17,14 +17,14 @@
   (:use [clojure test])
   (:import [org.apache.storm.drpc ReturnResults DRPCSpout
             LinearDRPCTopologyBuilder DRPCInvocationsClient]
-           [org.apache.storm.utils ConfigUtils Utils ServiceRegistry ClientUtils])
+           [org.apache.storm.utils DaemonConfigUtils DaemonUtils ServiceRegistry Utils])
   (:import [org.apache.storm.topology FailedException])
   (:import [org.apache.storm.coordination CoordinatedBolt$FinishedCallback])
   (:import [org.apache.storm ILocalDRPC LocalDRPC LocalCluster])
   (:import [org.apache.storm.tuple Fields])
   (:import [org.mockito Mockito])
   (:import [org.mockito.exceptions.base MockitoAssertionError])
-  (:import [org.apache.storm.utils.staticmocking ConfigUtilsInstaller])
+  (:import [org.apache.storm.utils.staticmocking DaemonConfigUtilsInstaller])
   (:import [org.apache.storm.spout SpoutOutputCollector])
   (:import [org.apache.storm.generated DRPCExecutionException DRPCRequest])
   (:import [java.util.concurrent ConcurrentLinkedQueue])
@@ -48,11 +48,11 @@
         topology (Thrift/buildTopology
                    {"1" (Thrift/prepareSpoutDetails spout)}
                    {"2" (Thrift/prepareBoltDetails
-                          {(ClientUtils/getGlobalStreamId "1" nil)
+                          {(Utils/getGlobalStreamId "1" nil)
                            (Thrift/prepareShuffleGrouping)}
                           exclamation-bolt)
                     "3" (Thrift/prepareBoltDetails
-                          {(ClientUtils/getGlobalStreamId "2" nil)
+                          {(Utils/getGlobalStreamId "2" nil)
                            (Thrift/prepareGlobalGrouping)}
                           (ReturnResults.))})]
     (.submitTopology cluster "test" {} topology)

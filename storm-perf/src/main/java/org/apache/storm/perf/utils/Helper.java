@@ -24,7 +24,7 @@ import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.KillOptions;
 import org.apache.storm.generated.Nimbus;
 import org.apache.storm.generated.StormTopology;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.NimbusClient;
 
@@ -54,7 +54,7 @@ public class Helper {
     }
 
     public static int getInt(Map map, Object key, int def) {
-        return ObjectReader.getInt(ClientUtils.get(map, key, def));
+        return ObjectReader.getInt(Utils.get(map, key, def));
     }
 
     public static String getStr(Map map, Object key) {
@@ -62,7 +62,7 @@ public class Helper {
     }
 
     public static void collectMetricsAndKill(String topologyName, Integer pollInterval, Integer duration) throws Exception {
-        Map clusterConf = ClientUtils.readStormConfig();
+        Map clusterConf = Utils.readStormConfig();
         Nimbus.Client client = NimbusClient.getConfiguredClient(clusterConf).getClient();
         BasicMetricsCollector metricsCollector = new BasicMetricsCollector(client, topologyName, clusterConf);
 
@@ -106,7 +106,7 @@ public class Helper {
 
   /** Kill topo on Ctrl-C */
   public static void setupShutdownHook(final String topoName) {
-    Map clusterConf = ClientUtils.readStormConfig();
+    Map clusterConf = Utils.readStormConfig();
     final Nimbus.Client client = NimbusClient.getConfiguredClient(clusterConf).getClient();
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {

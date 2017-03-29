@@ -31,7 +31,7 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 
 import org.apache.storm.topology.base.BaseRichSpout;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -219,7 +219,7 @@ public class JmsSpout extends BaseRichSpout implements MessageListener {
     public void nextTuple() {
         Message msg = this.queue.poll();
         if (msg == null) {
-            ClientUtils.sleep(50);
+            Utils.sleep(50);
         } else {
 
             LOG.debug("sending tuple: " + msg);

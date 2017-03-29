@@ -28,7 +28,7 @@ import org.apache.storm.testing.TestGlobalCount;
 import org.apache.storm.testing.TestWordCounter;
 import org.apache.storm.testing.TestWordSpout;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -52,7 +52,7 @@ public class LocalNimbusTest {
         ILocalCluster localCluster = Testing.getLocalCluster(localClusterConf);
 
         Config stormConf = new Config();
-        stormConf.putAll(ClientUtils.readDefaultConfig());
+        stormConf.putAll(Utils.readDefaultConfig());
         stormConf.setDebug(true);
         stormConf.put("storm.cluster.mode", "local"); // default is aways "distributed" but here local cluster is being used.
         stormConf.put(Config.STORM_TOPOLOGY_SUBMISSION_NOTIFIER_PLUGIN, InmemoryTopologySubmitterHook.class.getName());

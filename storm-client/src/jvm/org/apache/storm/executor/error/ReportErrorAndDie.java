@@ -17,7 +17,7 @@
  */
 package org.apache.storm.executor.error;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +38,9 @@ public class ReportErrorAndDie implements Thread.UncaughtExceptionHandler {
         } catch (Exception ex) {
             LOG.error("Error while reporting error to cluster, proceeding with shutdown", ex);
         }
-        if (ClientUtils.exceptionCauseIsInstanceOf(InterruptedException.class, e)
-                || (ClientUtils.exceptionCauseIsInstanceOf(java.io.InterruptedIOException.class, e)
-                    && !ClientUtils.exceptionCauseIsInstanceOf(java.net.SocketTimeoutException.class, e))) {
+        if (Utils.exceptionCauseIsInstanceOf(InterruptedException.class, e)
+                || (Utils.exceptionCauseIsInstanceOf(java.io.InterruptedIOException.class, e)
+                    && !Utils.exceptionCauseIsInstanceOf(java.net.SocketTimeoutException.class, e))) {
             LOG.info("Got interrupted exception shutting thread down...");
         } else {
             suicideFn.run();

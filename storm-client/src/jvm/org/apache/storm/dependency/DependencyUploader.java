@@ -25,7 +25,7 @@ import org.apache.storm.generated.AuthorizationException;
 import org.apache.storm.generated.KeyAlreadyExistsException;
 import org.apache.storm.generated.KeyNotFoundException;
 import org.apache.storm.generated.SettableBlobMeta;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public class DependencyUploader {
     private ClientBlobStore blobStore;
 
     public DependencyUploader() {
-        conf = ClientUtils.readStormConfig();
+        conf = Utils.readStormConfig();
     }
 
     public void init() {
@@ -64,7 +64,7 @@ public class DependencyUploader {
 
     private synchronized ClientBlobStore getBlobStore() {
         if (blobStore == null) {
-            blobStore = ClientUtils.getClientBlobStore(conf);
+            blobStore = Utils.getClientBlobStore(conf);
         }
         return blobStore;
     }

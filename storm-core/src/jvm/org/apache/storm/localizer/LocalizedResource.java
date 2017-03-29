@@ -17,7 +17,7 @@
  */
 package org.apache.storm.localizer;
 
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.DaemonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,12 +50,12 @@ public class LocalizedResource {
   public LocalizedResource(String key, String fileLoc, boolean uncompressed) {
     _ref = new HashSet<String>();
     _localPath = fileLoc;
-    _versionFilePath = Utils.constructVersionFileName(fileLoc);
-    _symlinkPath = Utils.constructBlobCurrentSymlinkName(fileLoc);
+    _versionFilePath = DaemonUtils.constructVersionFileName(fileLoc);
+    _symlinkPath = DaemonUtils.constructBlobCurrentSymlinkName(fileLoc);
     _uncompressed = uncompressed;
     _key = key;
     // we trust that the file exists
-    _size = Utils.getDU(new File(getFilePathWithVersion()));
+    _size = DaemonUtils.getDU(new File(getFilePathWithVersion()));
     LOG.debug("size of {} is: {}", fileLoc, _size);
   }
 
@@ -82,8 +82,8 @@ public class LocalizedResource {
   }
 
   public String getFilePathWithVersion() {
-    long version = Utils.localVersionOfBlob(_localPath);
-    return Utils.constructBlobWithVersionFileName(_localPath, version);
+    long version = DaemonUtils.localVersionOfBlob(_localPath);
+    return DaemonUtils.constructBlobWithVersionFileName(_localPath, version);
   }
 
   public String getFilePath() {

@@ -29,7 +29,7 @@ import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import org.apache.storm.hive.bolt.mapper.DelimitedRecordHiveMapper;
 import org.apache.storm.hive.common.HiveOptions;
@@ -133,7 +133,7 @@ public class HiveTopologyPartitioned {
             count++;
             total++;
             if(count > 1000){
-		ClientUtils.sleep(1000);
+		Utils.sleep(1000);
                 count = 0;
                 System.out.println("Pending count: " + this.pending.size() + ", total: " + this.total);
             }

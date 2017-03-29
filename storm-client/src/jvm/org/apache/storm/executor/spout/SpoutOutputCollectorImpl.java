@@ -25,7 +25,7 @@ import org.apache.storm.spout.ISpoutOutputCollector;
 import org.apache.storm.tuple.MessageId;
 import org.apache.storm.tuple.TupleImpl;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.MutableLong;
 import org.apache.storm.utils.RotatingMap;
 
@@ -129,7 +129,7 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
             }
 
             pending.put(rootId, info);
-            List<Object> ackInitTuple = new Values(rootId, ClientUtils.bitXorVals(ackSeq), this.taskId);
+            List<Object> ackInitTuple = new Values(rootId, Utils.bitXorVals(ackSeq), this.taskId);
             executor.sendUnanchored(taskData, Acker.ACKER_INIT_STREAM_ID, ackInitTuple, executor.getExecutorTransfer());
         } else if (messageId != null) {
             TupleInfo info = new TupleInfo();

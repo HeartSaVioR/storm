@@ -37,7 +37,7 @@ import org.apache.storm.generated.LocalAssignment;
 import org.apache.storm.generated.ProfileAction;
 import org.apache.storm.generated.ProfileRequest;
 import org.apache.storm.generated.StormTopology;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.LocalState;
 import org.junit.Test;
 
@@ -374,7 +374,7 @@ public class BasicContainerTest {
         st.set_spouts(new HashMap<>());
         st.set_bolts(new HashMap<>());
         st.set_state_spouts(new HashMap<>());
-        byte [] serializedState = ClientUtils.gzip(ClientUtils.thriftSerialize(st));
+        byte [] serializedState = Utils.gzip(Utils.thriftSerialize(st));
         
         final Map<String, Object> superConf = new HashMap<>();
         superConf.put(Config.STORM_LOCAL_DIR, stormLocal);

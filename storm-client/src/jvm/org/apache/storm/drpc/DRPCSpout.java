@@ -28,7 +28,7 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.ExtendedThreadPoolExecutor;
 import org.apache.storm.utils.ServiceRegistry;
@@ -240,7 +240,7 @@ public class DRPCSpout extends BaseRichSpout {
             }
         }
         if(!gotRequest) {
-            ClientUtils.sleep(1);
+            Utils.sleep(1);
         }
     }
 

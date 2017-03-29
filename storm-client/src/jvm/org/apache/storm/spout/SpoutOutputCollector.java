@@ -18,7 +18,7 @@
 package org.apache.storm.spout;
 
 import org.apache.storm.task.OutputCollector;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.util.List;
 
@@ -63,7 +63,7 @@ public class SpoutOutputCollector implements ISpoutOutputCollector {
      * @return the list of task ids that this tuple was sent to
      */
     public List<Integer> emit(List<Object> tuple, Object messageId) {
-        return emit(ClientUtils.DEFAULT_STREAM_ID, tuple, messageId);
+        return emit(Utils.DEFAULT_STREAM_ID, tuple, messageId);
     }
 
     /**
@@ -103,7 +103,7 @@ public class SpoutOutputCollector implements ISpoutOutputCollector {
      * or the Serializable interface. The emitted values must be immutable.
      */
     public void emitDirect(int taskId, List<Object> tuple, Object messageId) {
-        emitDirect(taskId, ClientUtils.DEFAULT_STREAM_ID, tuple, messageId);
+        emitDirect(taskId, Utils.DEFAULT_STREAM_ID, tuple, messageId);
     }
     
     /**

@@ -32,7 +32,7 @@ import org.apache.storm.topology.ReportedFailedException;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.RotatingMap;
 import org.apache.storm.utils.TupleUtils;
 
@@ -195,7 +195,7 @@ public class TridentBoltExecutor implements IRichBolt {
             if(_currBatch!=null) {
                 Map<Integer, Integer> taskEmittedTuples = _currBatch.taskEmittedTuples;
                 for(Integer task: tasks) {
-                    int newCount = ClientUtils.get(taskEmittedTuples, task, 0) + 1;
+                    int newCount = Utils.get(taskEmittedTuples, task, 0) + 1;
                     taskEmittedTuples.put(task, newCount);
                 }
             }
@@ -234,7 +234,7 @@ public class TridentBoltExecutor implements IRichBolt {
                     }
                 }
                 cond.targetTasks = new HashSet<>();
-                for(String component: ClientUtils.get(context.getThisTargets(),
+                for(String component: Utils.get(context.getThisTargets(),
                                         COORD_STREAM(batchGroup),
                                         new HashMap<String, Grouping>()).keySet()) {
                     cond.targetTasks.addAll(context.getComponentTasks(component));
@@ -267,7 +267,7 @@ public class TridentBoltExecutor implements IRichBolt {
             _bolt.finishBatch(tracked.info);
             String stream = COORD_STREAM(tracked.info.batchGroup);
             for(Integer task: tracked.condition.targetTasks) {
-                _collector.emitDirect(task, stream, finishTuple, new Values(tracked.info.batchId, ClientUtils.get(tracked.taskEmittedTuples, task, 0)));
+                _collector.emitDirect(task, stream, finishTuple, new Values(tracked.info.batchId, Utils.get(tracked.taskEmittedTuples, task, 0)));
             }
             if(tracked.delayedAck!=null) {
                 _collector.ack(tracked.delayedAck);

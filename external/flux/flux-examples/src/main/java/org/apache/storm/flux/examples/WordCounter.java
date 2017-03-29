@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static org.apache.storm.utils.ClientUtils.tuple;
+import static org.apache.storm.utils.Utils.tuple;
 
 /**
  * This bolt is used by the HBase example. It simply emits the first field

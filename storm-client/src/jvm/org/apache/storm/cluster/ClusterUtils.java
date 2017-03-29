@@ -22,7 +22,7 @@ import org.apache.storm.generated.ClusterWorkerHeartbeat;
 import org.apache.storm.generated.ExecutorInfo;
 import org.apache.storm.generated.ExecutorStats;
 import org.apache.storm.generated.ProfileAction;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
@@ -94,7 +94,7 @@ public class ClusterUtils {
     public static List<ACL> mkTopoOnlyAcls(Map topoConf) throws NoSuchAlgorithmException {
         List<ACL> aclList = null;
         String payload = (String) topoConf.get(Config.STORM_ZOOKEEPER_TOPOLOGY_AUTH_PAYLOAD);
-        if (ClientUtils.isZkAuthenticationConfiguredTopology(topoConf)) {
+        if (Utils.isZkAuthenticationConfiguredTopology(topoConf)) {
             aclList = new ArrayList<>();
             ACL acl1 = ZooDefs.Ids.CREATOR_ALL_ACL.get(0);
             aclList.add(acl1);
@@ -152,7 +152,7 @@ public class ClusterUtils {
         try {
             return errorStormRoot(stormId) + ZK_SEPERATOR + URLEncoder.encode(componentId, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
     }
 
@@ -178,7 +178,7 @@ public class ClusterUtils {
 
     public static <T> T maybeDeserialize(byte[] serialized, Class<T> clazz) {
         if (serialized != null) {
-            return ClientUtils.deserialize(serialized, clazz);
+            return Utils.deserialize(serialized, clazz);
         }
         return null;
     }

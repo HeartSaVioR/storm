@@ -17,13 +17,12 @@
  */
 package org.apache.storm.daemon.metrics;
 
-import org.apache.storm.Config;
 import org.apache.storm.DaemonConfig;
 import org.apache.storm.daemon.metrics.reporters.JmxPreparableReporter;
 import org.apache.storm.daemon.metrics.reporters.PreparableReporter;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.ObjectReader;
+import org.apache.storm.utils.DaemonConfigUtils;
 import org.apache.storm.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,8 +88,8 @@ public class MetricsUtils {
     public static File getCsvLogDir(Map stormConf) {
         String csvMetricsLogDirectory = ObjectReader.getString(stormConf.get(DaemonConfig.STORM_DAEMON_METRICS_REPORTER_CSV_LOG_DIR), null);
         if (csvMetricsLogDirectory == null) {
-            csvMetricsLogDirectory = ClientConfigUtils.absoluteStormLocalDir(stormConf);
-            csvMetricsLogDirectory = csvMetricsLogDirectory + ConfigUtils.FILE_SEPARATOR + "csvmetrics";
+            csvMetricsLogDirectory = ConfigUtils.absoluteStormLocalDir(stormConf);
+            csvMetricsLogDirectory = csvMetricsLogDirectory + DaemonConfigUtils.FILE_SEPARATOR + "csvmetrics";
         }
         File csvMetricsDir = new File(csvMetricsLogDirectory);
         validateCreateOutputDir(csvMetricsDir);

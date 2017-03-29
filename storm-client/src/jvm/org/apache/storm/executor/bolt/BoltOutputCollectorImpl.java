@@ -33,7 +33,7 @@ import org.apache.storm.tuple.MessageId;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.TupleImpl;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,7 +106,7 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
         Map<Long, Long> anchorsToIds = input.getMessageId().getAnchorsToIds();
         for (Map.Entry<Long, Long> entry : anchorsToIds.entrySet()) {
             executor.sendUnanchored(taskData, Acker.ACKER_ACK_STREAM_ID,
-                    new Values(entry.getKey(), ClientUtils.bitXor(entry.getValue(), ackValue)),
+                    new Values(entry.getKey(), Utils.bitXor(entry.getValue(), ackValue)),
                     executor.getExecutorTransfer());
         }
         long delta = tupleTimeDelta((TupleImpl) input);
@@ -166,6 +166,6 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
         if (curr == null) {
             curr = 0l;
         }
-        pending.put(key, ClientUtils.bitXor(curr, id));
+        pending.put(key, Utils.bitXor(curr, id));
     }
 }

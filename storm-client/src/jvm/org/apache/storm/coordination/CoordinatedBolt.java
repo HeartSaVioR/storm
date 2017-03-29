@@ -31,7 +31,7 @@ import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.TimeCacheMap;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -139,7 +139,7 @@ public class CoordinatedBolt implements IRichBolt {
                 if (track != null) {
                     Map<Integer, Integer> taskEmittedTuples = track.taskEmittedTuples;
                     for(Integer task: tasks) {
-                        int newCount = ClientUtils.get(taskEmittedTuples, task, 0) + 1;
+                        int newCount = Utils.get(taskEmittedTuples, task, 0) + 1;
                         taskEmittedTuples.put(task, newCount);
                     }
                 }
@@ -215,7 +215,7 @@ public class CoordinatedBolt implements IRichBolt {
         _tracked = new TimeCacheMap<>(context.maxTopologyMessageTimeout(), callback);
         _collector = collector;
         _delegate.prepare(config, context, new OutputCollector(new CoordinatedOutputCollector(collector)));
-        for(String component: ClientUtils.get(context.getThisTargets(),
+        for(String component: Utils.get(context.getThisTargets(),
                                         Constants.COORDINATED_STREAM_ID,
                                         new HashMap<String, Grouping>())
                                         .keySet()) {
@@ -267,7 +267,7 @@ public class CoordinatedBolt implements IRichBolt {
                         Iterator<Integer> outTasks = _countOutTasks.iterator();
                         while(outTasks.hasNext()) {
                             int task = outTasks.next();
-                            int numTuples = ClientUtils.get(track.taskEmittedTuples, task, 0);
+                            int numTuples = Utils.get(track.taskEmittedTuples, task, 0);
                             _collector.emitDirect(task, Constants.COORDINATED_STREAM_ID, tup, new Values(id, numTuples));
                         }
                         for(Tuple t: track.ackTuples) {

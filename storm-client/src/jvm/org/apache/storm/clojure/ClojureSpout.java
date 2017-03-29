@@ -24,7 +24,7 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichSpout;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import clojure.lang.IFn;
 import clojure.lang.PersistentArrayMap;
 import clojure.lang.Keyword;
@@ -52,7 +52,7 @@ public class ClojureSpout implements IRichSpout {
 
     @Override
     public void open(final Map conf, final TopologyContext context, final SpoutOutputCollector collector) {
-        IFn hof = ClientUtils.loadClojureFn(_fnSpec.get(0), _fnSpec.get(1));
+        IFn hof = Utils.loadClojureFn(_fnSpec.get(0), _fnSpec.get(1));
         try {
             IFn preparer = (IFn) hof.applyTo(RT.seq(_params));
             final Map<Keyword,Object> collectorMap = new PersistentArrayMap( new Object[] {
@@ -125,7 +125,7 @@ public class ClojureSpout implements IRichSpout {
     
     @Override
     public Map<String, Object> getComponentConfiguration() {
-        IFn hof = ClientUtils.loadClojureFn(_confSpec.get(0), _confSpec.get(1));
+        IFn hof = Utils.loadClojureFn(_confSpec.get(0), _confSpec.get(1));
         try {
             return (Map) hof.applyTo(RT.seq(_params));
         } catch (Exception e) {

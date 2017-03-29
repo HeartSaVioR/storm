@@ -45,7 +45,7 @@ import org.apache.storm.streams.windowing.Window;
 import org.apache.storm.topology.IBasicBolt;
 import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -427,7 +427,7 @@ public class Stream<T> {
         sinkNode.setComponentId(boltId);
         sinkNode.setParallelism(parallelism);
         if (node instanceof SpoutNode) {
-            addNode(node, sinkNode, ClientUtils.DEFAULT_STREAM_ID, parallelism);
+            addNode(node, sinkNode, Utils.DEFAULT_STREAM_ID, parallelism);
         } else {
             addNode(node, sinkNode, parallelism);
         }

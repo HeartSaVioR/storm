@@ -26,7 +26,7 @@ import org.apache.storm.generated.KeyNotFoundException;
 import org.apache.storm.generated.ReadableBlobMeta;
 
 import org.apache.storm.nimbus.NimbusInfo;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.curator.framework.CuratorFramework;
 import org.slf4j.Logger;
@@ -111,7 +111,7 @@ public class LocalFsBlobStore extends BlobStore {
         BlobStoreFileOutputStream mOut = null;
         try {
             mOut = new BlobStoreFileOutputStream(fbs.write(META_PREFIX+key, true));
-            mOut.write(ClientUtils.thriftSerialize(meta));
+            mOut.write(Utils.thriftSerialize(meta));
             mOut.close();
             mOut = null;
             return new BlobStoreFileOutputStream(fbs.write(DATA_PREFIX+key, true));
@@ -156,7 +156,7 @@ public class LocalFsBlobStore extends BlobStore {
             }
             in.close();
             in = null;
-            return ClientUtils.thriftDeserialize(SettableBlobMeta.class, out.toByteArray());
+            return Utils.thriftDeserialize(SettableBlobMeta.class, out.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -200,7 +200,7 @@ public class LocalFsBlobStore extends BlobStore {
         BlobStoreFileOutputStream mOut = null;
         try {
             mOut = new BlobStoreFileOutputStream(fbs.write(META_PREFIX+key, false));
-            mOut.write(ClientUtils.thriftSerialize(meta));
+            mOut.write(Utils.thriftSerialize(meta));
             mOut.close();
             mOut = null;
         } catch (IOException e) {

@@ -29,7 +29,7 @@ import org.apache.storm.topology.IRichSpout;
 import org.apache.storm.topology.SpoutDeclarer;
 import org.apache.storm.trident.operation.impl.PreservingFieldsOrderJoinerMultiReducer;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.io.Serializable;
 import java.util.*;
@@ -214,7 +214,7 @@ public class TridentTopology {
                 names.add(s._name);
             }
         }
-        Node n = new ProcessorNode(getUniqueStreamId(), ClientUtils.join(names, "-"), outputFields, outputFields, new MultiReducerProcessor(inputFields, function));
+        Node n = new ProcessorNode(getUniqueStreamId(), Utils.join(names, "-"), outputFields, outputFields, new MultiReducerProcessor(inputFields, function));
         return addSourcedNode(streams, n);
     }
     
@@ -696,7 +696,7 @@ public class TridentTopology {
                 if(groupName!=null && !groupName.isEmpty()) {
                     name.add(getGroupName(g));                
                 }
-                ret.put(g, ClientUtils.join(name, "-"));
+                ret.put(g, Utils.join(name, "-"));
                 ctr++;
             }
         }
@@ -718,7 +718,7 @@ public class TridentTopology {
                 names.add(n);
             }
         }
-        return ClientUtils.join(names, "-");
+        return Utils.join(names, "-");
     }
     
     private static Map<String, String> getOutputStreamBatchGroups(Group g, Map<Node, String> batchGroupMap) {
@@ -833,7 +833,7 @@ public class TridentTopology {
     private static boolean isIdentityPartition(PartitionNode n) {
         Grouping g = n.thriftGrouping;
         if(g.is_set_custom_serialized()) {
-            CustomStreamGrouping csg = (CustomStreamGrouping) ClientUtils.javaDeserialize(g.get_custom_serialized(), Serializable.class);
+            CustomStreamGrouping csg = (CustomStreamGrouping) Utils.javaDeserialize(g.get_custom_serialized(), Serializable.class);
             return csg instanceof IdentityGrouping;
         }
         return false;
@@ -892,7 +892,7 @@ public class TridentTopology {
     
     private static PartitionNode makeIdentityPartition(Node basis) {
         return new PartitionNode(basis.streamId, basis.name, basis.allOutputFields,
-            Grouping.custom_serialized(ClientUtils.javaSerialize(new IdentityGrouping())));
+            Grouping.custom_serialized(Utils.javaSerialize(new IdentityGrouping())));
     }
     
     

@@ -28,7 +28,7 @@ import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
@@ -119,7 +119,7 @@ public class TopologyBuilder {
             ComponentCommon common = getComponentCommon(boltId, bolt);
             try{
                 maybeAddCheckpointInputs(common);
-                boltSpecs.put(boltId, new Bolt(ComponentObject.serialized_java(ClientUtils.javaSerialize(bolt)), common));
+                boltSpecs.put(boltId, new Bolt(ComponentObject.serialized_java(Utils.javaSerialize(bolt)), common));
             }catch(RuntimeException wrapperCause){
                 if (wrapperCause.getCause() != null && NotSerializableException.class.equals(wrapperCause.getCause().getClass())){
                     throw new IllegalStateException(
@@ -134,7 +134,7 @@ public class TopologyBuilder {
             IRichSpout spout = _spouts.get(spoutId);
             ComponentCommon common = getComponentCommon(spoutId, spout);
             try{
-                spoutSpecs.put(spoutId, new SpoutSpec(ComponentObject.serialized_java(ClientUtils.javaSerialize(spout)), common));
+                spoutSpecs.put(spoutId, new SpoutSpec(ComponentObject.serialized_java(Utils.javaSerialize(spout)), common));
             }catch(RuntimeException wrapperCause){
                 if (wrapperCause.getCause() != null && NotSerializableException.class.equals(wrapperCause.getCause().getClass())){
                     throw new IllegalStateException(
@@ -362,7 +362,7 @@ public class TopologyBuilder {
             throw new IllegalArgumentException("WorkerHook must not be null.");
         }
 
-        _workerHooks.add(ByteBuffer.wrap(ClientUtils.javaSerialize(workerHook)));
+        _workerHooks.add(ByteBuffer.wrap(Utils.javaSerialize(workerHook)));
     }
 
     private void validateUnusedId(String id) {
@@ -481,7 +481,7 @@ public class TopologyBuilder {
         }
 
         public BoltDeclarer fieldsGrouping(String componentId, Fields fields) {
-            return fieldsGrouping(componentId, ClientUtils.DEFAULT_STREAM_ID, fields);
+            return fieldsGrouping(componentId, Utils.DEFAULT_STREAM_ID, fields);
         }
 
         public BoltDeclarer fieldsGrouping(String componentId, String streamId, Fields fields) {
@@ -489,7 +489,7 @@ public class TopologyBuilder {
         }
 
         public BoltDeclarer globalGrouping(String componentId) {
-            return globalGrouping(componentId, ClientUtils.DEFAULT_STREAM_ID);
+            return globalGrouping(componentId, Utils.DEFAULT_STREAM_ID);
         }
 
         public BoltDeclarer globalGrouping(String componentId, String streamId) {
@@ -497,7 +497,7 @@ public class TopologyBuilder {
         }
 
         public BoltDeclarer shuffleGrouping(String componentId) {
-            return shuffleGrouping(componentId, ClientUtils.DEFAULT_STREAM_ID);
+            return shuffleGrouping(componentId, Utils.DEFAULT_STREAM_ID);
         }
 
         public BoltDeclarer shuffleGrouping(String componentId, String streamId) {
@@ -505,7 +505,7 @@ public class TopologyBuilder {
         }
 
         public BoltDeclarer localOrShuffleGrouping(String componentId) {
-            return localOrShuffleGrouping(componentId, ClientUtils.DEFAULT_STREAM_ID);
+            return localOrShuffleGrouping(componentId, Utils.DEFAULT_STREAM_ID);
         }
 
         public BoltDeclarer localOrShuffleGrouping(String componentId, String streamId) {
@@ -513,7 +513,7 @@ public class TopologyBuilder {
         }
         
         public BoltDeclarer noneGrouping(String componentId) {
-            return noneGrouping(componentId, ClientUtils.DEFAULT_STREAM_ID);
+            return noneGrouping(componentId, Utils.DEFAULT_STREAM_ID);
         }
 
         public BoltDeclarer noneGrouping(String componentId, String streamId) {
@@ -521,7 +521,7 @@ public class TopologyBuilder {
         }
 
         public BoltDeclarer allGrouping(String componentId) {
-            return allGrouping(componentId, ClientUtils.DEFAULT_STREAM_ID);
+            return allGrouping(componentId, Utils.DEFAULT_STREAM_ID);
         }
 
         public BoltDeclarer allGrouping(String componentId, String streamId) {
@@ -529,7 +529,7 @@ public class TopologyBuilder {
         }
 
         public BoltDeclarer directGrouping(String componentId) {
-            return directGrouping(componentId, ClientUtils.DEFAULT_STREAM_ID);
+            return directGrouping(componentId, Utils.DEFAULT_STREAM_ID);
         }
 
         public BoltDeclarer directGrouping(String componentId, String streamId) {
@@ -553,12 +553,12 @@ public class TopologyBuilder {
 
         @Override
         public BoltDeclarer customGrouping(String componentId, CustomStreamGrouping grouping) {
-            return customGrouping(componentId, ClientUtils.DEFAULT_STREAM_ID, grouping);
+            return customGrouping(componentId, Utils.DEFAULT_STREAM_ID, grouping);
         }
 
         @Override
         public BoltDeclarer customGrouping(String componentId, String streamId, CustomStreamGrouping grouping) {
-            return grouping(componentId, streamId, Grouping.custom_serialized(ClientUtils.javaSerialize(grouping)));
+            return grouping(componentId, streamId, Grouping.custom_serialized(Utils.javaSerialize(grouping)));
         }
 
         @Override

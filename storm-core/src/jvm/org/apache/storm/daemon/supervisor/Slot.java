@@ -39,7 +39,7 @@ import org.apache.storm.generated.ProfileAction;
 import org.apache.storm.generated.ProfileRequest;
 import org.apache.storm.localizer.ILocalizer;
 import org.apache.storm.scheduler.ISupervisor;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.LocalState;
 import org.apache.storm.utils.Time;
@@ -771,9 +771,9 @@ public class Slot extends Thread implements AutoCloseable {
                 dynamicState = nextState;
             }
         } catch (Throwable e) {
-            if (!ClientUtils.exceptionCauseIsInstanceOf(InterruptedException.class, e)) {
+            if (!Utils.exceptionCauseIsInstanceOf(InterruptedException.class, e)) {
                 LOG.error("Error when processing event", e);
-                ClientUtils.exitProcess(20, "Error when processing an event");
+                Utils.exitProcess(20, "Error when processing an event");
             }
         }
     }

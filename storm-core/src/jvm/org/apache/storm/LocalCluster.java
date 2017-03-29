@@ -67,14 +67,14 @@ import org.apache.storm.testing.InProcessZookeeper;
 import org.apache.storm.testing.NonRichBoltTracker;
 import org.apache.storm.testing.TmpPath;
 import org.apache.storm.testing.TrackedTopology;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.RegisteredGlobalState;
 import org.apache.storm.utils.StormCommonInstaller;
 import org.apache.storm.utils.Time;
 import org.apache.storm.utils.Time.SimulatedTime;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.DaemonUtils;
 import org.apache.thrift.TException;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
@@ -290,7 +290,7 @@ public class LocalCluster implements ILocalClusterTrackedTopologyAware {
          * on tracked topologies.
          */
         public Builder withTracked() {
-            this.trackId = ClientUtils.uuid();
+            this.trackId = Utils.uuid();
             return this;
         }
         
@@ -378,7 +378,7 @@ public class LocalCluster implements ILocalClusterTrackedTopologyAware {
             this.supervisors = new ArrayList<>();
             TmpPath nimbusTmp = new TmpPath();
             this.tmpDirs.add(nimbusTmp);
-            Map<String, Object> conf = ClientConfigUtils.readStormConfig();
+            Map<String, Object> conf = ConfigUtils.readStormConfig();
             conf.put(Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS, true);
             conf.put(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS, false);
             conf.put(Config.TOPOLOGY_TRIDENT_BATCH_EMIT_INTERVAL_MILLIS, 50);
@@ -505,14 +505,14 @@ public class LocalCluster implements ILocalClusterTrackedTopologyAware {
     @Override
     public LocalTopology submitTopology(String topologyName, Map<String, Object> conf, StormTopology topology)
             throws TException {
-        if (!ClientUtils.isValidConf(conf)) {
+        if (!Utils.isValidConf(conf)) {
             throw new IllegalArgumentException("Topology conf is not json-serializable");
         }
         getNimbus().submitTopology(topologyName, null, JSONValue.toJSONString(conf), topology);
         
-        ISubmitterHook hook = (ISubmitterHook) Utils.getConfiguredClass(conf, Config.STORM_TOPOLOGY_SUBMISSION_NOTIFIER_PLUGIN);
+        ISubmitterHook hook = (ISubmitterHook) DaemonUtils.getConfiguredClass(conf, Config.STORM_TOPOLOGY_SUBMISSION_NOTIFIER_PLUGIN);
         if (hook != null) {
-            TopologyInfo topologyInfo = ClientUtils.getTopologyInfo(topologyName, null, conf);
+            TopologyInfo topologyInfo = Utils.getTopologyInfo(topologyName, null, conf);
             try {
                 hook.notify(topologyInfo, conf, topology);
             } catch (IllegalAccessException e) {
@@ -525,7 +525,7 @@ public class LocalCluster implements ILocalClusterTrackedTopologyAware {
     @Override
     public LocalTopology submitTopologyWithOpts(String topologyName, Map<String, Object> conf, StormTopology topology, SubmitOptions submitOpts)
             throws TException {
-        if (!ClientUtils.isValidConf(conf)) {
+        if (!Utils.isValidConf(conf)) {
             throw new IllegalArgumentException("Topology conf is not json-serializable");
         }
         getNimbus().submitTopologyWithOpts(topologyName, null, JSONValue.toJSONString(conf), topology, submitOpts);
@@ -739,14 +739,14 @@ public class LocalCluster implements ILocalClusterTrackedTopologyAware {
         superConf.put(Config.STORM_LOCAL_DIR, tmpDir.getPath());
         superConf.put(DaemonConfig.SUPERVISOR_SLOTS_PORTS, portNumbers);
         
-        final String superId = id == null ? ClientUtils.uuid() : id;
+        final String superId = id == null ? Utils.uuid() : id;
         ISupervisor isuper = new StandaloneSupervisor() {
             @Override
             public String generateSupervisorId() {
                 return superId;
             }
         };
-        if (!ClientConfigUtils.isLocalMode(superConf)) {
+        if (!ConfigUtils.isLocalMode(superConf)) {
             throw new IllegalArgumentException("Cannot start server in distrubuted mode!");
         }
         
@@ -802,7 +802,7 @@ public class LocalCluster implements ILocalClusterTrackedTopologyAware {
                 areAllWorkersWaiting())) {
             if (System.currentTimeMillis() >= endTime) {
                 LOG.info("Cluster was not idle in {} ms", timeoutMs);
-                LOG.info(Utils.threadDump());
+                LOG.info(DaemonUtils.threadDump());
                 throw new AssertionError("Test timed out (" + timeoutMs + "ms) cluster not idle");
             }
             Thread.sleep(rand.nextInt(20));

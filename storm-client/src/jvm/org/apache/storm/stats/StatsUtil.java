@@ -45,13 +45,12 @@ import org.apache.storm.generated.TopologyStats;
 import org.apache.storm.generated.WorkerResources;
 import org.apache.storm.generated.WorkerSummary;
 import org.apache.storm.scheduler.WorkerSlot;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1338,7 +1337,7 @@ public class StatsUtil {
                             String component = task2Component.get(task);
                             // if the component is a system (__*) component and we are hiding
                             // them in UI, keep going
-                            if (!includeSys && ClientUtils.isSystemId(component)) {
+                            if (!includeSys && Utils.isSystemId(component)) {
                                 continue;
                             }
 
@@ -1519,7 +1518,7 @@ public class StatsUtil {
             String host = (String) value.get(0);
             Integer port = (Integer) value.get(1);
             String comp = task2component.get(start);
-            if ((compId == null || compId.equals(comp)) && (includeSys || !ClientUtils.isSystemId(comp))) {
+            if ((compId == null || compId.equals(comp)) && (includeSys || !Utils.isSystemId(comp))) {
                 hostPorts.add(Lists.newArrayList(host, port));
             }
         }
@@ -1642,7 +1641,7 @@ public class StatsUtil {
             String id = (String) task2component.get(start);
 
             Map<String, Object> m = new HashMap<>();
-            if ((compId == null || compId.equals(id)) && (includeSys || !ClientUtils.isSystemId(id))) {
+            if ((compId == null || compId.equals(id)) && (includeSys || !Utils.isSystemId(id))) {
                 putKV(m, "exec-id", entry.getKey());
                 putKV(m, "comp-id", id);
                 putKV(m, NUM_TASKS, end - start + 1);
@@ -1839,7 +1838,7 @@ public class StatsUtil {
         if (!includeSys) {
             for (Iterator itr = stream2stat.keySet().iterator(); itr.hasNext(); ) {
                 Object key = itr.next();
-                if (key instanceof String && ClientUtils.isSystemId((String) key)) {
+                if (key instanceof String && Utils.isSystemId((String) key)) {
                     itr.remove();
                 }
             }
@@ -1862,7 +1861,7 @@ public class StatsUtil {
                 Map<K, V> stream2stat = stats.get(winOrStream);
                 for (Iterator subItr = stream2stat.keySet().iterator(); subItr.hasNext(); ) {
                     Object key = subItr.next();
-                    if (key instanceof String && ClientUtils.isSystemId((String) key)) {
+                    if (key instanceof String && Utils.isSystemId((String) key)) {
                         subItr.remove();
                     }
                 }
@@ -2376,7 +2375,7 @@ public class StatsUtil {
         }
 
         Map<String, Bolt> bolts = topology.get_bolts();
-        if (ClientUtils.isSystemId(compId) || bolts.containsKey(compId)) {
+        if (Utils.isSystemId(compId) || bolts.containsKey(compId)) {
             return BOLT;
         }
         return SPOUT;

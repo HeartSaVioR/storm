@@ -33,7 +33,7 @@ import javax.jms.Session;
 
 import org.apache.storm.jms.JmsProvider;
 import org.apache.storm.jms.JmsTupleProducer;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,7 +181,7 @@ public class TridentJmsSpout implements ITridentSpout<JmsBatch> {
     public Fields getOutputFields() {
         OutputFieldsGetter fieldGetter = new OutputFieldsGetter();
         tupleProducer.declareOutputFields(fieldGetter);
-        StreamInfo streamInfo = fieldGetter.getFieldsDeclaration().get(ClientUtils.DEFAULT_STREAM_ID);
+        StreamInfo streamInfo = fieldGetter.getFieldsDeclaration().get(Utils.DEFAULT_STREAM_ID);
         if (streamInfo == null) {
             throw new IllegalArgumentException("Jms Tuple producer has not declared output fields for the default stream");
         }
@@ -332,7 +332,7 @@ public class TridentJmsSpout implements ITridentSpout<JmsBatch> {
             for (int index=0; index<maxBatchSize; index++) {
                 Message msg = queue.poll();
                 if (msg == null) {
-                    ClientUtils.sleep(50); // Back off
+                    Utils.sleep(50); // Back off
                     break;
                 }
                 

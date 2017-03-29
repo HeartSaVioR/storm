@@ -26,7 +26,7 @@ import org.apache.storm.topology.IRichSpout;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,12 +58,12 @@ public class RichSpoutBatchTriggerer implements IRichSpout {
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
         _delegate.open(conf, context, new SpoutOutputCollector(new StreamOverrideCollector(collector)));
         _outputTasks = new ArrayList<>();
-        for(String component: ClientUtils.get(context.getThisTargets(),
+        for(String component: Utils.get(context.getThisTargets(),
                                         _coordStream,
                                         new HashMap<String, Grouping>()).keySet()) {
             _outputTasks.addAll(context.getComponentTasks(component));
         }
-        _rand = new Random(ClientUtils.secureRandomLong());
+        _rand = new Random(Utils.secureRandomLong());
     }
 
     @Override

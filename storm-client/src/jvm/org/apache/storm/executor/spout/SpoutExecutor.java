@@ -37,7 +37,7 @@ import org.apache.storm.spout.ISpoutWaitStrategy;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.stats.SpoutExecutorStats;
 import org.apache.storm.tuple.TupleImpl;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.DisruptorQueue;
 import org.apache.storm.utils.MutableLong;
 import org.apache.storm.utils.ObjectReader;
@@ -84,7 +84,7 @@ public class SpoutExecutor extends Executor {
 
     public void init(final Map<Integer, Task> idToTask) {
         while (!stormActive.get()) {
-            ClientUtils.sleep(100);
+            Utils.sleep(100);
         }
 
         LOG.info("Opening spout {}:{}", componentId, idToTask.keySet());
@@ -236,7 +236,7 @@ public class SpoutExecutor extends Executor {
                 ((SpoutExecutorStats) executor.getStats()).spoutAckedTuple(tupleInfo.getStream(), timeDelta);
             }
         } catch (Exception e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
     }
 
@@ -253,7 +253,7 @@ public class SpoutExecutor extends Executor {
                 ((SpoutExecutorStats) executor.getStats()).spoutFailedTuple(tupleInfo.getStream(), timeDelta);
             }
         } catch (Exception e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
     }
 }

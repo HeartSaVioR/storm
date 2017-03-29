@@ -18,7 +18,7 @@
 package org.apache.storm.spout;
 
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -26,8 +26,8 @@ import java.util.List;
 public class RawScheme implements Scheme {
     public List<Object> deserialize(ByteBuffer ser) {
         // Maintain backward compatibility for 0.10
-        byte[] b = ClientUtils.toByteArray(ser);
-        return ClientUtils.tuple(new Object[]{b});
+        byte[] b = Utils.toByteArray(ser);
+        return Utils.tuple(new Object[]{b});
     }
 
     public Fields getOutputFields() {

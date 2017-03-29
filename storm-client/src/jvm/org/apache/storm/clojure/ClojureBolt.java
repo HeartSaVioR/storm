@@ -31,7 +31,7 @@ import clojure.lang.PersistentArrayMap;
 import clojure.lang.Keyword;
 import clojure.lang.Symbol;
 import clojure.lang.RT;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ public class ClojureBolt implements IRichBolt, FinishedCallback {
 
     @Override
     public void prepare(final Map stormConf, final TopologyContext context, final OutputCollector collector) {
-        IFn hof = ClientUtils.loadClojureFn(_fnSpec.get(0), _fnSpec.get(1));
+        IFn hof = Utils.loadClojureFn(_fnSpec.get(0), _fnSpec.get(1));
         try {
             IFn preparer = (IFn) hof.applyTo(RT.seq(_params));
             final Map<Keyword,Object> collectorMap = new PersistentArrayMap( new Object[] {
@@ -110,7 +110,7 @@ public class ClojureBolt implements IRichBolt, FinishedCallback {
 
     @Override
     public Map<String, Object> getComponentConfiguration() {
-        IFn hof = ClientUtils.loadClojureFn(_confSpec.get(0), _confSpec.get(1));
+        IFn hof = Utils.loadClojureFn(_confSpec.get(0), _confSpec.get(1));
         try {
             return (Map) hof.applyTo(RT.seq(_params));
         } catch (Exception e) {

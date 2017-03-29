@@ -17,7 +17,7 @@
  */
 package org.apache.storm.trident.topology.state;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,7 +152,7 @@ public class RotatingTransactionalState {
             } catch(RuntimeException e) {
                 // Ignore NoNodeExists exceptions because when sync() it may populate _curr with stale data since
                 // zookeeper reads are eventually consistent.
-                if(!ClientUtils.exceptionCauseIsInstanceOf(KeeperException.NoNodeException.class, e)) {
+                if(!Utils.exceptionCauseIsInstanceOf(KeeperException.NoNodeException.class, e)) {
                     throw e;
                 }
             }

@@ -18,7 +18,7 @@
 package org.apache.storm.container.cgroup;
 
 import com.google.common.io.Files;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +84,7 @@ public class CgroupUtils {
     }
 
     public static boolean enabled() {
-        return ClientUtils.checkFileExists(CGROUP_STATUS_FILE);
+        return Utils.checkFileExists(CGROUP_STATUS_FILE);
     }
 
     public static List<String> readFileByLine(String filePath) throws IOException {

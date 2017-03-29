@@ -24,7 +24,7 @@ import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.storm.callback.ZKStateChangedCallback;
 import org.apache.storm.generated.*;
 import org.apache.storm.pacemaker.PacemakerClientPool;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.zookeeper.data.ACL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,7 +125,7 @@ public class PaceMakerStateStorage implements IStateStorage {
                 break;
             } catch (Exception e) {
                 if (retry <= 0) {
-                    throw ClientUtils.wrapInRuntime(e);
+                    throw Utils.wrapInRuntime(e);
                 }
                 retry--;
                 LOG.error("{} Failed to set_worker_hb. Will make {} more attempts.", e.getMessage(), retry);
@@ -155,7 +155,7 @@ public class PaceMakerStateStorage implements IStateStorage {
                     if(details == null) {
                         continue;
                     }
-                    ClusterWorkerHeartbeat cwh = ClientUtils.deserialize(details, ClusterWorkerHeartbeat.class);
+                    ClusterWorkerHeartbeat cwh = Utils.deserialize(details, ClusterWorkerHeartbeat.class);
                     if(cwh != null && cwh.get_time_secs() > latest_time_secs) {
                         latest_time_secs = cwh.get_time_secs();
                         ret = details;
@@ -167,7 +167,7 @@ public class PaceMakerStateStorage implements IStateStorage {
                 return ret;
             } catch (Exception e) {
                 if (retry <= 0) {
-                    throw ClientUtils.wrapInRuntime(e);
+                    throw Utils.wrapInRuntime(e);
                 }
                 retry--;
                 LOG.error("{} Failed to get_worker_hb. Will make {} more attempts.", e.getMessage(), retry);
@@ -198,7 +198,7 @@ public class PaceMakerStateStorage implements IStateStorage {
                 return new ArrayList<>(retSet);
             } catch (Exception e) {
                 if (retry <= 0) {
-                    throw ClientUtils.wrapInRuntime(e);
+                    throw Utils.wrapInRuntime(e);
                 }
                 retry--;
                 LOG.error("{} Failed to get_worker_hb_children. Will make {} more attempts.", e.getMessage(), retry);
@@ -239,7 +239,7 @@ public class PaceMakerStateStorage implements IStateStorage {
                     }
                     else {
                         LOG.error("Unable to delete_worker_hb from any pacemaker.");
-                        throw ClientUtils.wrapInRuntime(e);
+                        throw Utils.wrapInRuntime(e);
                     }
                 }
                 retry--;

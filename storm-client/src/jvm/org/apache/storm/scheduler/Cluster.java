@@ -27,7 +27,7 @@ import java.util.Set;
 
 import org.apache.storm.Config;
 import org.apache.storm.networktopography.DNSToSwitchMapping;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.ReflectionUtils;
 
@@ -572,9 +572,9 @@ public class Cluster {
         }
 
         Double memGcChildopts = null;
-        memGcChildopts = ClientUtils.parseJvmHeapMemByChildOpts(topologyWorkerGcChildopts, null);
+        memGcChildopts = Utils.parseJvmHeapMemByChildOpts(topologyWorkerGcChildopts, null);
         if (memGcChildopts == null) {
-            memGcChildopts = ClientUtils.parseJvmHeapMemByChildOpts(workerGcChildopts, null);
+            memGcChildopts = Utils.parseJvmHeapMemByChildOpts(workerGcChildopts, null);
         }
 
         String topologyWorkerChildopts = null;
@@ -583,7 +583,7 @@ public class Cluster {
         } else {
             topologyWorkerChildopts = ObjectReader.getString(topConf.get(Config.TOPOLOGY_WORKER_CHILDOPTS), null);
         }
-        Double memTopologyWorkerChildopts = ClientUtils.parseJvmHeapMemByChildOpts(topologyWorkerChildopts, null);
+        Double memTopologyWorkerChildopts = Utils.parseJvmHeapMemByChildOpts(topologyWorkerChildopts, null);
 
         String workerChildopts = null;
         if (topConf.get(Config.WORKER_CHILDOPTS) instanceof List) {
@@ -591,7 +591,7 @@ public class Cluster {
         } else {
             workerChildopts = ObjectReader.getString(topConf.get(Config.WORKER_CHILDOPTS), null);
         }
-        Double memWorkerChildopts = ClientUtils.parseJvmHeapMemByChildOpts(workerChildopts, null);
+        Double memWorkerChildopts = Utils.parseJvmHeapMemByChildOpts(workerChildopts, null);
 
         if (memGcChildopts != null) {
             totalWorkerMemory += memGcChildopts;
@@ -610,7 +610,7 @@ public class Cluster {
             topoWorkerLwChildopts = ObjectReader.getString(topConf.get(Config.TOPOLOGY_WORKER_LOGWRITER_CHILDOPTS), null);
         }
         if (topoWorkerLwChildopts != null) {
-            totalWorkerMemory += ClientUtils.parseJvmHeapMemByChildOpts(topoWorkerLwChildopts, 0.0);
+            totalWorkerMemory += Utils.parseJvmHeapMemByChildOpts(topoWorkerLwChildopts, 0.0);
         }
         return totalWorkerMemory;
     }

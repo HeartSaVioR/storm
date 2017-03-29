@@ -18,7 +18,7 @@
 package org.apache.storm.metric;
 
 import org.apache.storm.task.TopologyContext;
-import org.apache.storm.utils.ClientConfigUtils;
+import org.apache.storm.utils.ConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +87,7 @@ public class FileBasedEventLogger implements IEventLogger {
          * Include the topology name & worker port in the file name so that
          * multiple event loggers can log independently.
          */
-        String workersArtifactRoot = ClientConfigUtils.workerArtifactsRoot(stormConf, stormId, port);
+        String workersArtifactRoot = ConfigUtils.workerArtifactsRoot(stormConf, stormId, port);
 
         Path path = Paths.get(workersArtifactRoot, "events.log");
         File dir = path.toFile().getParentFile();

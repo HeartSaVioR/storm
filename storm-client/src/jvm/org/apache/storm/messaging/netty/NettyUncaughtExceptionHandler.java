@@ -17,7 +17,7 @@
  */
 package org.apache.storm.messaging.netty;
 
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,7 @@ public class NettyUncaughtExceptionHandler implements Thread.UncaughtExceptionHa
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         try {
-            ClientUtils.handleUncaughtException(e);
+            Utils.handleUncaughtException(e);
         } catch (Error error) {
             LOG.info("Received error in netty thread.. terminating server...");
             Runtime.getRuntime().exit(1);

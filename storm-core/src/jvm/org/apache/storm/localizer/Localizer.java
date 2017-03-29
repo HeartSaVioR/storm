@@ -26,7 +26,7 @@ import org.apache.storm.generated.KeyNotFoundException;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.ShellUtils.ExitCodeException;
 import org.apache.storm.utils.ShellUtils.ShellCommandExecutor;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.DaemonUtils;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -215,7 +215,7 @@ public class Localizer {
       files = dir.listFiles(new FilenameFilter() {
         @Override
         public boolean accept(File dir, String name) {
-          return name.toLowerCase().endsWith(Utils.DEFAULT_CURRENT_BLOB_SUFFIX);
+          return name.toLowerCase().endsWith(DaemonUtils.DEFAULT_CURRENT_BLOB_SUFFIX);
         }
       });
     }
@@ -315,13 +315,13 @@ public class Localizer {
   protected boolean isLocalizedResourceUpToDate(LocalizedResource lrsrc,
       ClientBlobStore blobstore) throws AuthorizationException, KeyNotFoundException {
     String localFile = lrsrc.getFilePath();
-    long nimbusBlobVersion = Utils.nimbusVersionOfBlob(lrsrc.getKey(), blobstore);
-    long currentBlobVersion = Utils.localVersionOfBlob(localFile);
+    long nimbusBlobVersion = DaemonUtils.nimbusVersionOfBlob(lrsrc.getKey(), blobstore);
+    long currentBlobVersion = DaemonUtils.localVersionOfBlob(localFile);
     return (nimbusBlobVersion == currentBlobVersion);
   }
 
   protected ClientBlobStore getClientBlobStore() {
-    return Utils.getClientBlobStoreForSupervisor(_conf);
+    return DaemonUtils.getClientBlobStoreForSupervisor(_conf);
   }
 
   /**
@@ -514,15 +514,15 @@ public class Localizer {
     ClientBlobStore blobstore = null;
     try {
       blobstore = getClientBlobStore();
-      long nimbusBlobVersion = Utils.nimbusVersionOfBlob(key, blobstore);
-      long oldVersion = Utils.localVersionOfBlob(localFile.toString());
+      long nimbusBlobVersion = DaemonUtils.nimbusVersionOfBlob(key, blobstore);
+      long oldVersion = DaemonUtils.localVersionOfBlob(localFile.toString());
       FileOutputStream out = null;
       PrintWriter writer = null;
       int numTries = 0;
       String localizedPath = localFile.toString();
-      String localFileWithVersion = Utils.constructBlobWithVersionFileName(localFile.toString(),
+      String localFileWithVersion = DaemonUtils.constructBlobWithVersionFileName(localFile.toString(),
               nimbusBlobVersion);
-      String localVersionFile = Utils.constructVersionFileName(localFile.toString());
+      String localVersionFile = DaemonUtils.constructVersionFileName(localFile.toString());
       String downloadFile = localFileWithVersion;
       if (uncompress) {
         // we need to download to temp file and then unpack into the one requested
@@ -532,7 +532,7 @@ public class Localizer {
         out = new FileOutputStream(downloadFile);
         numTries++;
         try {
-          if (!Utils.canUserReadBlob(blobstore.getBlobMeta(key), user)) {
+          if (!DaemonUtils.canUserReadBlob(blobstore.getBlobMeta(key), user)) {
             throw new AuthorizationException(user + " does not have READ access to " + key);
           }
           InputStreamWithMeta in = blobstore.getBlob(key);
@@ -544,7 +544,7 @@ public class Localizer {
           out.close();
           in.close();
           if (uncompress) {
-            Utils.unpack(new File(downloadFile), new File(localFileWithVersion));
+            DaemonUtils.unpack(new File(downloadFile), new File(localFileWithVersion));
             LOG.debug("uncompressed " + downloadFile + " to: " + localFileWithVersion);
           }
 
@@ -569,9 +569,9 @@ public class Localizer {
             File uuid_symlink = new File(localFile + "." + tmp_uuid_local);
 
             Files.createSymbolicLink(uuid_symlink.toPath(),
-                Paths.get(Utils.constructBlobWithVersionFileName(localFile.toString(),
+                Paths.get(DaemonUtils.constructBlobWithVersionFileName(localFile.toString(),
                         nimbusBlobVersion)));
-            File current_symlink = new File(Utils.constructBlobCurrentSymlinkName(
+            File current_symlink = new File(DaemonUtils.constructBlobCurrentSymlinkName(
                     localFile.toString()));
             Files.move(uuid_symlink.toPath(), current_symlink.toPath(), ATOMIC_MOVE);
           } catch (IOException e) {

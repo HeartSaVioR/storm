@@ -21,7 +21,7 @@ package org.apache.storm.testing;
 import java.io.File;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +30,10 @@ public class TmpPath implements AutoCloseable {
     
     public static String localTempPath() {
         StringBuilder ret = new StringBuilder().append(System.getProperty("java.io.tmpdir"));
-        if (!ClientUtils.isOnWindows()) {
+        if (!Utils.isOnWindows()) {
             ret.append("/");
         }
-        ret.append(ClientUtils.uuid());
+        ret.append(Utils.uuid());
         return ret.toString();
     }
     

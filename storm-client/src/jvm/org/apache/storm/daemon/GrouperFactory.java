@@ -31,7 +31,7 @@ import org.apache.storm.grouping.LoadMapping;
 import org.apache.storm.grouping.ShuffleGrouping;
 import org.apache.storm.task.WorkerTopologyContext;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.TupleUtils;
 
 import java.util.ArrayList;
@@ -86,7 +86,7 @@ public class GrouperFactory {
                 result = (CustomStreamGrouping) Thrift.instantiateJavaObject(thriftGrouping.get_custom_object());
                 break;
             case CUSTOM_SERIALIZED:
-                result = ClientUtils.javaDeserialize(thriftGrouping.get_custom_serialized(), CustomStreamGrouping.class);
+                result = Utils.javaDeserialize(thriftGrouping.get_custom_serialized(), CustomStreamGrouping.class);
                 break;
             case DIRECT:
                 result = DIRECT;

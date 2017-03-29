@@ -21,11 +21,11 @@ import org.apache.storm.Config;
 import org.apache.storm.generated.LSWorkerHeartbeat;
 import org.apache.storm.localizer.LocalResource;
 import org.apache.storm.localizer.Localizer;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.LocalState;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.DaemonUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.ACL;
 import org.slf4j.Logger;
@@ -55,13 +55,13 @@ public class SupervisorUtils {
     }
 
     public static void rmrAsUser(Map<String, Object> conf, String id, String path) throws IOException {
-        String user = Utils.getFileOwner(path);
+        String user = DaemonUtils.getFileOwner(path);
         String logPreFix = "rmr " + id;
         List<String> commands = new ArrayList<>();
         commands.add("rmr");
         commands.add(path);
         ClientSupervisorUtils.processLauncherAndWait(conf, user, commands, null, logPreFix);
-        if (ClientUtils.checkFileExists(path)) {
+        if (Utils.checkFileExists(path)) {
             throw new RuntimeException(path + " was not deleted.");
         }
     }
@@ -102,7 +102,7 @@ public class SupervisorUtils {
      * @param conf
      */
     static void addBlobReferences(Localizer localizer, String stormId, Map<String, Object> conf) throws IOException {
-        Map<String, Object> stormConf = ClientConfigUtils.readSupervisorStormConf(conf, stormId);
+        Map<String, Object> stormConf = ConfigUtils.readSupervisorStormConf(conf, stormId);
         Map<String, Map<String, Object>> blobstoreMap = (Map<String, Map<String, Object>>) stormConf.get(Config.TOPOLOGY_BLOBSTORE_MAP);
         String user = (String) stormConf.get(Config.TOPOLOGY_SUBMITTER_USER);
         String topoName = (String) stormConf.get(Config.TOPOLOGY_NAME);
@@ -114,8 +114,8 @@ public class SupervisorUtils {
 
     public static Set<String> readDownloadedTopologyIds(Map<String, Object> conf) throws IOException {
         Set<String> stormIds = new HashSet<>();
-        String path = ClientConfigUtils.supervisorStormDistRoot(conf);
-        Collection<String> rets = Utils.readDirContents(path);
+        String path = ConfigUtils.supervisorStormDistRoot(conf);
+        Collection<String> rets = DaemonUtils.readDirContents(path);
         for (String ret : rets) {
             stormIds.add(URLDecoder.decode(ret));
         }
@@ -123,8 +123,8 @@ public class SupervisorUtils {
     }
 
     public static Collection<String> supervisorWorkerIds(Map<String, Object> conf) {
-        String workerRoot = ClientConfigUtils.workerRoot(conf);
-        return Utils.readDirContents(workerRoot);
+        String workerRoot = ConfigUtils.workerRoot(conf);
+        return DaemonUtils.readDirContents(workerRoot);
     }
 
     /**
@@ -166,7 +166,7 @@ public class SupervisorUtils {
 
     protected LSWorkerHeartbeat readWorkerHeartbeatImpl(Map<String, Object> conf, String workerId) {
         try {
-            LocalState localState = ClientConfigUtils.workerState(conf, workerId);
+            LocalState localState = ConfigUtils.workerState(conf, workerId);
             return localState.getWorkerHeartBeat();
         } catch (Exception e) {
             LOG.warn("Failed to read local heartbeat for workerId : {},Ignoring exception.", workerId, e);

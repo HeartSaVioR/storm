@@ -19,7 +19,7 @@ package org.apache.storm.trident.testing;
 
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.RegisteredGlobalState;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -122,7 +122,7 @@ public class FeederBatchSpout implements ITridentSpout, IFeeder {
                 _masterEmitted++;
                 return true;
             } else {
-                ClientUtils.sleep(2);
+                Utils.sleep(2);
                 return false;
             }
         }

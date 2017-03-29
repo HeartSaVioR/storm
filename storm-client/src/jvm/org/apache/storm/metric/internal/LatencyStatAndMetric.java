@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.TimerTask;
 
 import org.apache.storm.metric.api.IMetric;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 /**
  * Acts as a Latency Metric, but also keeps track of approximate latency
@@ -145,7 +145,7 @@ public class LatencyStatAndMetric implements IMetric {
 
         long timeSpent = now - _bucketStart;
         long exactExtraCountSum = count + _exactExtraCount;
-        double ret = ClientUtils.zeroIfNaNOrInf(
+        double ret = Utils.zeroIfNaNOrInf(
                 ((double) (lat + _exactExtraLat)) / exactExtraCountSum);
         _bucketStart = now;
         _exactExtraLat = 0;
@@ -229,7 +229,7 @@ public class LatencyStatAndMetric implements IMetric {
         ret.put("10800", readApproximateLatAvg(lat, count, timeSpent, _thTime, _thLatBuckets, _thCountBuckets, 10800 * 1000));
         ret.put("86400", readApproximateLatAvg(lat, count, timeSpent, _odTime, _odLatBuckets, _odCountBuckets, 86400 * 1000));
         long allTimeCountSum = count + _allTimeCount;
-        ret.put(":all-time", ClientUtils.zeroIfNaNOrInf(
+        ret.put(":all-time", Utils.zeroIfNaNOrInf(
                 (double) lat + _allTimeLat)/allTimeCountSum);
         return ret;
     }
@@ -245,7 +245,7 @@ public class LatencyStatAndMetric implements IMetric {
             totalCount += countBuckets[i];
             timeNeeded -= bucketTime[i];
         }
-        return ClientUtils.zeroIfNaNOrInf(((double) totalLat) / totalCount);
+        return Utils.zeroIfNaNOrInf(((double) totalLat) / totalCount);
     }
 
     public void close() {

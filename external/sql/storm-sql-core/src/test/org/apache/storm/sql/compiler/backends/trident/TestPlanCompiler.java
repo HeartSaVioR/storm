@@ -33,7 +33,7 @@ import org.apache.storm.sql.AbstractTridentProcessor;
 import org.apache.storm.trident.TridentTopology;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -205,7 +205,7 @@ public class TestPlanCompiler {
 
     if (proc.getClassLoaders() != null && proc.getClassLoaders().size() > 0) {
       CompilingClassLoader lastClassloader = proc.getClassLoaders().get(proc.getClassLoaders().size() - 1);
-      ClientUtils.setClassLoaderForJavaDeSerialize(lastClassloader);
+      Utils.setClassLoaderForJavaDeSerialize(lastClassloader);
     }
 
     try (LocalTopology stormTopo = cluster.submitTopology("storm-sql", conf, topo.build())) {
@@ -219,7 +219,7 @@ public class TestPlanCompiler {
       while(cluster.getClusterInfo().get_topologies_size() > 0) {
         Thread.sleep(10);
       }
-      ClientUtils.resetClassLoaderForJavaDeSerialize();
+      Utils.resetClassLoaderForJavaDeSerialize();
     }
   }
 

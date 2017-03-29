@@ -25,9 +25,9 @@ import java.util.Map;
 
 import org.apache.storm.container.ResourceIsolationInterface;
 import org.apache.storm.generated.LocalAssignment;
-import org.apache.storm.utils.ClientUtils;
-import org.apache.storm.utils.LocalState;
 import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.LocalState;
+import org.apache.storm.utils.DaemonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ public class RunAsUserContainer extends BasicContainer {
             String workerId, Map<String, Object> topoConf, AdvancedFSOps ops, String profileCmd) throws IOException {
         super(type, conf, supervisorId, port, assignment, resourceIsolationManager, localState, workerId, topoConf, ops,
                 profileCmd);
-        if (ClientUtils.isOnWindows()) {
+        if (Utils.isOnWindows()) {
             throw new UnsupportedOperationException("ERROR: Windows doesn't support running workers as different users yet");
         }
     }
@@ -72,15 +72,15 @@ public class RunAsUserContainer extends BasicContainer {
         String user = this.getWorkerUser();
         String td = targetDir.getAbsolutePath();
         LOG.info("Running as user: {} command: {}", user, command);
-        String containerFile = Utils.containerFilePath(td);
-        if (ClientUtils.checkFileExists(containerFile)) {
+        String containerFile = DaemonUtils.containerFilePath(td);
+        if (Utils.checkFileExists(containerFile)) {
             SupervisorUtils.rmrAsUser(_conf, containerFile, containerFile);
         }
-        String scriptFile = Utils.scriptFilePath(td);
-        if (ClientUtils.checkFileExists(scriptFile)) {
+        String scriptFile = DaemonUtils.scriptFilePath(td);
+        if (Utils.checkFileExists(scriptFile)) {
             SupervisorUtils.rmrAsUser(_conf, scriptFile, scriptFile);
         }
-        String script = Utils.writeScript(td, command, env);
+        String script = DaemonUtils.writeScript(td, command, env);
         List<String> args = Arrays.asList("profiler", td, script);
         int ret = ClientSupervisorUtils.processLauncherAndWait(_conf, user, args, env, logPrefix);
         return ret == 0;
@@ -91,7 +91,7 @@ public class RunAsUserContainer extends BasicContainer {
             String logPrefix, ExitCodeCallback processExitCallback, File targetDir) throws IOException {
         String workerDir = targetDir.getAbsolutePath();
         String user = this.getWorkerUser();
-        List<String> args = Arrays.asList("worker", workerDir, Utils.writeScript(workerDir, command, env));
+        List<String> args = Arrays.asList("worker", workerDir, DaemonUtils.writeScript(workerDir, command, env));
         List<String> commandPrefix = null;
         if (_resourceIsolationManager != null) {
             commandPrefix = _resourceIsolationManager.getLaunchCommandPrefix(_workerId);

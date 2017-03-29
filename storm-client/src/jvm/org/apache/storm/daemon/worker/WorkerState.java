@@ -50,8 +50,8 @@ import org.apache.storm.serialization.KryoTupleSerializer;
 import org.apache.storm.task.WorkerTopologyContext;
 import org.apache.storm.tuple.AddressedTuple;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.DisruptorQueue;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.ThriftTopologyUtils;
@@ -154,7 +154,7 @@ public class WorkerState {
         return suicideCallback;
     }
 
-    public ClientUtils.UptimeComputer getUptime() {
+    public Utils.UptimeComputer getUptime() {
         return uptime;
     }
 
@@ -200,7 +200,7 @@ public class WorkerState {
     final Map<Integer, DisruptorQueue> shortExecutorReceiveQueueMap;
     final Map<Integer, Integer> taskToShortExecutor;
     final Runnable suicideCallback;
-    final ClientUtils.UptimeComputer uptime;
+    final Utils.UptimeComputer uptime;
     final Map<String, Object> defaultSharedResources;
     final Map<String, Object> userSharedResources;
     final LoadMapping loadMapping;
@@ -290,7 +290,7 @@ public class WorkerState {
         }
         Collections.sort(taskIds);
         this.topologyConf = topologyConf;
-        this.topology = ClientConfigUtils.readSupervisorTopology(conf, topologyId, AdvancedFSOps.make(conf));
+        this.topology = ConfigUtils.readSupervisorTopology(conf, topologyId, AdvancedFSOps.make(conf));
         this.systemTopology = StormCommon.systemTopology(topologyConf, topology);
         this.taskToComponent = StormCommon.stormTaskInfo(topology, topologyConf);
         this.componentToStreamToFields = new HashMap<>();
@@ -301,7 +301,7 @@ public class WorkerState {
             }
             componentToStreamToFields.put(c, streamToFields);
         }
-        this.componentToSortedTasks = ClientUtils.reverseMap(taskToComponent);
+        this.componentToSortedTasks = Utils.reverseMap(taskToComponent);
         this.componentToSortedTasks.values().forEach(Collections::sort);
         this.endpointSocketLock = new ReentrantReadWriteLock();
         this.cachedNodeToPortSocket = new AtomicReference<>(new HashMap<>());
@@ -312,8 +312,8 @@ public class WorkerState {
                 taskToShortExecutor.put(task, executor.get(0).intValue());
             }
         }
-        this.suicideCallback = ClientUtils.mkSuicideFn();
-        this.uptime = ClientUtils.makeUptimeComputer();
+        this.suicideCallback = Utils.mkSuicideFn();
+        this.uptime = Utils.makeUptimeComputer();
         this.defaultSharedResources = makeDefaultResources();
         this.userSharedResources = makeUserResources();
         this.loadMapping = new LoadMapping();
@@ -331,7 +331,7 @@ public class WorkerState {
         try {
             refreshConnections(() -> refreshConnectionsTimer.schedule(0, this::refreshConnections));
         } catch (Exception e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
     }
 
@@ -563,22 +563,22 @@ public class WorkerState {
 
     public WorkerTopologyContext getWorkerTopologyContext() {
         try {
-            String codeDir = ClientConfigUtils.supervisorStormResourcesPath(ClientConfigUtils.supervisorStormDistRoot(conf, topologyId));
-            String pidDir = ClientConfigUtils.workerPidsRoot(conf, topologyId);
+            String codeDir = ConfigUtils.supervisorStormResourcesPath(ConfigUtils.supervisorStormDistRoot(conf, topologyId));
+            String pidDir = ConfigUtils.workerPidsRoot(conf, topologyId);
             return new WorkerTopologyContext(systemTopology, topologyConf, taskToComponent, componentToSortedTasks,
                 componentToStreamToFields, topologyId, codeDir, pidDir, port, taskIds,
                 defaultSharedResources,
                 userSharedResources);
         } catch (IOException e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
     }
 
     public void runWorkerStartHooks() {
         WorkerTopologyContext workerContext = getWorkerTopologyContext();
         for (ByteBuffer hook : topology.get_worker_hooks()) {
-            byte[] hookBytes = ClientUtils.toByteArray(hook);
-            BaseWorkerHook hookObject = ClientUtils.javaDeserialize(hookBytes, BaseWorkerHook.class);
+            byte[] hookBytes = Utils.toByteArray(hook);
+            BaseWorkerHook hookObject = Utils.javaDeserialize(hookBytes, BaseWorkerHook.class);
             hookObject.start(topologyConf, workerContext);
 
         }
@@ -586,8 +586,8 @@ public class WorkerState {
 
     public void runWorkerShutdownHooks() {
         for (ByteBuffer hook : topology.get_worker_hooks()) {
-            byte[] hookBytes = ClientUtils.toByteArray(hook);
-            BaseWorkerHook hookObject = ClientUtils.javaDeserialize(hookBytes, BaseWorkerHook.class);
+            byte[] hookBytes = Utils.toByteArray(hook);
+            BaseWorkerHook hookObject = Utils.javaDeserialize(hookBytes, BaseWorkerHook.class);
             hookObject.shutdown();
 
         }
@@ -657,7 +657,7 @@ public class WorkerState {
     private StormTimer mkHaltingTimer(String name) {
         return new StormTimer(name, (thread, exception) -> {
             LOG.error("Error when processing event", exception);
-            ClientUtils.exitProcess(20, "Error when processing an event");
+            Utils.exitProcess(20, "Error when processing an event");
         });
     }
 
@@ -676,7 +676,7 @@ public class WorkerState {
 
         Set<Integer> outboundTasks = new HashSet<>();
 
-        for (Map.Entry<String, List<Integer>> entry : ClientUtils.reverseMap(taskToComponent).entrySet()) {
+        for (Map.Entry<String, List<Integer>> entry : Utils.reverseMap(taskToComponent).entrySet()) {
             if (components.contains(entry.getKey())) {
                 outboundTasks.addAll(entry.getValue());
             }

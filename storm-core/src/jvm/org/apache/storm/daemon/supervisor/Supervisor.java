@@ -30,7 +30,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.storm.Config;
 import org.apache.storm.DaemonConfig;
 import org.apache.storm.StormTimer;
 import org.apache.storm.cluster.ClusterStateContext;
@@ -50,13 +49,13 @@ import org.apache.storm.localizer.Localizer;
 import org.apache.storm.messaging.IContext;
 import org.apache.storm.metric.StormMetricsRegistry;
 import org.apache.storm.scheduler.ISupervisor;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ClientUtils;
-import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.ObjectReader;
+import org.apache.storm.utils.DaemonConfigUtils;
 import org.apache.storm.utils.LocalState;
 import org.apache.storm.utils.Time;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.DaemonUtils;
 import org.apache.storm.utils.VersionInfo;
 import org.apache.zookeeper.data.ACL;
 import org.slf4j.Logger;
@@ -68,7 +67,7 @@ public class Supervisor implements DaemonCommon, AutoCloseable {
     private final IContext sharedContext;
     private volatile boolean active;
     private final ISupervisor iSupervisor;
-    private final ClientUtils.UptimeComputer upTime;
+    private final Utils.UptimeComputer upTime;
     private final String stormVersion;
     private final IStormClusterState stormClusterState;
     private final LocalState localState;
@@ -86,21 +85,21 @@ public class Supervisor implements DaemonCommon, AutoCloseable {
     private ReadClusterState readState;
     
     private Supervisor(ISupervisor iSupervisor) throws IOException {
-        this(ClientUtils.readStormConfig(), null, iSupervisor);
+        this(Utils.readStormConfig(), null, iSupervisor);
     }
     
     public Supervisor(Map<String, Object> conf, IContext sharedContext, ISupervisor iSupervisor) throws IOException {
         this.conf = conf;
         this.iSupervisor = iSupervisor;
         this.active = true;
-        this.upTime = ClientUtils.makeUptimeComputer();
+        this.upTime = Utils.makeUptimeComputer();
         this.stormVersion = VersionInfo.getVersion();
         this.sharedContext = sharedContext;
         
-        iSupervisor.prepare(conf, ConfigUtils.supervisorIsupervisorDir(conf));
+        iSupervisor.prepare(conf, DaemonConfigUtils.supervisorIsupervisorDir(conf));
         
         List<ACL> acls = null;
-        if (Utils.isZkAuthenticationConfiguredStormServer(conf)) {
+        if (DaemonUtils.isZkAuthenticationConfiguredStormServer(conf)) {
             acls = SupervisorUtils.supervisorZkAcls();
         }
 
@@ -108,23 +107,23 @@ public class Supervisor implements DaemonCommon, AutoCloseable {
             this.stormClusterState = ClusterUtils.mkStormClusterState(conf, acls, new ClusterStateContext(DaemonType.SUPERVISOR));
         } catch (Exception e) {
             LOG.error("supervisor can't create stormClusterState");
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
 
         try {
-            this.localState = ConfigUtils.supervisorState(conf);
-            this.localizer = Utils.createLocalizer(conf, ClientConfigUtils.supervisorLocalDir(conf));
+            this.localState = DaemonConfigUtils.supervisorState(conf);
+            this.localizer = DaemonUtils.createLocalizer(conf, ConfigUtils.supervisorLocalDir(conf));
             this.asyncLocalizer = new AsyncLocalizer(conf, this.localizer);
         } catch (IOException e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
         this.supervisorId = iSupervisor.getSupervisorId();
         this.assignmentId = iSupervisor.getAssignmentId();
 
         try {
-            this.hostName = ClientUtils.hostname();
+            this.hostName = Utils.hostname();
         } catch (UnknownHostException e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
 
         this.currAssignment = new AtomicReference<Map<Long, LocalAssignment>>(new HashMap<Long,LocalAssignment>());
@@ -152,7 +151,7 @@ public class Supervisor implements DaemonCommon, AutoCloseable {
         return iSupervisor;
     }
 
-    public ClientUtils.UptimeComputer getUpTime() {
+    public Utils.UptimeComputer getUpTime() {
         return upTime;
     }
 
@@ -197,7 +196,7 @@ public class Supervisor implements DaemonCommon, AutoCloseable {
      */
     public void launch() throws Exception {
         LOG.info("Starting Supervisor with conf {}", conf);
-        String path = ConfigUtils.supervisorTmpDir(conf);
+        String path = DaemonConfigUtils.supervisorTmpDir(conf);
         FileUtils.cleanDirectory(new File(path));
 
         Localizer localizer = getLocalizer();
@@ -241,11 +240,11 @@ public class Supervisor implements DaemonCommon, AutoCloseable {
         LOG.info("Starting supervisor for storm version '{}'.", VersionInfo.getVersion());
         try {
             Map<String, Object> conf = getConf();
-            if (ClientConfigUtils.isLocalMode(conf)) {
+            if (ConfigUtils.isLocalMode(conf)) {
                 throw new IllegalArgumentException("Cannot start server in local mode!");
             }
             launch();
-            ClientUtils.addShutdownHookWithForceKillIn1Sec(() -> {this.close();});
+            Utils.addShutdownHookWithForceKillIn1Sec(() -> {this.close();});
             registerWorkerNumGauge("supervisor:num-slots-used-gauge", conf);
             StormMetricsRegistry.startMetricsReporters(conf);
         } catch (Exception e) {
@@ -332,7 +331,7 @@ public class Supervisor implements DaemonCommon, AutoCloseable {
                 ContainerLauncher launcher = ContainerLauncher.make(getConf(), getId(), getSharedContext());
                 killWorkers(SupervisorUtils.supervisorWorkerIds(conf), launcher);
             } catch (Exception e) {
-                throw ClientUtils.wrapInRuntime(e);
+                throw Utils.wrapInRuntime(e);
             }
         }
     }
@@ -355,7 +354,7 @@ public class Supervisor implements DaemonCommon, AutoCloseable {
      * @param args
      */
     public static void main(String[] args) throws IOException {
-        ClientUtils.setupDefaultUncaughtExceptionHandler();
+        Utils.setupDefaultUncaughtExceptionHandler();
         @SuppressWarnings("resource")
         Supervisor instance = new Supervisor(new StandaloneSupervisor());
         instance.launchDaemon();

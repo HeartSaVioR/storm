@@ -39,7 +39,7 @@ import org.apache.storm.scheduler.resource.SchedulingState;
 import org.apache.storm.scheduler.resource.TestUtilsForResourceAwareScheduler;
 import org.apache.storm.scheduler.resource.User;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -87,7 +87,7 @@ public class TestDefaultResourceAwareStrategy {
         resourceMap.put(Config.SUPERVISOR_CPU_CAPACITY, 150.0);
         resourceMap.put(Config.SUPERVISOR_MEMORY_CAPACITY_MB, 1500.0);
         Map<String, SupervisorDetails> supMap = TestUtilsForResourceAwareScheduler.genSupervisors(4, 4, resourceMap);
-        conf.putAll(ClientUtils.readDefaultConfig());
+        conf.putAll(Utils.readDefaultConfig());
         conf.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         conf.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         conf.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());
@@ -204,7 +204,7 @@ public class TestDefaultResourceAwareStrategy {
         supMap.putAll(supMapRack5);
 
         Config config = new Config();
-        config.putAll(ClientUtils.readDefaultConfig());
+        config.putAll(Utils.readDefaultConfig());
         config.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_EVICTION_STRATEGY, org.apache.storm.scheduler.resource.strategies.eviction.DefaultEvictionStrategy.class.getName());
         config.put(DaemonConfig.RESOURCE_AWARE_SCHEDULER_PRIORITY_STRATEGY, org.apache.storm.scheduler.resource.strategies.priority.DefaultSchedulingPriorityStrategy.class.getName());
         config.put(Config.TOPOLOGY_SCHEDULER_STRATEGY, org.apache.storm.scheduler.resource.strategies.scheduling.DefaultResourceAwareStrategy.class.getName());

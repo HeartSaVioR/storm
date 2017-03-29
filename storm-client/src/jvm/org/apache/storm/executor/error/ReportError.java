@@ -20,7 +20,7 @@ package org.apache.storm.executor.error;
 import org.apache.storm.Config;
 import org.apache.storm.cluster.IStormClusterState;
 import org.apache.storm.task.WorkerTopologyContext;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.utils.Time;
 import org.slf4j.Logger;
@@ -66,10 +66,10 @@ public class ReportError implements IReportError {
         }
         if (intervalErrors.incrementAndGet() <= maxPerInterval) {
             try {
-                stormClusterState.reportError(stormId, componentId, ClientUtils.hostname(),
+                stormClusterState.reportError(stormId, componentId, Utils.hostname(),
                         workerTopologyContext.getThisWorkerPort().longValue(), error);
             } catch (UnknownHostException e) {
-                throw ClientUtils.wrapInRuntime(e);
+                throw Utils.wrapInRuntime(e);
             }
 
         }

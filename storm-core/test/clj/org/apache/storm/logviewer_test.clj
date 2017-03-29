@@ -21,8 +21,8 @@
   (:use [conjure core])
   (:use [org.apache.storm.ui helpers])
   (:import [org.apache.storm.daemon DirectoryCleaner]
-           [org.apache.storm.utils Utils Time ClientUtils]
-           [org.apache.storm.utils.staticmocking UtilsInstaller ClientUtilsInstaller]
+           [org.apache.storm.utils DaemonUtils Time Utils]
+           [org.apache.storm.utils.staticmocking DaemonUtilsInstaller UtilsInstaller]
            [org.apache.storm.daemon.supervisor SupervisorUtils]
            [org.apache.storm.testing.staticmocking MockedSupervisorUtils]
            [org.apache.storm.generated LSWorkerHeartbeat])
@@ -129,7 +129,7 @@
 
 (deftest test-per-workerdir-cleanup!
   (testing "cleaner deletes oldest files in each worker dir if files are larger than per-dir quota."
-    (with-open [_ (ClientUtilsInstaller. (proxy [ClientUtils] []
+    (with-open [_ (UtilsInstaller. (proxy [Utils] []
                                      (forceDeleteImpl [path])))]
       (let [cleaner (proxy [org.apache.storm.daemon.DirectoryCleaner] []
                       (getStreamForDirectory
@@ -182,7 +182,7 @@
 (deftest test-global-log-cleanup!
   (testing "cleaner deletes oldest when files' sizes are larger than the global quota."
     (stubbing [logviewer/get-alive-worker-dirs ["/workers-artifacts/topo1/port1"]]
-              (with-open [_ (ClientUtilsInstaller. (proxy [ClientUtils] []
+              (with-open [_ (UtilsInstaller. (proxy [Utils] []
                                                (forceDeleteImpl [path])))]
                 (let [cleaner (proxy [org.apache.storm.daemon.DirectoryCleaner] []
                                 (getStreamForDirectory
@@ -270,10 +270,10 @@
     (let [mockfile1 (mk-mock-File {:name "delete-me1" :type :file})
           mockfile2 (mk-mock-File {:name "delete-me2" :type :file})
           forceDelete-args (atom [])
-          utils-proxy (proxy [ClientUtils] []
+          utils-proxy (proxy [Utils] []
                         (forceDeleteImpl [path]
                           (swap! forceDelete-args conj path)))]
-      (with-open [_ (ClientUtilsInstaller. utils-proxy)]
+      (with-open [_ (UtilsInstaller. utils-proxy)]
         (stubbing [logviewer/select-dirs-for-cleanup nil
                    logviewer/get-dead-worker-dirs (sorted-set mockfile1 mockfile2)
                    logviewer/cleanup-empty-topodir! nil]
@@ -359,7 +359,7 @@
           returned-all (logviewer/list-log-files "user" nil nil root-path nil origin)
           returned-filter-port (logviewer/list-log-files "user" nil "port1" root-path nil origin)
           returned-filter-topoId (logviewer/list-log-files "user" "topoB" nil root-path nil origin)]
-      (ClientUtils/forceDelete root-path)
+      (Utils/forceDelete root-path)
       (is   (= expected-all returned-all))
       (is   (= expected-filter-port returned-filter-port))
       (is   (= expected-filter-topoId returned-filter-topoId)))))
@@ -379,7 +379,7 @@
         exp-offset-fn #(- (/ logviewer/default-bytes-per-page 2) %)]
 
     (stubbing [logviewer/logviewer-port expected-port]
-      (with-open [_ (ClientUtilsInstaller. (proxy [ClientUtils] []
+      (with-open [_ (UtilsInstaller. (proxy [Utils] []
                                        (hostnameImpl [] expected-host)))]
         (testing "Logviewer link centers the match in the page"
           (let [expected-fname "foobar.log"]
@@ -820,5 +820,5 @@
           ; Called with a bad port (not in the config) No searching should be done.
           (verify-call-times-for logviewer/find-n-matches 0)
           (verify-call-times-for logviewer/logs-for-port 0)))
-      (ClientUtils/forceDelete topo-path))))
+      (Utils/forceDelete topo-path))))
 

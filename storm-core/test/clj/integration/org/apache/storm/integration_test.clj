@@ -26,7 +26,7 @@
   (:use [org.apache.storm.internal clojure])
   (:use [org.apache.storm config util])
   (:import [org.apache.storm Thrift])
-  (:import [org.apache.storm.utils Utils ClientUtils])
+  (:import [org.apache.storm.utils DaemonUtils Utils])
   (:import [org.apache.storm.daemon StormCommon]))
 
 (deftest test-basic-topology
@@ -39,15 +39,15 @@
                       {"1" (Thrift/prepareSpoutDetails
                              (TestWordSpout. true) (Integer. 3))}
                       {"2" (Thrift/prepareBoltDetails
-                             {(ClientUtils/getGlobalStreamId "1" nil)
+                             {(Utils/getGlobalStreamId "1" nil)
                               (Thrift/prepareFieldsGrouping ["word"])}
                              (TestWordCounter.) (Integer. 4))
                        "3" (Thrift/prepareBoltDetails
-                             {(ClientUtils/getGlobalStreamId "1" nil)
+                             {(Utils/getGlobalStreamId "1" nil)
                               (Thrift/prepareGlobalGrouping)}
                              (TestGlobalCount.))
                        "4" (Thrift/prepareBoltDetails
-                             {(ClientUtils/getGlobalStreamId "2" nil)
+                             {(Utils/getGlobalStreamId "2" nil)
                               (Thrift/prepareGlobalGrouping)}
                              (TestAggregatesCounter.))})
             results (Testing/completeTopology cluster
@@ -82,7 +82,7 @@
     (let [topology (Thrift/buildTopology
                     {"1" (Thrift/prepareSpoutDetails (TestWordSpout. true))}
                     {"2" (Thrift/prepareBoltDetails
-                           {(ClientUtils/getGlobalStreamId "1" nil)
+                           {(Utils/getGlobalStreamId "1" nil)
                             (Thrift/prepareAllGrouping)}
                            emit-task-id
                            (Integer. 3)
@@ -135,7 +135,7 @@
           topology (Thrift/buildTopology
                      {"1" (Thrift/prepareSpoutDetails feeder)}
                      {"2" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareGlobalGrouping)} ack-every-other)})]
       (.submitTopology cluster
                              "timeout-tester"
@@ -176,7 +176,7 @@
           topology (Thrift/buildTopology
                      {"1" (Thrift/prepareSpoutDetails feeder)}
                      {"2" (Thrift/prepareBoltDetails 
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareGlobalGrouping)} extend-timeout-twice)})]
     (.submitTopology cluster
                            "timeout-tester"
@@ -195,7 +195,7 @@
   (Thrift/buildTopology
                     {"1" (Thrift/prepareSpoutDetails (TestWordSpout. true) (Integer. 3))}
                     {"2" (Thrift/prepareBoltDetails
-                           {(ClientUtils/getGlobalStreamId "1" nil)
+                           {(Utils/getGlobalStreamId "1" nil)
                             (Thrift/prepareFieldsGrouping ["word"])}
                            (TestWordCounter.) (Integer. 4))}))
 
@@ -203,7 +203,7 @@
   (Thrift/buildTopology
                     {"1" (Thrift/prepareSpoutDetails (TestWordSpout. true) (Integer. 3))}
                     {"2" (Thrift/prepareBoltDetails
-                           {(ClientUtils/getGlobalStreamId "3" nil)
+                           {(Utils/getGlobalStreamId "3" nil)
                             (Thrift/prepareFieldsGrouping ["word"])}
                            (TestWordCounter.) (Integer. 4))}))
 
@@ -211,7 +211,7 @@
   (Thrift/buildTopology
                     {"1" (Thrift/prepareSpoutDetails (TestWordSpout. true) (Integer. 3))}
                     {"2" (Thrift/prepareBoltDetails
-                           {(ClientUtils/getGlobalStreamId "1" nil)
+                           {(Utils/getGlobalStreamId "1" nil)
                             (Thrift/prepareFieldsGrouping ["non-exists-field"])}
                            (TestWordCounter.) (Integer. 4))}))
 
@@ -219,7 +219,7 @@
   (Thrift/buildTopology
                     {"1" (Thrift/prepareSpoutDetails (TestWordSpout. true) (Integer. 3))}
                     {"2" (Thrift/prepareBoltDetails
-                           {(ClientUtils/getGlobalStreamId "1" "non-exists-stream")
+                           {(Utils/getGlobalStreamId "1" "non-exists-stream")
                             (Thrift/prepareFieldsGrouping ["word"])}
                            (TestWordCounter.) (Integer. 4))}))
 
@@ -259,9 +259,9 @@
                        {"1" (Thrift/prepareSpoutDetails
                               (TestWordSpout. true) (Integer. 3))}
                        {"2" (Thrift/prepareBoltDetails
-                              {(ClientUtils/getGlobalStreamId "1" nil)
+                              {(Utils/getGlobalStreamId "1" nil)
                                (Thrift/prepareFieldsGrouping ["word"])
-                               (ClientUtils/getGlobalStreamId "1" "__system")
+                               (Utils/getGlobalStreamId "1" "__system")
                                (Thrift/prepareGlobalGrouping)}
                                identity-bolt (Integer. 1))})
             results (Testing/completeTopology cluster
@@ -319,31 +319,31 @@
                       "2" (Thrift/prepareSpoutDetails feeder2)
                       "3" (Thrift/prepareSpoutDetails feeder3)}
                      {"4" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareShuffleGrouping)}
                             (branching-bolt 2))
                       "5" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "2" nil)
+                            {(Utils/getGlobalStreamId "2" nil)
                              (Thrift/prepareShuffleGrouping)}
                             (branching-bolt 4))
                       "6" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "3" nil)
+                            {(Utils/getGlobalStreamId "3" nil)
                              (Thrift/prepareShuffleGrouping)}
                             (branching-bolt 1))
                       "7" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "4" nil)
+                            {(Utils/getGlobalStreamId "4" nil)
                              (Thrift/prepareShuffleGrouping)
-                             (ClientUtils/getGlobalStreamId "5" nil)
+                             (Utils/getGlobalStreamId "5" nil)
                              (Thrift/prepareShuffleGrouping)
-                             (ClientUtils/getGlobalStreamId "6" nil)
+                             (Utils/getGlobalStreamId "6" nil)
                              (Thrift/prepareShuffleGrouping)}
                             (agg-bolt 3))
                       "8" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "7" nil)
+                            {(Utils/getGlobalStreamId "7" nil)
                              (Thrift/prepareShuffleGrouping)}
                             (branching-bolt 2))
                       "9" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "8" nil)
+                            {(Utils/getGlobalStreamId "8" nil)
                              (Thrift/prepareShuffleGrouping)}
                             ack-bolt)}
                      )
@@ -383,17 +383,17 @@
                    (Thrift/buildTopology
                      {"1" (Thrift/prepareSpoutDetails feeder)}
                      {"2" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareShuffleGrouping)}
                             identity-bolt)
                       "3" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareShuffleGrouping)}
                             identity-bolt)
                       "4" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "2" nil)
+                            {(Utils/getGlobalStreamId "2" nil)
                              (Thrift/prepareShuffleGrouping)
-                             (ClientUtils/getGlobalStreamId "3" nil)
+                             (Utils/getGlobalStreamId "3" nil)
                              (Thrift/prepareShuffleGrouping)}
                              (agg-bolt 4))})
                     cluster)]
@@ -441,7 +441,7 @@
                     {"1" (Thrift/prepareSpoutDetails feeder)
                      "2" (Thrift/prepareSpoutDetails open-tracked-spout)}
                     {"3" (Thrift/prepareBoltDetails
-                           {(ClientUtils/getGlobalStreamId "1" nil)
+                           {(Utils/getGlobalStreamId "1" nil)
                             (Thrift/prepareGlobalGrouping)}
                            prepare-tracked-bolt)})]
       (reset! bolt-prepared? false)
@@ -471,11 +471,11 @@
                    (Thrift/buildTopology
                      {"1" (Thrift/prepareSpoutDetails feeder)}
                      {"2" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareShuffleGrouping)}
                             dup-anchor)
                       "3" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "2" nil)
+                            {(Utils/getGlobalStreamId "2" nil)
                              (Thrift/prepareShuffleGrouping)}
                             ack-bolt)})
                    cluster)]
@@ -606,7 +606,7 @@
                      {"1" (Thrift/prepareSpoutDetails
                             (TestPlannerSpout. (Fields. ["conf"])))}
                      {"2" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareShuffleGrouping)}
                             hooks-bolt)})
           results (Testing/completeTopology cluster

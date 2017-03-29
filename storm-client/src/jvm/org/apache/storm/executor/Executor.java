@@ -65,8 +65,8 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.TupleImpl;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.DisruptorBackpressureCallback;
 import org.apache.storm.utils.DisruptorQueue;
 import org.apache.storm.utils.ObjectReader;
@@ -137,10 +137,10 @@ public abstract class Executor implements Callable, EventHandler<Object> {
 
         this.suicideFn = workerData.getSuicideCallback();
         try {
-            this.stormClusterState = ClusterUtils.mkStormClusterState(workerData.getStateStorage(), ClientUtils.getWorkerACL(stormConf),
+            this.stormClusterState = ClusterUtils.mkStormClusterState(workerData.getStateStorage(), Utils.getWorkerACL(stormConf),
                     new ClusterStateContext(DaemonType.WORKER));
         } catch (Exception e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
 
         StormTopology topology = workerTopologyContext.getRawTopology();
@@ -148,10 +148,10 @@ public abstract class Executor implements Callable, EventHandler<Object> {
         Map<String, Bolt> bolts = topology.get_bolts();
         if (spouts.containsKey(componentId)) {
             this.type = StatsUtil.SPOUT;
-            this.stats = new SpoutExecutorStats(ClientConfigUtils.samplingRate(stormConf));
+            this.stats = new SpoutExecutorStats(ConfigUtils.samplingRate(stormConf));
         } else if (bolts.containsKey(componentId)) {
             this.type = StatsUtil.BOLT;
-            this.stats = new BoltExecutorStats(ClientConfigUtils.samplingRate(stormConf));
+            this.stats = new BoltExecutorStats(ConfigUtils.samplingRate(stormConf));
         } else {
             throw new RuntimeException("Could not find " + componentId + " in " + topology);
         }
@@ -161,15 +161,15 @@ public abstract class Executor implements Callable, EventHandler<Object> {
         this.streamToComponentToGrouper = outboundComponents(workerTopologyContext, componentId, stormConf);
         this.reportError = new ReportError(stormConf, stormClusterState, stormId, componentId, workerTopologyContext);
         this.reportErrorDie = new ReportErrorAndDie(reportError, suicideFn);
-        this.sampler = ClientConfigUtils.mkStatsSampler(stormConf);
+        this.sampler = ConfigUtils.mkStatsSampler(stormConf);
         this.throttleOn = workerData.getThrottleOn();
         this.isDebug = ObjectReader.getBoolean(stormConf.get(Config.TOPOLOGY_DEBUG), false);
-        this.rand = new Random(ClientUtils.secureRandomLong());
+        this.rand = new Random(Utils.secureRandomLong());
         this.credentials = credentials;
         this.hasEventLoggers = StormCommon.hasEventLoggers(stormConf);
 
         try {
-            this.hostname = ClientUtils.hostname();
+            this.hostname = Utils.hostname();
         } catch (UnknownHostException ignored) {
             this.hostname = "";
         }
@@ -185,10 +185,10 @@ public abstract class Executor implements Callable, EventHandler<Object> {
         String type = getExecutorType(workerTopologyContext, componentId);
         if (StatsUtil.SPOUT.equals(type)) {
             executor = new SpoutExecutor(workerState, executorId, credentials);
-            executor.stats = new SpoutExecutorStats(ClientConfigUtils.samplingRate(executor.getStormConf()));
+            executor.stats = new SpoutExecutorStats(ConfigUtils.samplingRate(executor.getStormConf()));
         } else {
             executor = new BoltExecutor(workerState, executorId, credentials);
-            executor.stats = new BoltExecutorStats(ClientConfigUtils.samplingRate(executor.getStormConf()));
+            executor.stats = new BoltExecutorStats(ConfigUtils.samplingRate(executor.getStormConf()));
         }
 
         Map<Integer, Task> idToTask = new HashMap<>();
@@ -199,7 +199,7 @@ public abstract class Executor implements Callable, EventHandler<Object> {
                         task, StormCommon.SYSTEM_STREAM_ID, new Values("startup"), executor.getExecutorTransfer());
                 idToTask.put(taskId, task);
             } catch (IOException ex) {
-                throw ClientUtils.wrapInRuntime(ex);
+                throw Utils.wrapInRuntime(ex);
             }
         }
 
@@ -227,12 +227,12 @@ public abstract class Executor implements Callable, EventHandler<Object> {
         LOG.info("Loading executor tasks " + componentId + ":" + executorId);
 
         registerBackpressure();
-        ClientUtils.SmartThread systemThreads =
-                ClientUtils.asyncLoop(executorTransfer, executorTransfer.getName(), reportErrorDie);
+        Utils.SmartThread systemThreads =
+                Utils.asyncLoop(executorTransfer, executorTransfer.getName(), reportErrorDie);
 
         String handlerName = componentId + "-executor" + executorId;
-        ClientUtils.SmartThread handlers =
-                ClientUtils.asyncLoop(this, false, reportErrorDie, Thread.NORM_PRIORITY, true, true, handlerName);
+        Utils.SmartThread handlers =
+                Utils.asyncLoop(this, false, reportErrorDie, Thread.NORM_PRIORITY, true, true, handlerName);
         setupTicks(StatsUtil.SPOUT.equals(type));
 
         LOG.info("Finished loading executor " + componentId + ":" + executorId);
@@ -289,7 +289,7 @@ public abstract class Executor implements Callable, EventHandler<Object> {
                 }
             }
         } catch (Exception e) {
-            throw ClientUtils.wrapInRuntime(e);
+            throw Utils.wrapInRuntime(e);
         }
     }
 
@@ -358,7 +358,7 @@ public abstract class Executor implements Callable, EventHandler<Object> {
         final Integer tickTimeSecs = ObjectReader.getInt(stormConf.get(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS), null);
         boolean enableMessageTimeout = (Boolean) stormConf.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS);
         if (tickTimeSecs != null) {
-            if (ClientUtils.isSystemId(componentId) || (!enableMessageTimeout && isSpout)) {
+            if (Utils.isSystemId(componentId) || (!enableMessageTimeout && isSpout)) {
                 LOG.info("Timeouts disabled for executor " + componentId + ":" + executorId);
             } else {
                 StormTimer timerTask = workerData.getUserTimer();

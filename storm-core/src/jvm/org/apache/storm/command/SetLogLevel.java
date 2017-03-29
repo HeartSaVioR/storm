@@ -25,7 +25,7 @@ import org.apache.storm.generated.LogConfig;
 import org.apache.storm.generated.LogLevel;
 import org.apache.storm.generated.LogLevelAction;
 import org.apache.storm.generated.Nimbus;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.NimbusClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +61,7 @@ public class SetLogLevel {
         NimbusClient.withConfiguredClient(new NimbusClient.WithNimbus() {
             @Override
             public void run(Nimbus.Client nimbus) throws Exception {
-                String topologyId = ClientUtils.getTopologyId(topologyName, nimbus);
+                String topologyId = Utils.getTopologyId(topologyName, nimbus);
                 if (null == topologyId) {
                     throw new IllegalArgumentException(topologyName + " is not a running topology");
                 }

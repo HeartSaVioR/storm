@@ -30,7 +30,7 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +97,7 @@ public class MultipleLoggerTopology {
     } else {
       try (LocalCluster cluster = new LocalCluster();
            LocalTopology topo = cluster.submitTopology("test", conf, builder.createTopology());) {
-          ClientUtils.sleep(10000);
+          Utils.sleep(10000);
       }
     }
   }

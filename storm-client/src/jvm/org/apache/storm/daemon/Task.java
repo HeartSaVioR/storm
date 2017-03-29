@@ -41,8 +41,8 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.task.WorkerTopologyContext;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.TupleImpl;
-import org.apache.storm.utils.ClientConfigUtils;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,7 @@ public class Task {
         this.executorStats = executor.getStats();
         this.builtInMetrics = BuiltinMetricsUtil.mkData(executor.getType(), this.executorStats);
         this.workerTopologyContext = executor.getWorkerTopologyContext();
-        this.emitSampler = ClientConfigUtils.mkStatsSampler(stormConf);
+        this.emitSampler = ConfigUtils.mkStatsSampler(stormConf);
         this.loadMapping = workerData.getLoadMapping();
         this.systemTopologyContext = mkTopologyContext(workerData.getSystemTopology());
         this.userTopologyContext = mkTopologyContext(workerData.getTopology());
@@ -186,9 +186,9 @@ public class Task {
             workerData.getComponentToSortedTasks(),
             workerData.getComponentToStreamToFields(),
             workerData.getTopologyId(),
-            ClientConfigUtils.supervisorStormResourcesPath(
-                    ClientConfigUtils.supervisorStormDistRoot(conf, workerData.getTopologyId())),
-                    ClientConfigUtils.workerPidsRoot(conf, workerData.getWorkerId()),
+            ConfigUtils.supervisorStormResourcesPath(
+                    ConfigUtils.supervisorStormDistRoot(conf, workerData.getTopologyId())),
+                    ConfigUtils.workerPidsRoot(conf, workerData.getWorkerId()),
             taskId,
             workerData.getPort(), workerData.getTaskIds(),
             workerData.getDefaultSharedResources(),
@@ -214,7 +214,7 @@ public class Task {
         } else {
             throw new RuntimeException("Could not find " + componentId + " in " + topology);
         }
-        result = ClientUtils.getSetComponentObject(componentObject);
+        result = Utils.getSetComponentObject(componentObject);
 
         if (result instanceof ShellComponent) {
             if (spouts.containsKey(componentId)) {

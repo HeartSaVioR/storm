@@ -21,7 +21,7 @@
     (:use [org.apache.storm.daemon common])
     (:require [org.apache.storm [thrift :as thrift]])
     (:import [org.apache.storm Thrift])
-    (:import [org.apache.storm.utils Utils ClientUtils]))
+    (:import [org.apache.storm.utils Utils]))
 
 (defbolt lalala-bolt1 ["word"] [[val :as tuple] collector]
   (let [ret (str val "lalala")]
@@ -60,15 +60,15 @@
           topology (Thrift/buildTopology
                      {"1" (Thrift/prepareSpoutDetails (TestWordSpout. false))}
                      {"2" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareShuffleGrouping)}
                             lalala-bolt1)
                       "3" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareLocalOrShuffleGrouping)}
                             lalala-bolt2)
                       "4" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareShuffleGrouping)}
                             (lalala-bolt3 "_nathan_"))}
                      )
@@ -101,7 +101,7 @@
     (let [topology (Thrift/buildTopology
                       {"words" (Thrift/prepareSpoutDetails (TestWordSpout. false))}
                       {"out" (Thrift/prepareBoltDetails
-                               {(ClientUtils/getGlobalStreamId "words" nil)
+                               {(Utils/getGlobalStreamId "words" nil)
                                 (Thrift/prepareShuffleGrouping)}
                                punctuator-bolt)})
           results (complete-topology cluster
@@ -129,7 +129,7 @@
                             nil
                             {TOPOLOGY-MESSAGE-TIMEOUT-SECS 40})}
                      {"2" (Thrift/prepareBoltDetails
-                            {(ClientUtils/getGlobalStreamId "1" nil)
+                            {(Utils/getGlobalStreamId "1" nil)
                              (Thrift/prepareShuffleGrouping)}
                             (conf-query-bolt {"fake.config" 1
                                               TOPOLOGY-MAX-TASK-PARALLELISM 2

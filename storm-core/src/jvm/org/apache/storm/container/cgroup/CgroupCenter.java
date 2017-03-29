@@ -17,7 +17,7 @@
  */
 package org.apache.storm.container.cgroup;
 
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.DaemonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,7 +136,7 @@ public class CgroupCenter implements CgroupOperation {
 
     @Override
     public boolean isMounted(Hierarchy hierarchy) {
-        if (Utils.CheckDirExists(hierarchy.getDir())) {
+        if (DaemonUtils.CheckDirExists(hierarchy.getDir())) {
             List<Hierarchy> hierarchies = this.getHierarchies();
             for (Hierarchy h : hierarchies) {
                 if (h.equals(hierarchy)) {
@@ -164,7 +164,7 @@ public class CgroupCenter implements CgroupOperation {
         if (subSystems.size() == 0) {
             return;
         }
-        if (!Utils.CheckDirExists(hierarchy.getDir())) {
+        if (!DaemonUtils.CheckDirExists(hierarchy.getDir())) {
             new File(hierarchy.getDir()).mkdirs();
         }
         String subSystemsName = CgroupUtils.subSystemsToString(subSystems);
@@ -191,7 +191,7 @@ public class CgroupCenter implements CgroupOperation {
         }
         CgroupCommon parent = cgroup.getParent();
         while (parent != null) {
-            if (!Utils.CheckDirExists(parent.getDir())) {
+            if (!DaemonUtils.CheckDirExists(parent.getDir())) {
                 throw new RuntimeException("Parent " + parent.getDir() + "does not exist");
             }
             parent = parent.getParent();
@@ -200,7 +200,7 @@ public class CgroupCenter implements CgroupOperation {
         if (!isMounted(h)) {
             throw new RuntimeException("hierarchy " + h.getDir() + " is not mounted");
         }
-        if (Utils.CheckDirExists(cgroup.getDir())) {
+        if (DaemonUtils.CheckDirExists(cgroup.getDir())) {
             throw new RuntimeException("cgroup {} already exists " + cgroup.getDir());
         }
 

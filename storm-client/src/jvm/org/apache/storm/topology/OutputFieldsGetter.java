@@ -19,7 +19,7 @@ package org.apache.storm.topology;
 
 import org.apache.storm.generated.StreamInfo;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +31,7 @@ public class OutputFieldsGetter implements OutputFieldsDeclarer {
     }
 
     public void declare(boolean direct, Fields fields) {
-        declareStream(ClientUtils.DEFAULT_STREAM_ID, direct, fields);
+        declareStream(Utils.DEFAULT_STREAM_ID, direct, fields);
     }
 
     public void declareStream(String streamId, Fields fields) {

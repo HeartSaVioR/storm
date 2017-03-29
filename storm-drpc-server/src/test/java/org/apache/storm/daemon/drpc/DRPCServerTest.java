@@ -33,13 +33,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.storm.Config;
 import org.apache.storm.DaemonConfig;
-import org.apache.storm.daemon.drpc.DRPCServer;
 import org.apache.storm.drpc.DRPCInvocationsClient;
 import org.apache.storm.generated.DRPCExecutionException;
 import org.apache.storm.generated.DRPCRequest;
 import org.apache.storm.security.auth.SimpleTransportPlugin;
 import org.apache.storm.utils.DRPCClient;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.utils.DaemonUtils;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -88,8 +87,8 @@ public class DRPCServerTest {
     
     @Test
     public void testGoodThrift() throws Exception {
-        int drpcPort = Utils.getAvailablePort();
-        int invocationsPort = Utils.getAvailablePort(drpcPort + 1);
+        int drpcPort = DaemonUtils.getAvailablePort();
+        int invocationsPort = DaemonUtils.getAvailablePort(drpcPort + 1);
         Map<String, Object> conf = getConf(drpcPort, invocationsPort, null);
         try (DRPCServer server = new DRPCServer(conf)) {
             exec.submit(() -> {
@@ -112,8 +111,8 @@ public class DRPCServerTest {
     
     @Test
     public void testFailedThrift() throws Exception {
-        int drpcPort = Utils.getAvailablePort();
-        int invocationsPort = Utils.getAvailablePort(drpcPort + 1);
+        int drpcPort = DaemonUtils.getAvailablePort();
+        int invocationsPort = DaemonUtils.getAvailablePort(drpcPort + 1);
         Map<String, Object> conf = getConf(drpcPort, invocationsPort, null);
         try (DRPCServer server = new DRPCServer(conf)) {
             exec.submit(() -> {
@@ -156,9 +155,9 @@ public class DRPCServerTest {
     @Test
     public void testGoodHttpGet() throws Exception {
         LOG.info("STARTING HTTP GET TEST...");
-        int drpcPort = Utils.getAvailablePort();
-        int invocationsPort = Utils.getAvailablePort(drpcPort + 1);
-        int httpPort = Utils.getAvailablePort(invocationsPort + 1);
+        int drpcPort = DaemonUtils.getAvailablePort();
+        int invocationsPort = DaemonUtils.getAvailablePort(drpcPort + 1);
+        int httpPort = DaemonUtils.getAvailablePort(invocationsPort + 1);
         Map<String, Object> conf = getConf(drpcPort, invocationsPort, httpPort);
         try (DRPCServer server = new DRPCServer(conf)) {
             exec.submit(() -> {
@@ -183,9 +182,9 @@ public class DRPCServerTest {
     @Test
     public void testFailedHttpGet() throws Exception {
         LOG.info("STARTING HTTP GET (FAIL) TEST...");
-        int drpcPort = Utils.getAvailablePort();
-        int invocationsPort = Utils.getAvailablePort(drpcPort + 1);
-        int httpPort = Utils.getAvailablePort(invocationsPort + 1);
+        int drpcPort = DaemonUtils.getAvailablePort();
+        int invocationsPort = DaemonUtils.getAvailablePort(drpcPort + 1);
+        int httpPort = DaemonUtils.getAvailablePort(invocationsPort + 1);
         Map<String, Object> conf = getConf(drpcPort, invocationsPort, httpPort);
         try (DRPCServer server = new DRPCServer(conf)) {
             exec.submit(() -> {

@@ -21,7 +21,7 @@ package org.apache.storm;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.storm.generated.InvalidTopologyException;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.validation.ConfigValidation;
 import org.apache.storm.validation.ConfigValidation.*;
 import org.apache.storm.validation.ConfigValidationAnnotations.*;
@@ -94,14 +94,14 @@ public class TestConfigValidate {
         HashSet<String> keySet = new HashSet<>();
         keySet.add("key1");
         keySet.add("key2");
-        ClientUtils.validateTopologyBlobStoreMap(stormConf, keySet);
+        Utils.validateTopologyBlobStoreMap(stormConf, keySet);
         keySet.remove("key2");
-        ClientUtils.validateTopologyBlobStoreMap(stormConf, keySet);
+        Utils.validateTopologyBlobStoreMap(stormConf, keySet);
     }
 
     @Test
     public void defaultYamlTest() throws InvocationTargetException, NoSuchMethodException, NoSuchFieldException, InstantiationException, IllegalAccessException {
-        Map conf = ClientUtils.readStormConfig();
+        Map conf = Utils.readStormConfig();
         ConfigValidation.validateFields(conf);
     }
 
@@ -190,7 +190,7 @@ public class TestConfigValidate {
         testList.add(new Integer("3"));
         testList.add(new Long("4"));
         conf.put("eee", testList);
-        ClientUtils.isValidConf(conf);
+        Utils.isValidConf(conf);
     }
 
     @Test

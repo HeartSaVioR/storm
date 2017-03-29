@@ -20,7 +20,7 @@ package org.apache.storm.kafka;
 import org.apache.storm.spout.Scheme;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -40,7 +40,7 @@ public class StringScheme implements Scheme {
             int base = string.arrayOffset();
             return new String(string.array(), base + string.position(), string.remaining());
         } else {
-            return new String(ClientUtils.toByteArray(string), UTF8_CHARSET);
+            return new String(Utils.toByteArray(string), UTF8_CHARSET);
         }
     }
 

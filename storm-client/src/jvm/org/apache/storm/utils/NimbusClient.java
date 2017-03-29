@@ -41,7 +41,7 @@ public class NimbusClient extends ThriftClient {
     }
 
     public static void withConfiguredClient(WithNimbus cb) throws Exception {
-        withConfiguredClient(cb, ClientConfigUtils.readStormConfig());
+        withConfiguredClient(cb, ConfigUtils.readStormConfig());
     }
 
     public static void withConfiguredClient(WithNimbus cb, Map conf) throws Exception {

@@ -20,7 +20,7 @@ package org.apache.storm.topology;
 import org.apache.storm.task.IOutputCollector;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import java.util.List;
 
 
@@ -37,7 +37,7 @@ public class BasicOutputCollector implements IBasicOutputCollector {
     }
 
     public List<Integer> emit(List<Object> tuple) {
-        return emit(ClientUtils.DEFAULT_STREAM_ID, tuple);
+        return emit(Utils.DEFAULT_STREAM_ID, tuple);
     }
 
     public void setContext(Tuple inputTuple) {
@@ -49,7 +49,7 @@ public class BasicOutputCollector implements IBasicOutputCollector {
     }
 
     public void emitDirect(int taskId, List<Object> tuple) {
-        emitDirect(taskId, ClientUtils.DEFAULT_STREAM_ID, tuple);
+        emitDirect(taskId, Utils.DEFAULT_STREAM_ID, tuple);
     }
 
     /**

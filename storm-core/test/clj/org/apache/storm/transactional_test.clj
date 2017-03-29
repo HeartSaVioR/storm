@@ -29,7 +29,7 @@
   (:import [org.apache.storm.testing InProcessZookeeper CountingBatchBolt MemoryTransactionalSpout
             KeyedCountingBatchBolt KeyedCountingCommitterBolt KeyedSummingBatchBolt
             IdentityBolt CountingCommitBolt OpaqueMemoryTransactionalSpout])
-  (:import [org.apache.storm.utils ZookeeperAuthInfo Utils ClientUtils])
+  (:import [org.apache.storm.utils ZookeeperAuthInfo DaemonUtils Utils])
   (:import [org.apache.curator.framework CuratorFramework])
   (:import [org.apache.curator.framework.api CreateBuilder ProtectACLCreateModePathAndBytesable])
   (:import [org.apache.zookeeper CreateMode ZooDefs ZooDefs$Ids])
@@ -120,7 +120,7 @@
         (bind coordinator
               (mk-coordinator-state-changer coordinator-state))
         (.open coordinator
-               (merge (clojurify-structure (ClientUtils/readDefaultConfig))
+               (merge (clojurify-structure (Utils/readDefaultConfig))
                        {TOPOLOGY-MAX-SPOUT-PENDING 4
                        TOPOLOGY-TRANSACTIONAL-ID "abc"
                        STORM-ZOOKEEPER-PORT (.getPort zk)
@@ -283,7 +283,7 @@
 (deftest test-rotating-transactional-state
   ;; test strict ordered vs not strict ordered
   (with-open [zk (InProcessZookeeper. )]
-    (let [conf (merge (clojurify-structure (ClientUtils/readDefaultConfig))
+    (let [conf (merge (clojurify-structure (Utils/readDefaultConfig))
                       {STORM-ZOOKEEPER-PORT (.getPort zk)
                        STORM-ZOOKEEPER-SERVERS ["localhost"]
                        })

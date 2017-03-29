@@ -27,7 +27,7 @@ import org.apache.storm.transactional.state.RotatingTransactionalState;
 import org.apache.storm.transactional.state.TransactionalState;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.ObjectReader;
 
 import java.math.BigInteger;
@@ -73,7 +73,7 @@ public class TransactionalSpoutCoordinator extends BaseRichSpout {
     
     @Override
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-        _rand = new Random(ClientUtils.secureRandomLong());
+        _rand = new Random(Utils.secureRandomLong());
         _state = TransactionalState.newCoordinatorState(conf, (String) conf.get(Config.TOPOLOGY_TRANSACTIONAL_ID), _spout.getComponentConfiguration());
         _coordinatorState = new RotatingTransactionalState(_state, META_DIR, true);
         _collector = collector;

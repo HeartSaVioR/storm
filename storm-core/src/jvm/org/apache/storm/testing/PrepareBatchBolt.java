@@ -22,7 +22,7 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseBasicBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.ClientUtils;
+import org.apache.storm.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public class PrepareBatchBolt extends BaseBasicBolt {
 
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
-        long id = ClientUtils.secureRandomLong();
+        long id = Utils.secureRandomLong();
         List<Object> toEmit = new ArrayList<Object>();
         toEmit.add(id);
         toEmit.addAll(input.getValues());

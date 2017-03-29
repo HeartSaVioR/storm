@@ -500,7 +500,6 @@
                             <include>ring:*</include>
                             <include>compojure:compojure</include>
                             <include>clj-time:clj-time</include>
-                            <include>org.apache.thrift:*</include>
                             <include>io.netty:netty</include>
                             <include>com.google.guava:guava</include>
                             <include>org.apache.httpcomponents:http*</include>
@@ -527,14 +526,12 @@
                             <include>org.clojure:tools.macro</include>
                             <include>org.clojure:java.jmx</include>
                             <include>joda-time:joda-time</include>
-                            <include>org.eclipse.jetty:*</include>
                             <include>com.fasterxml.jackson.core:*</include>
                             <include>com.fasterxml.jackson.dataformat:*</include>
                             <include>clout:clout</include>
                             <include>org.clojure:tools.namespace</include>
                             <include>cheshire:cheshire</include>
                             <include>org.clojure:core.incubator</include>
-                            <include>io.dropwizard.metrics:*</include>
                             <include>metrics-clojure:*</include>
                             <include>uk.org.lidalia:*</include>
                         </includes>
@@ -591,11 +588,6 @@
                         <relocation>
                             <pattern>com.fasterxml</pattern>
                             <shadedPattern>org.apache.storm.shade.com.fasterxml</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>org.apache.thrift</pattern>
-                            <!-- This pattern is inconsistent for backwards compatibility purposes. -->
-                            <shadedPattern>org.apache.storm.thrift</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>org.jboss.netty</pattern>
@@ -708,14 +700,6 @@
                         <relocation>
                           <pattern>org.joda.time</pattern>
                           <shadedPattern>org.apache.storm.shade.org.joda.time</shadedPattern>
-                        </relocation>
-                        <relocation>
-                          <pattern>org.eclipse.jetty</pattern>
-                          <shadedPattern>org.apache.storm.shade.org.eclipse.jetty</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>com.codahale.metrics</pattern>
-                            <shadedPattern>org.apache.storm.shade.com.codahale.metrics</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>metrics.core</pattern>

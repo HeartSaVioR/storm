@@ -35,16 +35,16 @@ import org.apache.storm.ui.FilterConfiguration;
 import org.apache.storm.ui.UIHelpers;
 import org.apache.storm.utils.ConfigUtils;
 import org.apache.storm.utils.Utils;
-import org.apache.storm.shade.org.eclipse.jetty.server.Server;
-import org.apache.storm.shade.org.eclipse.jetty.servlet.FilterHolder;
-import org.apache.storm.shade.org.eclipse.jetty.servlet.FilterMapping;
-import org.apache.storm.shade.org.eclipse.jetty.servlet.ServletContextHandler;
-import org.apache.storm.shade.org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.FilterMapping;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.storm.shade.com.codahale.metrics.Meter;
+import com.codahale.metrics.Meter;
 import com.google.common.annotations.VisibleForTesting;
 
 public class DRPCServer implements AutoCloseable {

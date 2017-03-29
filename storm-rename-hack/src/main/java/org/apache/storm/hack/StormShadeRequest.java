@@ -31,7 +31,7 @@ public class StormShadeRequest {
         request.setRelocators(Arrays.asList(
                 (Relocator)new SimpleRelocator("backtype.storm", "org.apache.storm"),
                 (Relocator)new SimpleRelocator("storm.trident", "org.apache.storm.trident"),
-                (Relocator)new SimpleRelocator("org.apache.thrift7", "org.apache.storm.thrift")
+                (Relocator)new SimpleRelocator("org.apache.thrift7", "org.apache.thrift")
         ));
         request.setResourceTransformers(Arrays.asList(
                 (ResourceTransformer)new ClojureTransformer()

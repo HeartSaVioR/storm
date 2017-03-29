@@ -503,12 +503,12 @@
                             <include>ring:*</include>
                             <include>compojure:compojure</include>
                             <include>clj-time:clj-time</include>
-                            <!--<include>org.apache.thrift:*</include>-->
+                            <include>org.apache.thrift:*</include>
                             <include>io.netty:netty</include>
                             <include>com.google.guava:guava</include>
                             <include>org.apache.httpcomponents:http*</include>
-                            <!--<include>org.apache.zookeeper:zookeeper</include>-->
-                            <!--<include>org.apache.curator:*</include>-->
+                            <include>org.apache.zookeeper:zookeeper</include>
+                            <include>org.apache.curator:*</include>
                             <include>com.twitter:carbonite</include>
                             <include>com.twitter:chill-java</include>
                             <include>org.tukaani:xz</include>
@@ -595,15 +595,11 @@
                             <pattern>com.fasterxml</pattern>
                             <shadedPattern>org.apache.storm.shade.com.fasterxml</shadedPattern>
                         </relocation>
-                        <!--
                         <relocation>
                             <pattern>org.apache.thrift</pattern>
-                            -->
                             <!-- This pattern is inconsistent for backwards compatibility purposes. -->
-                        <!--
                             <shadedPattern>org.apache.storm.thrift</shadedPattern>
                         </relocation>
-                        -->
                         <relocation>
                             <pattern>org.jboss.netty</pattern>
                             <shadedPattern>org.apache.storm.shade.org.jboss.netty</shadedPattern>
@@ -620,18 +616,14 @@
                             <pattern>org.apache.http</pattern>
                             <shadedPattern>org.apache.storm.shade.org.apache.http</shadedPattern>
                         </relocation>
-                        <!--
                         <relocation>
                             <pattern>org.apache.curator</pattern>
                             <shadedPattern>org.apache.storm.shade.org.apache.curator</shadedPattern>
                         </relocation>
-                        -->
-                        <!--
                         <relocation>
                             <pattern>org.apache.zookeeper</pattern>
                             <shadedPattern>org.apache.storm.shade.org.apache.zookeeper</shadedPattern>
                         </relocation>
-                        -->
                         <relocation>
                             <pattern>org.apache.jute</pattern>
                             <shadedPattern>org.apache.storm.shade.org.apache.jute</shadedPattern>

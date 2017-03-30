@@ -15,8 +15,9 @@ addons:
 
 env:
   - MODULES=storm-client
+  - MODULES=storm-server
   - MODULES=storm-core
-  - MODULES='!storm-client,!storm-core'
+  - MODULES='!storm-client,!storm-server,!storm-core'
   - MODULES='INTEGRATION-TEST'
 
 language: java

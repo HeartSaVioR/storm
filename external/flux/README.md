@@ -115,7 +115,7 @@ The current version of Flux is available in Maven Central at the following coord
 </dependency>
 <dependency>
     <groupId>org.apache.storm</groupId>
-    <artifactId>storm-core</artifactId>
+    <artifactId>storm-server</artifactId>
     <version>${storm.version}</version>
     <exclustions>
         <exclusion>

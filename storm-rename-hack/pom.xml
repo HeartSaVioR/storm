@@ -37,7 +37,7 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.storm</groupId>
-      <artifactId>storm-server</artifactId>
+      <artifactId>storm-core</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>

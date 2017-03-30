@@ -23,7 +23,6 @@ import org.apache.storm.nimbus.ITopologyActionNotifierPlugin;
 import org.apache.storm.scheduler.resource.strategies.eviction.IEvictionStrategy;
 import org.apache.storm.scheduler.resource.strategies.priority.ISchedulingPriorityStrategy;
 import org.apache.storm.validation.ConfigValidation;
-import org.apache.storm.validation.ConfigValidationAnnotations;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -847,12 +846,6 @@ public class DaemonConfig extends Config {
      */
 
     /**
-     * root directory of the storm cgroup hierarchy
-     */
-    @isString
-    public static final String STORM_CGROUP_HIERARCHY_DIR = "storm.cgroup.hierarchy.dir";
-
-    /**
      * resources to to be controlled by cgroups
      */
     @isStringList
@@ -907,7 +900,7 @@ public class DaemonConfig extends Config {
     }
 
     public static String getCgroupStormHierarchyDir(Map conf) {
-        return (String) conf.get(DaemonConfig.STORM_CGROUP_HIERARCHY_DIR);
+        return (String) conf.get(Config.STORM_CGROUP_HIERARCHY_DIR);
     }
 
     public static ArrayList<String> getCgroupStormResources(Map conf) {

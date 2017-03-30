@@ -802,7 +802,7 @@ public class LocalCluster implements ILocalClusterTrackedTopologyAware {
                 areAllWorkersWaiting())) {
             if (System.currentTimeMillis() >= endTime) {
                 LOG.info("Cluster was not idle in {} ms", timeoutMs);
-                LOG.info(DaemonUtils.threadDump());
+                LOG.info(Utils.threadDump());
                 throw new AssertionError("Test timed out (" + timeoutMs + "ms) cluster not idle");
             }
             Thread.sleep(rand.nextInt(20));

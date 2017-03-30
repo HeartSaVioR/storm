@@ -1468,6 +1468,12 @@ public class Config extends HashMap<String, Object> {
     @isBoolean
     public static final String DRPC_AUTHORIZER_ACL_STRICT = "drpc.authorizer.acl.strict";
 
+    /**
+     * root directory of the storm cgroup hierarchy
+     */
+    @isString
+    public static final String STORM_CGROUP_HIERARCHY_DIR = "storm.cgroup.hierarchy.dir";
+
     public static void setClasspath(Map conf, String cp) {
         conf.put(Config.TOPOLOGY_CLASSPATH, cp);
     }

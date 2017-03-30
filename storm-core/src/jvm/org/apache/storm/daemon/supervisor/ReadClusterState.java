@@ -44,7 +44,7 @@ import org.apache.storm.localizer.ILocalizer;
 import org.apache.storm.scheduler.ISupervisor;
 import org.apache.storm.utils.LocalState;
 import org.apache.storm.utils.Time;
-import org.apache.storm.utils.DaemonUtils;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -294,7 +294,7 @@ public class ReadClusterState implements Runnable, AutoCloseable {
     };
     public static final UniFunc<Slot> DEFAULT_ON_WARN_TIMEOUT = (slot) -> LOG.warn("It has taken {}ms so far and {} is still not shut down.", WARN_MILLIS, slot);
     public static final UniFunc<Slot> THREAD_DUMP_ON_ERROR = (slot) -> {
-        LOG.warn("Shutdown of slot {} appears to be stuck\n{}", slot, DaemonUtils.threadDump());
+        LOG.warn("Shutdown of slot {} appears to be stuck\n{}", slot, Utils.threadDump());
         DEFAULT_ON_ERROR_TIMEOUT.call(slot);
     };
     

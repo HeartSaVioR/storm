@@ -235,11 +235,6 @@ public class DaemonUtils {
         return isSuccess;
     }
 
-    public static boolean CheckDirExists(String dir) {
-        File file = new File(dir);
-        return file.isDirectory();
-    }
-
     public static long nimbusVersionOfBlob(String key, ClientBlobStore cb) throws AuthorizationException, KeyNotFoundException {
         long nimbusBlobVersion = 0;
         ReadableBlobMeta metadata = cb.getBlobMeta(key);
@@ -576,35 +571,6 @@ public class DaemonUtils {
             }
             return size;
         }
-    }
-
-    /**
-     * Gets some information, including stack trace, for a running thread.
-     * @return A human-readable string of the dump.
-     */
-    public static String threadDump() {
-        final StringBuilder dump = new StringBuilder();
-        final java.lang.management.ThreadMXBean threadMXBean =  java.lang.management.ManagementFactory.getThreadMXBean();
-        final java.lang.management.ThreadInfo[] threadInfos = threadMXBean.getThreadInfo(threadMXBean.getAllThreadIds(), 100);
-        for (java.lang.management.ThreadInfo threadInfo : threadInfos) {
-            dump.append('"');
-            dump.append(threadInfo.getThreadName());
-            dump.append("\" ");
-            dump.append("\n   lock: ");
-            dump.append(threadInfo.getLockName());
-            dump.append(" owner: ");
-            dump.append(threadInfo.getLockOwnerName());
-            final Thread.State state = threadInfo.getThreadState();
-            dump.append("\n   java.lang.Thread.State: ");
-            dump.append(state);
-            final StackTraceElement[] stackTraceElements = threadInfo.getStackTrace();
-            for (final StackTraceElement stackTraceElement : stackTraceElements) {
-                dump.append("\n        at ");
-                dump.append(stackTraceElement);
-            }
-            dump.append("\n\n");
-        }
-        return dump.toString();
     }
 
     /**

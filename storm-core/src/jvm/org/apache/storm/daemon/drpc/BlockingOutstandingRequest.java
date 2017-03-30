@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -24,7 +24,7 @@ import org.apache.storm.generated.DRPCExecutionException;
 import org.apache.storm.generated.DRPCRequest;
 
 public class BlockingOutstandingRequest extends OutstandingRequest {
-    public static final RequestFactory<BlockingOutstandingRequest> FACTORY = 
+    public static final RequestFactory<BlockingOutstandingRequest> FACTORY =
             (function, request) -> new BlockingOutstandingRequest(function, request);
     private Semaphore _sem;
     private volatile String _result = null;

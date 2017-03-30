@@ -350,7 +350,7 @@ public class BasicContainer extends Container {
     }
     
     protected List<String> frameworkClasspath() {
-        File stormLibDir = new File(_stormHome, "lib");
+        File stormWorkerLibDir = new File(_stormHome, "lib-worker");
         String stormConfDir =
                 System.getenv("STORM_CONF_DIR") != null ?
                 System.getenv("STORM_CONF_DIR") :
@@ -358,7 +358,7 @@ public class BasicContainer extends Container {
         File stormExtlibDir = new File(_stormHome, "extlib");
         String extcp = System.getenv("STORM_EXT_CLASSPATH");
         List<String> pathElements = new LinkedList<>();
-        pathElements.addAll(getFullJars(stormLibDir));
+        pathElements.addAll(getFullJars(stormWorkerLibDir));
         pathElements.addAll(getFullJars(stormExtlibDir));
         pathElements.add(extcp);
         pathElements.add(stormConfDir);

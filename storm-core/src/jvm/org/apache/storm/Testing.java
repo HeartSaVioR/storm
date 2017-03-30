@@ -58,7 +58,6 @@ import org.apache.storm.utils.Utils;
 import org.apache.storm.utils.RegisteredGlobalState;
 import org.apache.storm.utils.Time;
 import org.apache.storm.utils.Time.SimulatedTime;
-import org.apache.storm.utils.DaemonUtils;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +115,7 @@ public class Testing {
         while (condition.exec()) {
             if (System.currentTimeMillis() > endTime) {
                 LOG.info("Condition {} not met in {} ms", condition, timeoutMs);
-                LOG.info(DaemonUtils.threadDump());
+                LOG.info(Utils.threadDump());
                 throw new AssertionError("Test timed out (" + timeoutMs + "ms) " + condition);
             }
             body.run();

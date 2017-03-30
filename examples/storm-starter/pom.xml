@@ -102,6 +102,7 @@
           <groupId>org.apache.storm</groupId>
           <artifactId>storm-client-misc</artifactId>
           <version>${project.version}</version>
+          <scope>${provided.scope}</scope>
       </dependency>
       <dependency>
           <groupId>org.apache.storm</groupId>

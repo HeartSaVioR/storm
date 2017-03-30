@@ -15,10 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.storm.daemon.drpc;
+package org.apache.storm.daemon.drpc.webapp;
 
-import org.apache.storm.generated.DRPCRequest;
+import org.apache.storm.daemon.DRPC;
 
-public interface RequestFactory<T extends OutstandingRequest> {
-    public T mkRequest(String function, DRPCRequest req); 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
+@ApplicationPath("")
+public class DRPCApplication extends Application {
+    private static DRPC _drpc;
+    private final Set<Object> singletons = new HashSet<Object>();
+    
+    public DRPCApplication() {
+        singletons.add(new DRPCResource(_drpc));
+        singletons.add(new DRPCExceptionMapper());
+        singletons.add(new AuthorizationExceptionMapper());
+    }
+    
+    @Override
+    public Set<Object> getSingletons() {
+        return singletons;
+    }
+
+    public static void setup(DRPC drpc) {
+        _drpc = drpc;
+    }
 }

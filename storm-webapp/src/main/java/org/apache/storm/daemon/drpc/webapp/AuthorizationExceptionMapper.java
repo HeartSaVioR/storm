@@ -15,10 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.storm.daemon.drpc;
+package org.apache.storm.daemon.drpc.webapp;
 
-import org.apache.storm.generated.DRPCRequest;
+import java.util.HashMap;
+import java.util.Map;
 
-public interface RequestFactory<T extends OutstandingRequest> {
-    public T mkRequest(String function, DRPCRequest req); 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+
+import org.apache.storm.generated.AuthorizationException;
+import org.json.simple.JSONValue;
+
+@Provider
+public class AuthorizationExceptionMapper implements ExceptionMapper<AuthorizationException> {
+    @Override
+    public Response toResponse(AuthorizationException ex) {
+        Map<String, String> body = new HashMap<>();
+        body.put("error", "Not Authorized");
+        body.put("errorMessage", ex.get_msg());
+        return Response.status(403).entity(JSONValue.toJSONString(body)).type("application/json").build();
+    }
 }

@@ -81,7 +81,7 @@ if (not os.path.isfile(os.path.join(USER_CONF_DIR, "storm.yaml"))):
     USER_CONF_DIR = CLUSTER_CONF_DIR
 
 STORM_WORKER_LIB_DIR = os.path.join(STORM_DIR, "lib-worker")
-STORM_LIB_DIR = os.path.join(STORM_DIR, "lib")
+STORM_SERVER_LIB_DIR = os.path.join(STORM_DIR, "lib-server")
 STORM_WEBAPP_LIB_DIR = os.path.join(STORM_DIR, "lib-webapp")
 STORM_BIN_DIR = os.path.join(STORM_DIR, "bin")
 STORM_LOG4J2_CONF_DIR = os.path.join(STORM_DIR, "log4j2")
@@ -107,7 +107,7 @@ def get_config_opts():
     global CONFIG_OPTS
     return "-Dstorm.options=" + ','.join(map(quote_plus,CONFIG_OPTS))
 
-if not os.path.exists(STORM_LIB_DIR):
+if not os.path.exists(STORM_SERVER_LIB_DIR):
     print("******************************************")
     print("The storm client can only be run from within a release. You appear to be trying to run the client from a checkout of Storm's source code.")
     print("\nYou can download a Storm release at http://storm.apache.org/downloads.html")
@@ -129,7 +129,7 @@ def get_jars_full(adir):
 
 def get_classpath(extrajars, daemon=True):
     ret = get_jars_full(STORM_DIR)
-    ret.extend(get_jars_full(STORM_LIB_DIR))
+    ret.extend(get_jars_full(STORM_SERVER_LIB_DIR))
     ret.extend(get_jars_full(os.path.join(STORM_DIR, "extlib")))
     if daemon:
         ret.extend(get_jars_full(os.path.join(STORM_DIR, "extlib-daemon")))
@@ -170,7 +170,7 @@ def resolve_dependencies(artifacts, artifact_repositories):
 
     # TODO: should we move some external modules to outer place?
 
-    # storm-submit module doesn't rely on storm-core and relevant libs
+    # storm-submit module doesn't rely on neither storm-client nor storm-server, and relevant libs
     extrajars = get_jars_full(STORM_DIR + "/external/storm-submit-tools")
     classpath = normclasspath(os.pathsep.join(extrajars))
 

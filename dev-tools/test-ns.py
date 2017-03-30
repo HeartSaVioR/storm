@@ -19,7 +19,7 @@ from subprocess import Popen, PIPE
 import sys
 import os
 
-os.chdir("storm-core")
+os.chdir("storm-server")
 
 ns = sys.argv[1]
 pipe = Popen(["mvn", "test", "-DfailIfNoTests=false", "-Dtest=%s"%ns])

@@ -203,7 +203,7 @@
 
 -----------------------------------------------------------------------
 
-For jQuery 1.11.1 (storm-core/src/ui/public/js/jquery-1.11.1.min.js)
+For jQuery 1.11.1 (storm-server/src/ui/public/js/jquery-1.11.1.min.js)
 
 Includes Sizzle.js
 http://sizzlejs.com/
@@ -233,7 +233,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------------------------------------------------------------------
 
-For jQuery Cookies 2.2.0 (storm-core/src/ui/public/js/jquery.cookies.2.2.0.min.js)
+For jQuery Cookies 2.2.0 (storm-server/src/ui/public/js/jquery.cookies.2.2.0.min.js)
 
 Copyright (c) 2005 - 2010, James Auldridge
 
@@ -258,7 +258,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------------------------------------------------------------------
 
-For typeahead jquery 0.10.5 (storm-core/src/ui/public/js/typeahead.jquery.min.js)
+For typeahead jquery 0.10.5 (storm-server/src/ui/public/js/typeahead.jquery.min.js)
 
 Copyright (c) 2013-2014 Twitter, Inc
 
@@ -283,7 +283,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS "AS IS" AND ANY EXPRESS OR IM
 
 -----------------------------------------------------------------------
 
-For js-yaml.min.js (storm-core/src/ui/public/js/)
+For js-yaml.min.js (storm-server/src/ui/public/js/)
 
 (The MIT License)
 
@@ -309,7 +309,7 @@ THE SOFTWARE.
 
 -----------------------------------------------------------------------
 
-For dagre.min.js (storm-core/src/ui/public/js/)
+For dagre.min.js (storm-server/src/ui/public/js/)
 
 Copyright (c) 2012-2014 Chris Pettitt
 
@@ -333,7 +333,7 @@ THE SOFTWARE.
 
 -----------------------------------------------------------------------
 
-For cytoscape.min.js and cytoscape-dagre.js (storm-core/src/ui/public/js/)
+For cytoscape.min.js and cytoscape-dagre.js (storm-server/src/ui/public/js/)
 
 Copyright (c) 2016 The Cytoscape Consortium
 
@@ -357,7 +357,7 @@ SOFTWARE.
 
 -----------------------------------------------------------------------
 
-For esprima.js (storm-core/src/ui/public/js/)
+For esprima.js (storm-server/src/ui/public/js/)
 
 Copyright JS Foundation and other contributors, https://js.foundation/
 
@@ -383,7 +383,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 -----------------------------------------------------------------------
 
-For arbor.js and arbor-graphics.js (storm-core/src/ui/public/js/)
+For arbor.js and arbor-graphics.js (storm-server/src/ui/public/js/)
 
   Copyright (c) 2011 Samizdat Drafting Co.
   Physics code derived from springy.js, copyright (c) 2010 Dennis Hotson
@@ -411,7 +411,7 @@ For arbor.js and arbor-graphics.js (storm-core/src/ui/public/js/)
 
 -----------------------------------------------------------------------
 
-For Arbor Tween (storm-core/src/ui/public/js/arbor-tween.js)
+For Arbor Tween (storm-server/src/ui/public/js/arbor-tween.js)
 
   Copyright (c) 2011 Samizdat Drafting Co.
 
@@ -468,7 +468,7 @@ For Arbor Tween (storm-core/src/ui/public/js/arbor-tween.js)
 
 -----------------------------------------------------------------------
 
-For mustache.js (storm-core/src/ui/public/js/jquery.mustache.js)
+For mustache.js (storm-server/src/ui/public/js/jquery.mustache.js)
 
 The MIT License
 
@@ -495,7 +495,7 @@ THE SOFTWARE.
 
 -----------------------------------------------------------------------
 
-For moment.js (storm-core/src/ui/public/js/moment.min.js)
+For moment.js (storm-server/src/ui/public/js/moment.min.js)
 
 Copyright (c) 2011-2014 Tim Wood, Iskren Chernev, Moment.js contributors
 
@@ -523,7 +523,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 -----------------------------------------------------------------------
 
-For Jquery url plugin (storm-core/src/ui/public/js/url.min.js)
+For Jquery url plugin (storm-server/src/ui/public/js/url.min.js)
 
 Jquery Url (A Jquery plugin for URL parser) v1.8.6
 Source repository: https://github.com/websanova/js-url
@@ -532,7 +532,7 @@ Licensed under an MIT-style license. Seehttps://github.com/websanova/js-url#lice
 -----------------------------------------------------------------------
 
 
-For jquery.blockUI.min.js (storm-core/src/ui/public/js/jquery.blockUI.min.js)
+For jquery.blockUI.min.js (storm-server/src/ui/public/js/jquery.blockUI.min.js)
 
 jQuery BlockUI; v20131009
 http://jquery.malsup.com/block/
@@ -559,10 +559,10 @@ use the BlockUI plugin in commercial projects as long as the copyright header is
 
 For jquery dataTables v1.10.4
 
-(storm-core/src/ui/public/js/jquery.dataTables.1.10.4.min.js
-storm-core/src/ui/public/css/jquery.dataTables.1.10.4.min.css
-storm-core/src/ui/public/images/{{back, forward}_{disabled, enabled, enabled_hover}}.png
-storm-core/src/ui/public/images/{sort_{asc, asc_disabled, both, desc, desc_disabled}}.png)
+(storm-server/src/ui/public/js/jquery.dataTables.1.10.4.min.js
+storm-server/src/ui/public/css/jquery.dataTables.1.10.4.min.css
+storm-server/src/ui/public/images/{{back, forward}_{disabled, enabled, enabled_hover}}.png
+storm-server/src/ui/public/images/{sort_{asc, asc_disabled, both, desc, desc_disabled}}.png)
 
 Copyright (c) 2008-2013 SpryMedia Limited
 http://datatables.net
@@ -589,7 +589,7 @@ THE SOFTWARE.
 
 For jquery dataTables bootstrap integration
 
-(storm-core/src/ui/public/js/jquery.dataTables.1.10.4.min.js
+(storm-server/src/ui/public/js/jquery.dataTables.1.10.4.min.js
 torm-core/src/ui/public/css/dataTables.bootstrap.css)
 
 Copyright (c) 2013-2014 SpryMedia Limited
@@ -618,8 +618,8 @@ THE SOFTWARE.
 -----------------------------------------------------------------------
 
 For bootstrap v3.3.1
-(storm-core/src/ui/public/js/bootstrap-3.3.1.min.js
-storm-core/src/ui/public/css/bootstrap-3.3.1.min.css)
+(storm-server/src/ui/public/js/bootstrap-3.3.1.min.js
+storm-server/src/ui/public/css/bootstrap-3.3.1.min.css)
 
 Bootstrap v3.3.1 (http://getbootstrap.com)
 Copyright 2011-2014 Twitter, Inc.
@@ -628,8 +628,8 @@ Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
 -----------------------------------------------------------------------
 
 For jQuery JSONFormatter 1.0.1 2015-02-28
-(storm-core/src/ui/public/js/jsonFormatter.min.js
-storm-core/src/ui/public/css/jsonFormatter.min.css)
+(storm-server/src/ui/public/js/jsonFormatter.min.js
+storm-server/src/ui/public/css/jsonFormatter.min.css)
 http://www.jqueryscript.net/other/jQuery-Plugin-For-Pretty-JSON-Formatting-jsonFormatter.htmlA
 
 The MIT License (MIT)
@@ -658,7 +658,7 @@ SOFTWARE.
 
 For statistic image
 
-storm-core/src/ui/public/images/statistic.png
+storm-server/src/ui/public/images/statistic.png
 
 Copyright (c) 2015 Github, Inc.
 

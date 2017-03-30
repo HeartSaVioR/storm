@@ -159,10 +159,10 @@
             </exclusions>
         </dependency>
 
-        <!-- storm-core is needed only for test (surefire) -->
+        <!-- storm-server is needed only for test (surefire) -->
         <dependency>
             <groupId>org.apache.storm</groupId>
-            <artifactId>storm-core</artifactId>
+            <artifactId>storm-server</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

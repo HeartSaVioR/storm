@@ -335,30 +335,6 @@
      (nil? (tplg-config "topologyMainClass")) {:valid false :error "topologyMainClass missing in topologyConfig"}
      :else {:valid true})))
 
-(defn run-tplg-submit-cmd [tplg-jar-file tplg-config user]
-  (let [tplg-main-class (if (not-nil? tplg-config) (trim (tplg-config "topologyMainClass")))
-        tplg-main-class-args (if (not-nil? tplg-config) (tplg-config "topologyMainClassArgs"))
-        storm-home (System/getProperty "storm.home")
-        storm-conf-dir (str storm-home DaemonUtils/FILE_PATH_SEPARATOR "conf")
-        storm-log-dir (if (not-nil? (*STORM-CONF* "storm.log.dir")) (*STORM-CONF* "storm.log.dir")
-                                                                    (str storm-home DaemonUtils/FILE_PATH_SEPARATOR "logs"))
-        storm-libs (str storm-home DaemonUtils/FILE_PATH_SEPARATOR "lib" DaemonUtils/FILE_PATH_SEPARATOR "*")
-        java-cmd (str (System/getProperty "java.home") DaemonUtils/FILE_PATH_SEPARATOR "bin" DaemonUtils/FILE_PATH_SEPARATOR "java")
-        storm-cmd (str storm-home DaemonUtils/FILE_PATH_SEPARATOR "bin" DaemonUtils/FILE_PATH_SEPARATOR "storm")
-        tplg-cmd-response (apply sh
-                            (flatten
-                              [storm-cmd "jar" tplg-jar-file tplg-main-class
-                                (if (not-nil? tplg-main-class-args) tplg-main-class-args [])
-                                (if (not= user "unknown") (str "-c storm.doAsUser=" user) [])]))]
-    (log-message "tplg-cmd-response " tplg-cmd-response)
-    (cond
-     (= (tplg-cmd-response :exit) 0) {"status" "success"}
-     (and (not= (tplg-cmd-response :exit) 0)
-          (not-nil? (re-find #"already exists on cluster" (tplg-cmd-response :err)))) {"status" "failed" "error" "Topology with the same name exists in cluster"}
-          (not= (tplg-cmd-response :exit) 0) {"status" "failed" "error" (clojure.string/trim-newline (tplg-cmd-response :err))}
-          :else {"status" "success" "response" "topology deployed"}
-          )))
-
 (defn cluster-configuration []
   (thrift/with-configured-nimbus-connection nimbus
     (.getNimbusConf ^Nimbus$Client nimbus)))

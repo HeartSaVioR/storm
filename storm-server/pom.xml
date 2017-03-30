@@ -24,10 +24,10 @@
         <relativePath>..</relativePath>
     </parent>
 
-    <artifactId>storm-core</artifactId>
+    <artifactId>storm-server</artifactId>
     <packaging>jar</packaging>
-    <name>Storm Core</name>
-    <description>Storm Core Java API and Clojure implementation.</description>
+    <name>Storm Server</name>
+    <description>Storm Server (Daemon) implementation.</description>
 
     <properties>
         <worker-launcher.conf.dir>/etc/storm</worker-launcher.conf.dir>
@@ -353,7 +353,7 @@
         </dependency>
         <dependency>
             <!--
-            hadoop-auth is needed in storm-core because ui in a secured storm cluster needs it for authentication.
+            hadoop-auth is needed in storm-server because ui in a secured storm cluster needs it for authentication.
             Please DO NOT REMOVE this dependency
             -->
             <groupId>org.apache.hadoop</groupId>
@@ -388,7 +388,7 @@
                 <targetPath>META-INF</targetPath>
                 <includes>
                     <!--
-                    storm-core doesn't package jquery, etc. so the stock
+                    storm-server doesn't package jquery, etc. so the stock
                     apache LICENSE file is okay. We do want our version
                     of the NOTICE file, however
                     -->
@@ -398,14 +398,14 @@
             <resource>
                 <directory>${basedir}/src/resources</directory>
                 <excludes>
-                  <exclude>storm-core-version-info.properties</exclude>
+                  <exclude>storm-server-version-info.properties</exclude>
                 </excludes>
                 <filtering>false</filtering>
            </resource>
            <resource>
               <directory>${basedir}/src/resources</directory>
               <includes>
-                <include>storm-core-version-info.properties</include>
+                <include>storm-server-version-info.properties</include>
              </includes>
              <filtering>true</filtering>
          </resource>
@@ -769,7 +769,7 @@
                     <filters>
                         <!-- Several of these filters remove the .clj files from the shaded dependencies, even though only .clj files are in these jars.
                              The reason for this is a bit complex, but intentional.  During the build process all of the dependency .clj files are
-                             compiled down into .class files, and included in storm-core.jar.  The regular shade transformer handles these in 
+                             compiled down into .class files, and included in storm-server.jar.  The regular shade transformer handles these in
                              the majority of cases correctly.  However, the Clojure-Transformer does not shade everything correctly all the
                              time.  Instead of spending a lot of time to get the Clojure-Transformer to parse Clojure correctly we opted to remove
                              the .clj files from the uber jar. -->

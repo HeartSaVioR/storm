@@ -24,11 +24,11 @@
         <format>zip</format>
     </formats>
 
-    <!-- put deps in the lib folder -->
+    <!-- put deps of storm-server in the lib-server folder -->
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>lib</outputDirectory>
+            <outputDirectory>lib-server</outputDirectory>
             <unpack>false</unpack>
         </dependencySet>
     </dependencySets>
@@ -68,7 +68,7 @@
             maven assembly plugin should inject a value.
         -->
         <fileSet>
-            <directory>${project.basedir}/../../../storm-core/src/ui/public</directory>
+            <directory>${project.basedir}/../../../storm-server/src/ui/public</directory>
             <outputDirectory>public</outputDirectory>
             <includes>
                 <include>*.html</include>
@@ -81,7 +81,7 @@
             Include rest of public/ directory, without any filtering
         -->
         <fileSet>
-            <directory>${project.basedir}/../../../storm-core/src/ui/public</directory>
+            <directory>${project.basedir}/../../../storm-server/src/ui/public</directory>
             <outputDirectory>public</outputDirectory>
             <includes>
                 <include>*/**</include>
@@ -99,7 +99,7 @@
             </excludes>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/../../../storm-core/target/native/target/usr/local/bin/</directory>
+            <directory>${project.basedir}/../../../storm-server/target/native/target/usr/local/bin/</directory>
             <includes>
                 <include>worker-launcher</include>
             </includes>

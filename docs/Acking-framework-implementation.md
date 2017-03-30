@@ -7,7 +7,7 @@ You can read a bit more about the [reliability mechanism](Guaranteeing-message-p
 
 ### acker `execute()`
 
-The acker is actually a regular bolt, with its  [execute method](https://github.com/apache/incubator-storm/blob/46c3ba7/storm-core/src/clj/backtype/storm/daemon/acker.clj#L36) defined withing `mk-acker-bolt`.  When a new tupletree is born, the spout sends the XORed edge-ids of each tuple recipient, which the acker records in its `pending` ledger. Every time an executor acks a tuple, the acker receives a partial checksum that is the XOR of the tuple's own edge-id (clearing it from the ledger) and the edge-id of each downstream tuple the executor emitted (thus entering them into the ledger).
+The acker is actually a regular bolt, with its  [execute method](https://github.com/apache/incubator-storm/blob/46c3ba7/storm-server/src/clj/backtype/storm/daemon/acker.clj#L36) defined withing `mk-acker-bolt`.  When a new tupletree is born, the spout sends the XORed edge-ids of each tuple recipient, which the acker records in its `pending` ledger. Every time an executor acks a tuple, the acker receives a partial checksum that is the XOR of the tuple's own edge-id (clearing it from the ledger) and the edge-id of each downstream tuple the executor emitted (thus entering them into the ledger).
 
 This is accomplished as follows.
 
@@ -17,7 +17,7 @@ On a tick tuple, just advance pending tupletree checksums towards death and retu
 * on ack:  xor the partial checksum into the existing checksum value
 * on fail: just mark it as failed
 
-Next, [put the record](https://github.com/apache/incubator-storm/blob/46c3ba7/storm-core/src/clj/backtype/storm/daemon/acker.clj#L50)),  into the RotatingMap (thus resetting is countdown to expiry) and take action:
+Next, [put the record](https://github.com/apache/incubator-storm/blob/46c3ba7/storm-server/src/clj/backtype/storm/daemon/acker.clj#L50)),  into the RotatingMap (thus resetting is countdown to expiry) and take action:
 
 * if the total checksum is zero, the tupletree is complete: remove it from the pending collection and notify the spout of success
 * if the tupletree has failed, it is also complete:   remove it from the pending collection and notify the spout of failure
@@ -26,7 +26,7 @@ Finally, pass on an ack of our own.
 
 ### Pending tuples and the `RotatingMap`
 
-The acker stores pending tuples in a [`RotatingMap`](https://github.com/apache/incubator-storm/blob/master/storm-core/src/jvm/backtype/storm/utils/RotatingMap.java#L19), a simple device used in several places within Storm to efficiently time-expire a process.
+The acker stores pending tuples in a [`RotatingMap`](https://github.com/apache/incubator-storm/blob/master/storm-server/src/jvm/backtype/storm/utils/RotatingMap.java#L19), a simple device used in several places within Storm to efficiently time-expire a process.
 
 The RotatingMap behaves as a HashMap, and offers the same O(1) access guarantees.
 

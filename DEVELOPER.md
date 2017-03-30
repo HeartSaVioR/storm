@@ -272,7 +272,7 @@ If you wish to skip the unit tests you can do this by adding `-DskipTests` to th
 In case you modified `storm.thrift`, you have to regenerate thrift code as java and python code before compiling whole project.
 
 ```sh
-cd storm-core/src
+cd storm-client/src
 sh genthrift.sh
 ```
 
@@ -302,7 +302,7 @@ To run all unit tests and all integration tests execute one of the commands
  
  
 You can also run tests selectively via the Clojure REPL.  The following example runs the tests in
-[auth_test.clj](storm-core/test/clj/org/apache/storm/security/auth/auth_test.clj), which has the namespace
+[auth_test.clj](storm-server/test/clj/org/apache/storm/security/auth/auth_test.clj), which has the namespace
 `org.apache.storm.security.auth.auth-test`.
 
 You can also run tests selectively with `-Dtest=<test_name>`.  This works for both clojure and junit tests.
@@ -362,7 +362,7 @@ simulating time, which means we do not have to worry about e.g. random delays fa
 
 If you are testing topologies that do not do full tuple acking, then you should be testing using the "tracked
 topologies" utilities in `org.apache.storm.testing.clj`.  For example,
-[test-acking](storm-core/test/clj/org/apache/storm/integration_test.clj) (around line 213) tests the acking system in
+[test-acking](storm-server/test/clj/org/apache/storm/integration_test.clj) (around line 213) tests the acking system in
 Storm using tracked topologies.  Here, the key is the `tracked-wait` function: it will only return when both that many
 tuples have been emitted by the spouts _and_ the topology is idle (i.e. no tuples have been emitted nor will be emitted
 without further input).  Note that you should not use tracked topologies for topologies that have tick tuples.

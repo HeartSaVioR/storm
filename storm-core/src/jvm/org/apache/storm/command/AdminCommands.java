@@ -20,6 +20,7 @@ package org.apache.storm.command;
 import com.google.common.collect.Sets;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.storm.Config;
+import org.apache.storm.utils.ServerConfigUtils;
 import org.apache.storm.blobstore.BlobStore;
 import org.apache.storm.blobstore.KeyFilter;
 import org.apache.storm.blobstore.LocalFsBlobStore;
@@ -30,13 +31,13 @@ import org.apache.storm.cluster.DaemonType;
 import org.apache.storm.cluster.IStormClusterState;
 import org.apache.storm.nimbus.NimbusInfo;
 import org.apache.storm.utils.ConfigUtils;
-import org.apache.storm.utils.DaemonUtils;
+import org.apache.storm.utils.ServerUtils;
+import org.apache.storm.utils.Utils;
 import org.apache.storm.zookeeper.ClientZookeeper;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.ACL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.storm.utils.DaemonConfigUtils;
 
 import java.util.*;
 
@@ -67,12 +68,12 @@ public class AdminCommands {
     }
 
     private static void initialize() {
-        conf = DaemonConfigUtils.readStormConfig();
-        nimbusBlobStore = DaemonUtils.getNimbusBlobStore (conf, NimbusInfo.fromConf(conf));
+        conf = ServerConfigUtils.readStormConfig();
+        nimbusBlobStore = ServerUtils.getNimbusBlobStore (conf, NimbusInfo.fromConf(conf));
         List<String> servers = (List<String>) conf.get(Config.STORM_ZOOKEEPER_SERVERS);
         Object port = conf.get(Config.STORM_ZOOKEEPER_PORT);
         List<ACL> acls = null;
-        if (DaemonUtils.isZkAuthenticationConfiguredStormServer(conf)) {
+        if (Utils.isZkAuthenticationConfiguredStormServer(conf)) {
             acls = adminZkAcls();
         }
         try {
@@ -97,7 +98,7 @@ public class AdminCommands {
         keyLists.add(ConfigUtils.masterStormCodeKey(corruptId));
         keyLists.add(ConfigUtils.masterStormConfKey(corruptId));
         if(!ConfigUtils.isLocalMode(conf)) {
-            DaemonConfigUtils.masterStormJarKey(corruptId);
+            ConfigUtils.masterStormJarKey(corruptId);
         }
         return keyLists;
     }

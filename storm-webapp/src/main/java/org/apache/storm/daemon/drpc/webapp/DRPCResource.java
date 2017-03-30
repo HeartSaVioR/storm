@@ -28,7 +28,7 @@ import org.apache.storm.daemon.drpc.DRPC;
 import org.apache.storm.metric.StormMetricsRegistry;
 import org.apache.thrift.TException;
 
-import org.apache.storm.shade.com.codahale.metrics.Meter;
+import com.codahale.metrics.Meter;
 
 @Path("/drpc/")
 public class DRPCResource {

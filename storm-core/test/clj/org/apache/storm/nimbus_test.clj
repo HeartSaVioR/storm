@@ -40,8 +40,8 @@
   (:import [java.util HashMap HashSet Optional])
   (:import [java.io File])
   (:import [javax.security.auth Subject])
-  (:import [org.apache.storm.utils Time Time$SimulatedTime DaemonUtils DaemonConfigUtils IPredicate StormCommonInstaller Utils$UptimeComputer ReflectionUtils Utils ConfigUtils]
-           [org.apache.storm.utils.staticmocking DaemonConfigUtilsInstaller DaemonUtilsInstaller ReflectionUtilsInstaller UtilsInstaller])
+  (:import [org.apache.storm.utils Time Time$SimulatedTime IPredicate StormCommonInstaller Utils$UptimeComputer ReflectionUtils Utils ConfigUtils ServerConfigUtils]
+           [org.apache.storm.utils.staticmocking ServerConfigUtilsInstaller ReflectionUtilsInstaller UtilsInstaller])
   (:import [org.apache.storm.zookeeper Zookeeper])
   (:import [org.apache.commons.io FileUtils])
   (:import [org.json.simple JSONValue])
@@ -936,7 +936,7 @@
       (check-executor-distribution slot-executors2 [2 2 2 3])
       (check-consistency cluster "test")
 
-      (bind common (first (DaemonUtils/findOne (proxy [IPredicate] []
+      (bind common (first (Utils/findOne (proxy [IPredicate] []
                                            (test [[k v]] (= 3 (count v)))) slot-executors2)))
       (is (not-nil? common))
       (is (= (slot-executors2 common) (slot-executors common)))
@@ -1524,7 +1524,7 @@
                      NIMBUS-THRIFT-PORT 6666})
           expected-acls Nimbus/ZK_ACLS
           fake-inimbus (reify INimbus (getForcedScheduler [this] nil) (prepare [this conf dir] nil))
-          fake-cu (proxy [DaemonConfigUtils] []
+          fake-cu (proxy [ServerConfigUtils] []
                     (nimbusTopoHistoryStateImpl [conf] nil))
           fake-ru (proxy [ReflectionUtils] []
                     (newInstanceImpl [_]))
@@ -1534,7 +1534,7 @@
           cluster-utils (Mockito/mock ClusterUtils)
 	  fake-common (proxy [StormCommon] []
                              (mkAuthorizationHandler [_] nil))]
-      (with-open [_ (DaemonConfigUtilsInstaller. fake-cu)
+      (with-open [_ (ServerConfigUtilsInstaller. fake-cu)
                   _ (ReflectionUtilsInstaller. fake-ru)
                   _ (UtilsInstaller. fake-utils)
                   - (StormCommonInstaller. fake-common)

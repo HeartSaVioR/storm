@@ -88,6 +88,11 @@
         -->
         <scope>${provided.scope}</scope>
     </dependency>
+      <!--
+      normally including 'storm-server' is OK for LocalCluster,
+      but 'storm-starter' also uses clojure implementation
+      so 'storm-starter' needs to include 'storm-core'
+      -->
     <dependency>
       <groupId>org.apache.storm</groupId>
       <artifactId>storm-core</artifactId>

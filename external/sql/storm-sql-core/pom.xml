@@ -44,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.storm</groupId>
-            <artifactId>storm-core</artifactId>
+            <artifactId>storm-server</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

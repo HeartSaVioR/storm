@@ -16,15 +16,12 @@
 
 (ns org.apache.storm.thrift
   (:import [java.util HashMap]
-           [java.io Serializable]
-           [org.apache.storm.generated NodeInfo Assignment])
-  (:import [org.apache.storm.generated JavaObject Grouping Nimbus StormTopology
-            StormTopology$_Fields Bolt Nimbus$Client Nimbus$Iface
+           [java.io Serializable])
+  (:import [org.apache.storm.generated JavaObject Grouping StormTopology
+            StormTopology$_Fields Bolt Nimbus$Client
             ComponentCommon Grouping$_Fields SpoutSpec NullStruct StreamInfo
-            GlobalStreamId ComponentObject ComponentObject$_Fields
-            ShellComponent SupervisorInfo])
-  (:import [org.apache.storm.utils DaemonUtils NimbusClient DaemonConfigUtils ConfigUtils Utils])
-  (:import [org.apache.storm Constants])
+            GlobalStreamId ComponentObject ComponentObject$_Fields])
+  (:import [org.apache.storm.utils NimbusClient ConfigUtils Utils])
   (:import [org.apache.storm.security.auth ReqContext])
   (:import [org.apache.storm.grouping CustomStreamGrouping])
   (:import [org.apache.storm.topology TopologyBuilder])

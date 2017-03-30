@@ -38,7 +38,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.storm</groupId>
-            <artifactId>storm-client</artifactId>
+            <artifactId>storm-server</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -56,10 +56,6 @@
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.esotericsoftware</groupId>
-            <artifactId>kryo</artifactId>
         </dependency>
         <!--clojure-->
         <dependency>
@@ -99,14 +95,6 @@
         <dependency>
             <groupId>ring</groupId>
             <artifactId>ring-json</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlets</artifactId>
         </dependency>
         <dependency>
             <groupId>org.clojure</groupId>
@@ -332,6 +320,14 @@
             <artifactId>jetty-util</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlets</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
         </dependency>
@@ -530,14 +526,14 @@
                             <include>org.clojure:tools.macro</include>
                             <include>org.clojure:java.jmx</include>
                             <include>joda-time:joda-time</include>
-                            <include>org.eclipse.jetty:*</include>
+                            <!-- <include>org.eclipse.jetty:*</include> -->
                             <include>com.fasterxml.jackson.core:*</include>
                             <include>com.fasterxml.jackson.dataformat:*</include>
                             <include>clout:clout</include>
                             <include>org.clojure:tools.namespace</include>
                             <include>cheshire:cheshire</include>
                             <include>org.clojure:core.incubator</include>
-                            <include>io.dropwizard.metrics:*</include>
+                            <!-- <include>io.dropwizard.metrics:*</include> -->
                             <include>metrics-clojure:*</include>
                             <include>uk.org.lidalia:*</include>
                         </includes>
@@ -718,14 +714,18 @@
                           <pattern>org.joda.time</pattern>
                           <shadedPattern>org.apache.storm.shade.org.joda.time</shadedPattern>
                         </relocation>
+                        <!--
                         <relocation>
                           <pattern>org.eclipse.jetty</pattern>
                           <shadedPattern>org.apache.storm.shade.org.eclipse.jetty</shadedPattern>
                         </relocation>
+                        -->
+                        <!--
                         <relocation>
                             <pattern>com.codahale.metrics</pattern>
                             <shadedPattern>org.apache.storm.shade.com.codahale.metrics</shadedPattern>
                         </relocation>
+                        -->
                         <relocation>
                             <pattern>metrics.core</pattern>
                             <shadedPattern>org.apache.storm.shade.metrics.core</shadedPattern>

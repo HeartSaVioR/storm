@@ -17,14 +17,13 @@
   (:use [clojure test])
   (:import [org.apache.storm.drpc ReturnResults DRPCSpout
             LinearDRPCTopologyBuilder DRPCInvocationsClient]
-           [org.apache.storm.utils DaemonConfigUtils DaemonUtils ServiceRegistry Utils])
+           [org.apache.storm.utils ServiceRegistry Utils])
   (:import [org.apache.storm.topology FailedException])
   (:import [org.apache.storm.coordination CoordinatedBolt$FinishedCallback])
   (:import [org.apache.storm ILocalDRPC LocalDRPC LocalCluster])
   (:import [org.apache.storm.tuple Fields])
   (:import [org.mockito Mockito])
   (:import [org.mockito.exceptions.base MockitoAssertionError])
-  (:import [org.apache.storm.utils.staticmocking DaemonConfigUtilsInstaller])
   (:import [org.apache.storm.spout SpoutOutputCollector])
   (:import [org.apache.storm.generated DRPCExecutionException DRPCRequest])
   (:import [java.util.concurrent ConcurrentLinkedQueue])

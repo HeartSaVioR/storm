@@ -30,6 +30,7 @@
     <description>Webapp Servers for Apache Storm</description>
 
     <dependencies>
+        <!-- storm-webapp is based on storm-core -->
         <dependency>
             <groupId>org.apache.storm</groupId>
             <artifactId>storm-core</artifactId>

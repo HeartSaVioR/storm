@@ -31,7 +31,7 @@
            [org.apache.storm.stats StatsUtil]
            [org.apache.storm.ui UIHelpers IConfigurator FilterConfiguration]
            [org.apache.storm.metric StormMetricsRegistry])
-  (:import [org.apache.storm.utils DaemonUtils TopologySpoutLag])
+  (:import [org.apache.storm.utils TopologySpoutLag])
   (:use [clojure.string :only [blank? lower-case trim split]])
   (:import [org.apache.storm.generated ExecutorSpecificStats
             ExecutorStats ExecutorSummary ExecutorInfo TopologyInfo SpoutStats BoltStats
@@ -45,7 +45,7 @@
   (:import [org.apache.storm.security.auth AuthUtils ReqContext])
   (:import [org.apache.storm.generated AuthorizationException ProfileRequest ProfileAction NodeInfo])
   (:import [org.apache.storm.security.auth AuthUtils])
-  (:import [org.apache.storm.utils DaemonUtils VersionInfo DaemonConfigUtils ConfigUtils Utils])
+  (:import [org.apache.storm.utils VersionInfo ConfigUtils Utils WebAppUtils])
   (:import [org.apache.storm Config DaemonConfig])
   (:import [java.io File])
   (:import [java.net URLEncoder URLDecoder])
@@ -147,12 +147,12 @@
 
 (defn event-log-link
   [topology-id component-id host port secure?]
-  (logviewer-link host (DaemonUtils/eventLogsFilename topology-id (str port)) secure?))
+  (logviewer-link host (WebAppUtils/eventLogsFilename topology-id (str port)) secure?))
 
 (defn worker-log-link [host port topology-id secure?]
   (if (or (empty? host) (let [port_str (str port "")] (or (empty? port_str) (= "0" port_str))))
     ""
-    (let [fname (DaemonUtils/logsFilename topology-id (str port))]
+    (let [fname (WebAppUtils/logsFilename topology-id (str port))]
       (logviewer-link host fname secure?))))
 
 (defn nimbus-log-link [host]
@@ -339,12 +339,12 @@
   (let [tplg-main-class (if (not-nil? tplg-config) (trim (tplg-config "topologyMainClass")))
         tplg-main-class-args (if (not-nil? tplg-config) (tplg-config "topologyMainClassArgs"))
         storm-home (System/getProperty "storm.home")
-        storm-conf-dir (str storm-home DaemonUtils/FILE_PATH_SEPARATOR "conf")
+        storm-conf-dir (str storm-home WebAppUtils/FILE_PATH_SEPARATOR "conf")
         storm-log-dir (if (not-nil? (*STORM-CONF* "storm.log.dir")) (*STORM-CONF* "storm.log.dir")
-                                                                    (str storm-home DaemonUtils/FILE_PATH_SEPARATOR "logs"))
-        storm-libs (str storm-home DaemonUtils/FILE_PATH_SEPARATOR "lib" DaemonUtils/FILE_PATH_SEPARATOR "*")
-        java-cmd (str (System/getProperty "java.home") DaemonUtils/FILE_PATH_SEPARATOR "bin" DaemonUtils/FILE_PATH_SEPARATOR "java")
-        storm-cmd (str storm-home DaemonUtils/FILE_PATH_SEPARATOR "bin" DaemonUtils/FILE_PATH_SEPARATOR "storm")
+                                                                    (str storm-home WebAppUtils/FILE_PATH_SEPARATOR "logs"))
+        storm-libs (str storm-home WebAppUtils/FILE_PATH_SEPARATOR "lib" WebAppUtils/FILE_PATH_SEPARATOR "*")
+        java-cmd (str (System/getProperty "java.home") WebAppUtils/FILE_PATH_SEPARATOR "bin" WebAppUtils/FILE_PATH_SEPARATOR "java")
+        storm-cmd (str storm-home WebAppUtils/FILE_PATH_SEPARATOR "bin" WebAppUtils/FILE_PATH_SEPARATOR "storm")
         tplg-cmd-response (apply sh
                             (flatten
                               [storm-cmd "jar" tplg-jar-file tplg-main-class
@@ -939,7 +939,7 @@
      "port" port
      "emitted" (if-let [e (.get_emitted cas)] e 0)
      "transferred" (if-let [t (.get_transferred cas)] t 0)
-     "capacity" (StatsUtil/floatStr (DaemonUtils/nullToZero (.get_capacity bas)))
+     "capacity" (StatsUtil/floatStr (Utils/nullToZero (.get_capacity bas)))
      "executeLatency" (StatsUtil/floatStr (.get_execute_latency_ms bas))
      "executed" (if-let [e (.get_executed bas)] e 0)
      "processLatency" (StatsUtil/floatStr (.get_process_latency_ms bas))

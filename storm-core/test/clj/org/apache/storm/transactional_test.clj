@@ -29,7 +29,7 @@
   (:import [org.apache.storm.testing InProcessZookeeper CountingBatchBolt MemoryTransactionalSpout
             KeyedCountingBatchBolt KeyedCountingCommitterBolt KeyedSummingBatchBolt
             IdentityBolt CountingCommitBolt OpaqueMemoryTransactionalSpout])
-  (:import [org.apache.storm.utils ZookeeperAuthInfo DaemonUtils Utils])
+  (:import [org.apache.storm.utils ZookeeperAuthInfo Utils])
   (:import [org.apache.curator.framework CuratorFramework])
   (:import [org.apache.curator.framework.api CreateBuilder ProtectACLCreateModePathAndBytesable])
   (:import [org.apache.zookeeper CreateMode ZooDefs ZooDefs$Ids])

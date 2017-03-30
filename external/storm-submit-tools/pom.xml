@@ -159,7 +159,7 @@
             </exclusions>
         </dependency>
 
-        <!-- storm-core is needed only for test (surefire) -->
+        <!-- storm-client is needed only for test (surefire) -->
         <dependency>
             <groupId>org.apache.storm</groupId>
             <artifactId>storm-client</artifactId>

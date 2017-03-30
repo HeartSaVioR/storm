@@ -23,14 +23,13 @@
   (:import [org.apache.storm.spout ShellSpout])
   (:import [org.apache.storm.metric.api CountMetric IMetricsConsumer$DataPoint IMetricsConsumer$TaskInfo])
   (:import [org.apache.storm.metric.api.rpc CountShellMetric])
-  (:import [org.apache.storm.utils DaemonUtils])
   (:import [org.apache.storm Testing Testing$Condition LocalCluster$Builder])
   
   (:use [org.apache.storm config])
   (:use [org.apache.storm.internal clojure])
   (:use [org.apache.storm.util])
   (:import [org.apache.storm Thrift])
-  (:import [org.apache.storm.utils DaemonUtils Utils]
+  (:import [org.apache.storm.utils Utils]
            (org.apache.storm.metric FakeMetricConsumer)))
 
 (defbolt acking-bolt {} {:prepare true}

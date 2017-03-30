@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.apache.storm.Config;
 import org.apache.storm.DaemonConfig;
+import org.apache.storm.utils.ServerConfigUtils;
 import org.apache.storm.daemon.drpc.webapp.DRPCApplication;
 import org.apache.storm.daemon.drpc.webapp.ReqContextFilter;
 import org.apache.storm.generated.DistributedRPC;
@@ -35,18 +36,17 @@ import org.apache.storm.security.auth.ThriftServer;
 import org.apache.storm.ui.FilterConfiguration;
 import org.apache.storm.ui.UIHelpers;
 import org.apache.storm.utils.Utils;
-import org.apache.storm.utils.DaemonConfigUtils;
 import org.apache.storm.utils.ObjectReader;
-import org.apache.storm.shade.org.eclipse.jetty.server.Server;
-import org.apache.storm.shade.org.eclipse.jetty.servlet.FilterHolder;
-import org.apache.storm.shade.org.eclipse.jetty.servlet.FilterMapping;
-import org.apache.storm.shade.org.eclipse.jetty.servlet.ServletContextHandler;
-import org.apache.storm.shade.org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.FilterMapping;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.storm.shade.com.codahale.metrics.Meter;
+import com.codahale.metrics.Meter;
 import com.google.common.annotations.VisibleForTesting;
 
 public class DRPCServer implements AutoCloseable {
@@ -172,7 +172,7 @@ public class DRPCServer implements AutoCloseable {
     
     public static void main(String [] args) throws Exception {
         Utils.setupDefaultUncaughtExceptionHandler();
-        Map<String, Object> conf = DaemonConfigUtils.readStormConfig();
+        Map<String, Object> conf = ServerConfigUtils.readStormConfig();
         try (DRPCServer server = new DRPCServer(conf)) {
             Utils.addShutdownHookWithForceKillIn1Sec(() -> server.close());
             StormMetricsRegistry.startMetricsReporters(conf);

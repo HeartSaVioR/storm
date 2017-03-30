@@ -17,7 +17,6 @@
   (:use [clojure test])
   (:import [org.apache.storm.trident.operation.builtin Count])
   (:import [org.apache.storm.trident.state OpaqueValue])
-  (:import [org.apache.storm.utils DaemonUtils])
   (:import [org.apache.storm.trident.state CombinerValueUpdater])
   (:import [org.apache.storm.trident.topology.state TransactionalState TestTransactionalState])
   (:import [org.apache.storm.trident.state.map TransactionalMap OpaqueMap])

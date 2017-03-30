@@ -19,8 +19,8 @@ package org.apache.storm.command;
 
 import org.apache.storm.Config;
 import org.apache.storm.DaemonConfig;
+import org.apache.storm.utils.ServerConfigUtils;
 import org.apache.storm.utils.Utils;
-import org.apache.storm.utils.DaemonConfigUtils;
 import org.apache.storm.utils.ObjectReader;
 import org.apache.storm.zookeeper.Zookeeper;
 
@@ -28,7 +28,7 @@ import java.util.Map;
 
 public class DevZookeeper {
     public static void main(String[] args) throws Exception {
-        Map<String, Object> conf = DaemonConfigUtils.readStormConfig();
+        Map<String, Object> conf = ServerConfigUtils.readStormConfig();
         Object port = conf.get(Config.STORM_ZOOKEEPER_PORT);
         String localPath = (String) conf.get(DaemonConfig.DEV_ZOOKEEPER_PATH);
         Utils.forceDelete(localPath);

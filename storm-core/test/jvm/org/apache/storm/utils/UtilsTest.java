@@ -59,19 +59,19 @@ public class UtilsTest {
     public void isZkAuthenticationConfiguredStormServerTest() {
         Assert.assertFalse(
             "Returns false if given null config",
-            DaemonUtils.isZkAuthenticationConfiguredStormServer(null));
+            Utils.isZkAuthenticationConfiguredStormServer(null));
 
         Assert.assertFalse(
             "Returns false if scheme key is missing",
-            DaemonUtils.isZkAuthenticationConfiguredStormServer(emptyMockMap()));
+            Utils.isZkAuthenticationConfiguredStormServer(emptyMockMap()));
 
         Assert.assertFalse(
             "Returns false if scheme value is null",
-            DaemonUtils.isZkAuthenticationConfiguredStormServer(serverMockMap(null)));
+            Utils.isZkAuthenticationConfiguredStormServer(serverMockMap(null)));
 
         Assert.assertTrue(
             "Returns true if scheme value is string",
-            DaemonUtils.isZkAuthenticationConfiguredStormServer(serverMockMap("foobar")));
+            Utils.isZkAuthenticationConfiguredStormServer(serverMockMap("foobar")));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class UtilsTest {
         String oldValue = System.getProperty(key);
         try {
             System.setProperty("java.security.auth.login.config", "anything");
-            Assert.assertTrue(DaemonUtils.isZkAuthenticationConfiguredStormServer(emptyMockMap()));
+            Assert.assertTrue(Utils.isZkAuthenticationConfiguredStormServer(emptyMockMap()));
         } finally {
             // reset property
             if (oldValue == null) {

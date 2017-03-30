@@ -19,7 +19,7 @@
   (:import [org.apache.storm.messaging TransportFactory]
            [org.apache.storm Thrift Testing LocalCluster$Builder])
   (:import [org.apache.storm.testing CompleteTopologyParam MockedSources TestWordSpout TestGlobalCount])
-  (:import [org.apache.storm.utils DaemonUtils Utils])
+  (:import [org.apache.storm.utils Utils])
   (:use [org.apache.storm util config]))
 
 (deftest test-integration

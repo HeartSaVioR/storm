@@ -18,15 +18,15 @@
   (:require [org.apache.storm.security.auth [auth-test :refer [nimbus-timeout]]])
   (:import [java.nio ByteBuffer])
   (:import [java.util Optional])
-  (:import [org.apache.storm Config LocalCluster$Builder DaemonConfig])
+  (:import [org.apache.storm LocalCluster$Builder DaemonConfig])
   (:import [org.apache.storm.blobstore BlobStore])
-  (:import [org.apache.storm.utils NimbusClient DaemonConfigUtils])
+  (:import [org.apache.storm.utils NimbusClient])
   (:import [org.apache.storm.generated NotAliveException StormBase])
-  (:import [org.apache.storm.security.auth AuthUtils ThriftServer ThriftClient 
+  (:import [org.apache.storm.security.auth AuthUtils ThriftServer ThriftClient
                                          ReqContext ThriftConnectionType])
   (:import [org.apache.storm.generated Nimbus Nimbus$Client Nimbus$Processor
             AuthorizationException SubmitOptions TopologyInitialStatus KillOptions])
-  (:import [org.apache.storm.utils DaemonUtils ConfigUtils])
+  (:import [org.apache.storm.utils ConfigUtils Utils])
   (:import [org.apache.storm.cluster IStormClusterState])
   (:import [org.mockito Mockito Matchers])
   (:use [org.apache.storm util config log])
@@ -50,7 +50,7 @@
        ~@body)))
 
 (deftest Simple-authentication-test
-  (let [port (DaemonUtils/getAvailablePort)]
+  (let [port (Utils/getAvailablePort)]
     (with-test-cluster [port nil nil "org.apache.storm.security.auth.SimpleTransportPlugin"]
       (let [storm-conf (merge (clojurify-structure (ConfigUtils/readStormConfig))
                               {STORM-THRIFT-TRANSPORT-PLUGIN "org.apache.storm.security.auth.SimpleTransportPlugin"
@@ -63,7 +63,7 @@
         (.close client)))))
 
 (deftest test-noop-authorization-w-simple-transport
-  (let [port (DaemonUtils/getAvailablePort)
+  (let [port (Utils/getAvailablePort)
         cluster-state (Mockito/mock IStormClusterState)
         blob-store (Mockito/mock BlobStore)
         topo-name "topo-name"]
@@ -88,7 +88,7 @@
         (.close client)))))
 
 (deftest test-deny-authorization-w-simple-transport
-  (let [port (DaemonUtils/getAvailablePort)
+  (let [port (Utils/getAvailablePort)
         cluster-state (Mockito/mock IStormClusterState)
         blob-store (Mockito/mock BlobStore)
         topo-name "topo-name"
@@ -134,7 +134,7 @@
         (.close client)))))
 
 (deftest test-noop-authorization-w-sasl-digest
-  (let [port (DaemonUtils/getAvailablePort)]
+  (let [port (Utils/getAvailablePort)]
     (with-test-cluster [port
                   "test/clj/org/apache/storm/security/auth/jaas_digest.conf"
                   "org.apache.storm.security.auth.authorizer.NoopAuthorizer"
@@ -152,7 +152,7 @@
         (.close client)))))
 
 (deftest test-deny-authorization-w-sasl-digest
-  (let [port (DaemonUtils/getAvailablePort)
+  (let [port (Utils/getAvailablePort)
         cluster-state (Mockito/mock IStormClusterState)
         blob-store (Mockito/mock BlobStore)
         topo-name "topo-name"

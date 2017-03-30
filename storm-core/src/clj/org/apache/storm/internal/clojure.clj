@@ -21,7 +21,7 @@
   (:import [org.apache.storm.tuple Tuple])
   (:import [org.apache.storm.task OutputCollector IBolt TopologyContext])
   (:import [org.apache.storm.spout SpoutOutputCollector ISpout])
-  (:import [org.apache.storm.utils DaemonUtils Utils])
+  (:import [org.apache.storm.utils Utils])
   (:import [org.apache.storm.clojure ClojureBolt ClojureSpout])
   (:import [java.util Collection List])
   (:require [org.apache.storm.internal [thrift :as thrift]]))

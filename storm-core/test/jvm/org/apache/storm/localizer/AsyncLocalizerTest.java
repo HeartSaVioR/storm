@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.storm.DaemonConfig;
 import org.apache.storm.daemon.supervisor.AdvancedFSOps;
 import org.apache.storm.utils.ConfigUtils;
+import org.apache.storm.utils.ServerUtils;
 import org.apache.storm.utils.ReflectionUtils;
 import org.junit.Test;
 
@@ -40,7 +41,6 @@ import org.apache.storm.generated.ExecutorInfo;
 import org.apache.storm.generated.LocalAssignment;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.security.auth.DefaultPrincipalToLocal;
-import org.apache.storm.utils.DaemonUtils;
 
 public class AsyncLocalizerTest {
 
@@ -70,14 +70,14 @@ public class AsyncLocalizerTest {
         AdvancedFSOps ops = mock(AdvancedFSOps.class);
         ConfigUtils mockedCU = mock(ConfigUtils.class);
         ReflectionUtils mockedRU = mock(ReflectionUtils.class);
-        DaemonUtils mockedU = mock(DaemonUtils.class);
+        ServerUtils mockedU = mock(ServerUtils.class);
         
         Map<String, Object> topoConf = new HashMap<>(conf);
         
         AsyncLocalizer al = new AsyncLocalizer(conf, localizer, ops);
         ConfigUtils orig = ConfigUtils.setInstance(mockedCU);
         ReflectionUtils origRU = ReflectionUtils.setInstance(mockedRU);
-        DaemonUtils origUtils = DaemonUtils.setInstance(mockedU);
+        ServerUtils origUtils = ServerUtils.setInstance(mockedU);
         try {
             when(mockedCU.supervisorStormDistRootImpl(conf, topoId)).thenReturn(stormRoot);
             when(mockedCU.supervisorLocalDirImpl(conf)).thenReturn(stormLocal);
@@ -103,7 +103,7 @@ public class AsyncLocalizerTest {
             al.shutdown();
             ConfigUtils.setInstance(orig);
             ReflectionUtils.setInstance(origRU);
-            DaemonUtils.setInstance(origUtils);
+            ServerUtils.setInstance(origUtils);
         }
     }
 
@@ -146,8 +146,7 @@ public class AsyncLocalizerTest {
         Localizer localizer = mock(Localizer.class);
         AdvancedFSOps ops = mock(AdvancedFSOps.class);
         ConfigUtils mockedCU = mock(ConfigUtils.class);
-        DaemonUtils mockedU = mock(DaemonUtils.class);
-        
+
         Map<String, Object> topoConf = new HashMap<>(conf);
         topoConf.put(Config.TOPOLOGY_BLOBSTORE_MAP, topoBlobMap);
         topoConf.put(Config.TOPOLOGY_SUBMITTER_USER, user);
@@ -159,7 +158,6 @@ public class AsyncLocalizerTest {
         
         AsyncLocalizer al = new AsyncLocalizer(conf, localizer, ops);
         ConfigUtils orig = ConfigUtils.setInstance(mockedCU);
-        DaemonUtils origUtils = DaemonUtils.setInstance(mockedU);
         try {
             when(mockedCU.supervisorStormDistRootImpl(conf, topoId)).thenReturn(stormRoot);
             when(mockedCU.readSupervisorStormConfImpl(conf, topoId)).thenReturn(topoConf);
@@ -183,7 +181,6 @@ public class AsyncLocalizerTest {
         } finally {
             al.shutdown();
             ConfigUtils.setInstance(orig);
-            DaemonUtils.setInstance(origUtils);
         }
     }
 

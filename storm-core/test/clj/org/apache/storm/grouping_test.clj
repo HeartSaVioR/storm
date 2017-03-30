@@ -21,7 +21,7 @@
   (:use [org.apache.storm log config])
   (:use [org.apache.storm.internal clojure])
   (:import [org.apache.storm LocalCluster$Builder Testing Thrift])
-  (:import [org.apache.storm.utils DaemonUtils Utils]
+  (:import [org.apache.storm.utils Utils]
            (org.apache.storm.daemon GrouperFactory)))
 
 (def shuffle-grouping (Grouping/shuffle (NullStruct. )))

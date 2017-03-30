@@ -56,22 +56,27 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -79,6 +84,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
@@ -1041,6 +1047,162 @@ public class Utils {
     public static boolean checkDirExists(String dir) {
         File file = new File(dir);
         return file.isDirectory();
+    }
+
+    /**
+     * Return a new instance of a pluggable specified in the conf.
+     * @param conf The conf to read from.
+     * @param configKey The key pointing to the pluggable class
+     * @return an instance of the class or null if it is not specified.
+     */
+    public static Object getConfiguredClass(Map conf, Object configKey) {
+        if (conf.containsKey(configKey)) {
+            return ReflectionUtils.newInstance((String)conf.get(configKey));
+        }
+        return null;
+    }
+
+    /**
+     * Is the cluster configured to interact with ZooKeeper in a secure way?
+     * This only works when called from within Nimbus or a Supervisor process.
+     * @param conf the storm configuration, not the topology configuration
+     * @return true if it is configured else false.
+     */
+    public static boolean isZkAuthenticationConfiguredStormServer(Map conf) {
+        return null != System.getProperty("java.security.auth.login.config")
+                || (conf != null
+                && conf.get(Config.STORM_ZOOKEEPER_AUTH_SCHEME) != null
+                && !((String)conf.get(Config.STORM_ZOOKEEPER_AUTH_SCHEME)).isEmpty());
+    }
+
+    public static byte[] toCompressedJsonConf(Map<String, Object> stormConf) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            OutputStreamWriter out = new OutputStreamWriter(new GZIPOutputStream(bos));
+            JSONValue.writeJSONString(stormConf, out);
+            out.close();
+            return bos.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static double nullToZero (Double v) {
+        return (v != null ? v : 0);
+    }
+
+    /**
+     * a or b the first one that is not null
+     * @param a something
+     * @param b something else
+     * @return a or b the first one that is not null
+     */
+    public static <V> V OR(V a, V b) {
+        return a == null ? b : a;
+    }
+
+    public static TreeMap<Integer, Integer> integerDivided(int sum, int numPieces) {
+        int base = sum / numPieces;
+        int numInc = sum % numPieces;
+        int numBases = numPieces - numInc;
+        TreeMap<Integer, Integer> ret = new TreeMap<Integer, Integer>();
+        ret.put(base, numBases);
+        if (numInc != 0) {
+            ret.put(base+1, numInc);
+        }
+        return ret;
+    }
+
+    /**
+     * Fills up chunks out of a collection (given a maximum amount of chunks)
+     *
+     * i.e. partitionFixed(5, [1,2,3]) -> [[1,2,3]]
+     *      partitionFixed(5, [1..9]) -> [[1,2], [3,4], [5,6], [7,8], [9]]
+     *      partitionFixed(3, [1..10]) -> [[1,2,3,4], [5,6,7], [8,9,10]]
+     * @param maxNumChunks the maximum number of chunks to return
+     * @param coll the collection to be chunked up
+     * @return a list of the chunks, which are themselves lists.
+     */
+    public static <T> List<List<T>> partitionFixed(int maxNumChunks, Collection<T> coll) {
+        List<List<T>> ret = new ArrayList<>();
+
+        if(maxNumChunks == 0 || coll == null) {
+            return ret;
+        }
+
+        Map<Integer, Integer> parts = integerDivided(coll.size(), maxNumChunks);
+
+        // Keys sorted in descending order
+        List<Integer> sortedKeys = new ArrayList<Integer>(parts.keySet());
+        Collections.sort(sortedKeys, Collections.reverseOrder());
+
+
+        Iterator<T> it = coll.iterator();
+        for(Integer chunkSize : sortedKeys) {
+            if(!it.hasNext()) { break; }
+            Integer times = parts.get(chunkSize);
+            for(int i = 0; i < times; i++) {
+                if(!it.hasNext()) { break; }
+                List<T> chunkList = new ArrayList<>();
+                for(int j = 0; j < chunkSize; j++) {
+                    if(!it.hasNext()) { break; }
+                    chunkList.add(it.next());
+                }
+                ret.add(chunkList);
+            }
+        }
+
+        return ret;
+    }
+
+    public static Object readYamlFile(String yamlFile) {
+        try (FileReader reader = new FileReader(yamlFile)) {
+            return new Yaml(new SafeConstructor()).load(reader);
+        } catch(Exception ex) {
+            LOG.error("Failed to read yaml file.", ex);
+        }
+        return null;
+    }
+
+    public static int getAvailablePort(int prefferedPort) {
+        int localPort = -1;
+        try(ServerSocket socket = new ServerSocket(prefferedPort)) {
+            localPort = socket.getLocalPort();
+        } catch(IOException exp) {
+            if (prefferedPort > 0) {
+                return getAvailablePort(0);
+            }
+        }
+        return localPort;
+    }
+
+    public static int getAvailablePort() {
+        return getAvailablePort(0);
+    }
+
+    /**
+     * Find the first item of coll for which pred.test(...) returns true.
+     * @param pred The IPredicate to test for
+     * @param coll The Collection of items to search through.
+     * @return The first matching value in coll, or null if nothing matches.
+     */
+    public static <T> T findOne (IPredicate<T> pred, Collection<T> coll) {
+        if(coll == null) {
+            return null;
+        }
+        for(T elem : coll) {
+            if (pred.test(elem)) {
+                return elem;
+            }
+        }
+        return null;
+    }
+
+    public static <T, U> T findOne (IPredicate<T> pred, Map<U, T> map) {
+        if (map == null) {
+            return null;
+        }
+        return findOne(pred, (Set<T>) map.entrySet());
     }
 
     // Non-static impl methods exist for mocking purposes.

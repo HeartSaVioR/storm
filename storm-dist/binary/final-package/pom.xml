@@ -33,7 +33,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.storm</groupId>
-            <artifactId>storm-client</artifactId>
+            <artifactId>storm-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

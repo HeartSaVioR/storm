@@ -139,11 +139,6 @@ public class ConfigUtils {
         return _instance.readSupervisorTopologyImpl(conf, stormId, ops);
     }
 
-    // we use this "weird" wrapper pattern temporarily for mocking in clojure test
-    public static String supervisorStormDistRoot(Map conf) throws IOException {
-        return _instance.supervisorStormDistRootImpl(conf);
-    }
-
     public static String supervisorStormCodePath(String stormRoot) {
         return (concatIfNotNull(stormRoot) + FILE_SEPARATOR + "stormcode.ser");
     }
@@ -155,6 +150,11 @@ public class ConfigUtils {
             ret = dir;
         }
         return ret;
+    }
+
+    // we use this "weird" wrapper pattern temporarily for mocking in clojure test
+    public static String supervisorStormDistRoot(Map conf) throws IOException {
+        return ConfigUtils._instance.supervisorStormDistRootImpl(conf);
     }
 
     // we use this "weird" wrapper pattern temporarily for mocking in clojure test
@@ -170,11 +170,6 @@ public class ConfigUtils {
         return (concatIfNotNull(stormRoot) + FILE_SEPARATOR + "stormconf.ser");
     }
 
-    // we use this "weird" wrapper pattern temporarily for mocking in clojure test
-    public static String supervisorLocalDir(Map conf) throws IOException {
-        return _instance.supervisorLocalDirImpl(conf);
-    }
-
     public static String absoluteStormLocalDir(Map conf) {
         String stormHome = System.getProperty("storm.home");
         String localDir = (String) conf.get(Config.STORM_LOCAL_DIR);
@@ -187,15 +182,6 @@ public class ConfigUtils {
                 return (stormHome + FILE_SEPARATOR + localDir);
             }
         }
-    }
-
-    public static String stormDistPath(String stormRoot) {
-        String ret = "";
-        // we do this since to concat a null String will actually concat a "null", which is not the expected: ""
-        if (stormRoot != null) {
-            ret = stormRoot;
-        }
-        return ret + FILE_SEPARATOR + "stormdist";
     }
 
     public static StormTopology readSupervisorStormCodeGivenPath(String stormCodePath, AdvancedFSOps ops) throws IOException {
@@ -279,8 +265,52 @@ public class ConfigUtils {
         return ret;
     }
 
-    public String supervisorStormDistRootImpl(Map conf) throws IOException {
-        return stormDistPath(supervisorLocalDir(conf));
+    public static String masterStormJarKey(String topologyId) {
+        return (topologyId + "-stormjar.jar");
+    }
+
+    public static Map<String, Object> readYamlConfig(String name, boolean mustExist) {
+        Map<String, Object> conf = Utils.findAndReadConfigFile(name, mustExist);
+        ConfigValidation.validateFields(conf);
+        return conf;
+    }
+
+    public static Map readYamlConfig(String name) {
+        return readYamlConfig(name, true);
+    }
+
+    public static String stormDistPath(String stormRoot) {
+        String ret = "";
+        // we do this since to concat a null String will actually concat a "null", which is not the expected: ""
+        if (stormRoot != null) {
+            ret = stormRoot;
+        }
+        return ret + FILE_SEPARATOR + "stormdist";
+    }
+
+    // we use this "weird" wrapper pattern temporarily for mocking in clojure test
+    public static String supervisorLocalDir(Map conf) throws IOException {
+        return _instance.supervisorLocalDirImpl(conf);
+    }
+
+    public static String workerTmpRoot(Map conf, String id) {
+        return (workerRoot(conf, id) + FILE_SEPARATOR + "tmp");
+    }
+
+    public static String workerUserRoot(Map conf) {
+        return (absoluteStormLocalDir(conf) + FILE_SEPARATOR + "workers-users");
+    }
+
+    public static String workerUserFile(Map conf, String workerId) {
+        return (workerUserRoot(conf) + FILE_SEPARATOR + workerId);
+    }
+
+    public static String workerPidPath(Map<String, Object> conf, String id, long pid) {
+        return workerPidPath(conf, id, String.valueOf(pid));
+    }
+
+    public static File getWorkerDirFromRoot(String logRoot, String id, Integer port) {
+        return new File((logRoot + FILE_SEPARATOR + id + FILE_SEPARATOR + port));
     }
 
     public StormTopology readSupervisorTopologyImpl(Map conf, String stormId, AdvancedFSOps ops) throws IOException {
@@ -312,12 +342,6 @@ public class ConfigUtils {
         return supervisorStormDistRoot(conf) + FILE_SEPARATOR + URLEncoder.encode(stormId, "UTF-8");
     }
 
-    public String supervisorLocalDirImpl(Map conf) throws IOException {
-        String ret = absoluteStormLocalDir(conf) + FILE_SEPARATOR + "supervisor";
-        FileUtils.forceMkdir(new File(ret));
-        return ret;
-    }
-
     public String workerRootImpl(Map conf) {
         return (absoluteStormLocalDir(conf) + FILE_SEPARATOR + "workers");
     }
@@ -328,5 +352,14 @@ public class ConfigUtils {
         return readSupervisorStormConfGivenPath(conf, confPath);
     }
 
+    public String supervisorStormDistRootImpl(Map conf) throws IOException {
+        return stormDistPath(supervisorLocalDir(conf));
+    }
+
+    public String supervisorLocalDirImpl(Map conf) throws IOException {
+        String ret = ConfigUtils.absoluteStormLocalDir(conf) + FILE_SEPARATOR + "supervisor";
+        FileUtils.forceMkdir(new File(ret));
+        return ret;
+    }
 
 }

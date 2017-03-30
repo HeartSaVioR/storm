@@ -21,7 +21,7 @@
   (:import [org.mockito Mockito])
   (:import [org.mockito.exceptions.base MockitoAssertionError])
   (:import [org.apache.curator.framework CuratorFramework CuratorFrameworkFactory CuratorFrameworkFactory$Builder])
-  (:import [org.apache.storm.utils Time Time$SimulatedTime DaemonUtils ZookeeperAuthInfo DaemonConfigUtils ConfigUtils Utils CuratorUtils])
+  (:import [org.apache.storm.utils Time Time$SimulatedTime ZookeeperAuthInfo ConfigUtils Utils CuratorUtils])
   (:import [org.apache.storm.cluster IStateStorage ZKStateStorage ClusterStateContext StormClusterStateImpl ClusterUtils])
   (:import [org.apache.storm.zookeeper Zookeeper ClientZookeeper])
   (:import [org.apache.storm.callback ZKStateChangedCallback])

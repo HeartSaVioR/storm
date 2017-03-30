@@ -67,6 +67,8 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.storm</groupId>
+            <!-- Since Flux uses LocalCluster to provide the feature: running topology locally... -->
+            <!-- User should notice this when pulling Flux into topology dependency -->
             <artifactId>storm-core</artifactId>
             <version>${project.version}</version>
             <scope>${provided.scope}</scope>

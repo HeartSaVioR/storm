@@ -109,8 +109,8 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
         
         protected void downloadBaseBlobs(File tmproot) throws Exception {
             String stormJarKey = DaemonConfigUtils.masterStormJarKey(_topologyId);
-            String stormCodeKey = DaemonConfigUtils.masterStormCodeKey(_topologyId);
-            String stormConfKey = DaemonConfigUtils.masterStormConfKey(_topologyId);
+            String stormCodeKey = ConfigUtils.masterStormCodeKey(_topologyId);
+            String stormConfKey = ConfigUtils.masterStormConfKey(_topologyId);
             String jarPath = ConfigUtils.supervisorStormJarPath(tmproot.getAbsolutePath());
             String codePath = ConfigUtils.supervisorStormCodePath(tmproot.getAbsolutePath());
             String confPath = ConfigUtils.supervisorStormConfPath(tmproot.getAbsolutePath());
@@ -171,8 +171,8 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
         @Override
         protected void downloadBaseBlobs(File tmproot) throws Exception {
             _fsOps.forceMkdir(tmproot);
-            String stormCodeKey = DaemonConfigUtils.masterStormCodeKey(_topologyId);
-            String stormConfKey = DaemonConfigUtils.masterStormConfKey(_topologyId);
+            String stormCodeKey = ConfigUtils.masterStormCodeKey(_topologyId);
+            String stormConfKey = ConfigUtils.masterStormConfKey(_topologyId);
             File codePath = new File(ConfigUtils.supervisorStormCodePath(tmproot.getAbsolutePath()));
             File confPath = new File(ConfigUtils.supervisorStormConfPath(tmproot.getAbsolutePath()));
             BlobStore blobStore = DaemonUtils.getNimbusBlobStore(_conf, null);

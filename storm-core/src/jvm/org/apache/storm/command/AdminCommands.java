@@ -94,8 +94,8 @@ public class AdminCommands {
 
     private static Set<String> getKeyListFromId( String corruptId) {
         Set<String> keyLists = new HashSet<>();
-        keyLists.add(DaemonConfigUtils.masterStormCodeKey(corruptId));
-        keyLists.add(DaemonConfigUtils.masterStormConfKey(corruptId));
+        keyLists.add(ConfigUtils.masterStormCodeKey(corruptId));
+        keyLists.add(ConfigUtils.masterStormConfKey(corruptId));
         if(!ConfigUtils.isLocalMode(conf)) {
             DaemonConfigUtils.masterStormJarKey(corruptId);
         }
@@ -120,7 +120,7 @@ public class AdminCommands {
         Set<String> blobStoreTopologyIds = nimbusBlobStore.filterAndListKeys(new KeyFilter<String>() {
             @Override
             public String filter(String key) {
-                return DaemonConfigUtils.getIdFromBlobKey(key);
+                return ConfigUtils.getIdFromBlobKey(key);
             }
         });
         Set<String> activeTopologyIds = new HashSet<>(stormClusterState.activeStorms());

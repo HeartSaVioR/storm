@@ -131,14 +131,6 @@ public class DaemonConfigUtils {
         return (topologyId + "-stormjar.jar");
     }
 
-    public static String masterStormCodeKey(String topologyId) {
-        return (topologyId + "-stormcode.ser");
-    }
-
-    public static String masterStormConfKey(String topologyId) {
-        return (topologyId + "-stormconf.ser");
-    }
-
     public static String masterStormDistRoot(Map conf) throws IOException {
         String ret = ConfigUtils.stormDistPath(masterLocalDir(conf));
         FileUtils.forceMkdir(new File(ret));
@@ -197,23 +189,6 @@ public class DaemonConfigUtils {
 
     public static String workerUserFile(Map conf, String workerId) {
         return (workerUserRoot(conf) + FILE_SEPARATOR + workerId);
-    }
-
-    public static String getIdFromBlobKey(String key) {
-        if (key == null) return null;
-        final String STORM_JAR_SUFFIX = "-stormjar.jar";
-        final String STORM_CODE_SUFFIX = "-stormcode.ser";
-        final String STORM_CONF_SUFFIX = "-stormconf.ser";
-
-        String ret = null;
-        if (key.endsWith(STORM_JAR_SUFFIX)) {
-            ret = key.substring(0, key.length() - STORM_JAR_SUFFIX.length());
-        } else if (key.endsWith(STORM_CODE_SUFFIX)) {
-            ret = key.substring(0, key.length() - STORM_CODE_SUFFIX.length());
-        } else if (key.endsWith(STORM_CONF_SUFFIX)) {
-            ret = key.substring(0, key.length() - STORM_CONF_SUFFIX.length());
-        }
-        return ret;
     }
 
     public static File getLogMetaDataFile(String fname) {

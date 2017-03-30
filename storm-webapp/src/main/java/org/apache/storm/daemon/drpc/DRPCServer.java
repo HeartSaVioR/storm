@@ -23,8 +23,6 @@ import java.util.Map;
 
 import org.apache.storm.Config;
 import org.apache.storm.DaemonConfig;
-import org.apache.storm.daemon.DRPC;
-import org.apache.storm.daemon.DRPCThrift;
 import org.apache.storm.daemon.drpc.webapp.DRPCApplication;
 import org.apache.storm.daemon.drpc.webapp.ReqContextFilter;
 import org.apache.storm.generated.DistributedRPC;

@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import javax.security.auth.Subject;
 
 import org.apache.storm.Config;
+import org.apache.storm.daemon.drpc.DRPC;
 import org.apache.storm.generated.AuthorizationException;
 import org.apache.storm.generated.DRPCExceptionType;
 import org.apache.storm.generated.DRPCExecutionException;

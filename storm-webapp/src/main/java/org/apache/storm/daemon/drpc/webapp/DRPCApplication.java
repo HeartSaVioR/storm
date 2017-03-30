@@ -17,7 +17,7 @@
  */
 package org.apache.storm.daemon.drpc.webapp;
 
-import org.apache.storm.daemon.DRPC;
+import org.apache.storm.daemon.drpc.DRPC;
 
 import java.util.HashSet;
 import java.util.Set;

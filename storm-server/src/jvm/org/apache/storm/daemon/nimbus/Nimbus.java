@@ -550,8 +550,8 @@ public class Nimbus implements Iface, Shutdownable, DaemonCommon {
     
     static List<String> getKeyListFromId(Map<String, Object> conf, String id) {
         List<String> ret = new ArrayList<>(3);
-        ret.add(DaemonConfigUtils.masterStormCodeKey(id));
-        ret.add(DaemonConfigUtils.masterStormConfKey(id));
+        ret.add(ConfigUtils.masterStormCodeKey(id));
+        ret.add(ConfigUtils.masterStormConfKey(id));
         if (!ConfigUtils.isLocalMode(conf)) {
             ret.add(DaemonConfigUtils.masterStormJarKey(id));
         }
@@ -1248,8 +1248,8 @@ public class Nimbus implements Iface, Shutdownable, DaemonCommon {
         IStormClusterState clusterState = stormClusterState;
         BlobStore store = blobStore;
         String jarKey = DaemonConfigUtils.masterStormJarKey(topoId);
-        String codeKey = DaemonConfigUtils.masterStormCodeKey(topoId);
-        String confKey = DaemonConfigUtils.masterStormConfKey(topoId);
+        String codeKey = ConfigUtils.masterStormCodeKey(topoId);
+        String confKey = ConfigUtils.masterStormConfKey(topoId);
         NimbusInfo hostPortInfo = nimbusHostPortInfo;
         if (tmpJarLocation != null) {
             //in local mode there is no jar
@@ -1287,8 +1287,8 @@ public class Nimbus implements Iface, Shutdownable, DaemonCommon {
         if (!ConfigUtils.isLocalMode(topoConf)) {
             jarCount = getBlobReplicationCount(DaemonConfigUtils.masterStormJarKey(topoId));
         }
-        int codeCount = getBlobReplicationCount(DaemonConfigUtils.masterStormCodeKey(topoId));
-        int confCount = getBlobReplicationCount(DaemonConfigUtils.masterStormConfKey(topoId));
+        int codeCount = getBlobReplicationCount(ConfigUtils.masterStormCodeKey(topoId));
+        int confCount = getBlobReplicationCount(ConfigUtils.masterStormConfKey(topoId));
         long totalWaitTime = 0;
         //When is this ever null?
         if (blobStore != null) {
@@ -1310,8 +1310,8 @@ public class Nimbus implements Iface, Shutdownable, DaemonCommon {
                 if (!ConfigUtils.isLocalMode(topoConf)) {
                     jarCount = getBlobReplicationCount(DaemonConfigUtils.masterStormJarKey(topoId));
                 }
-                codeCount = getBlobReplicationCount(DaemonConfigUtils.masterStormCodeKey(topoId));
-                confCount = getBlobReplicationCount(DaemonConfigUtils.masterStormConfKey(topoId));
+                codeCount = getBlobReplicationCount(ConfigUtils.masterStormCodeKey(topoId));
+                confCount = getBlobReplicationCount(ConfigUtils.masterStormConfKey(topoId));
             }
         }
         LOG.info("desired replication count {} achieved, current-replication-count for conf key = {},"
@@ -2022,8 +2022,8 @@ public class Nimbus implements Iface, Shutdownable, DaemonCommon {
         BlobStore store = blobStore;
         IStormClusterState state = stormClusterState;
         rmBlobKey(store, DaemonConfigUtils.masterStormJarKey(topoId), state);
-        rmBlobKey(store, DaemonConfigUtils.masterStormConfKey(topoId), state);
-        rmBlobKey(store, DaemonConfigUtils.masterStormCodeKey(topoId), state);
+        rmBlobKey(store, ConfigUtils.masterStormConfKey(topoId), state);
+        rmBlobKey(store, ConfigUtils.masterStormCodeKey(topoId), state);
     }
 
     @VisibleForTesting
@@ -2288,7 +2288,7 @@ public class Nimbus implements Iface, Shutdownable, DaemonCommon {
                 summary.set_assigned_memoffheap(resources.getAssignedMemOffHeap());
                 summary.set_assigned_cpu(resources.getAssignedCpu());
             }
-            summary.set_replication_count(getBlobReplicationCount(DaemonConfigUtils.masterStormCodeKey(topoId)));
+            summary.set_replication_count(getBlobReplicationCount(ConfigUtils.masterStormCodeKey(topoId)));
             topologySummaries.add(summary);
         }
         
@@ -3386,7 +3386,7 @@ public class Nimbus implements Iface, Shutdownable, DaemonCommon {
             if (common.base.is_set_component_debug()) {
                 topoInfo.set_component_debug(common.base.get_component_debug());
             }
-            topoInfo.set_replication_count(getBlobReplicationCount(DaemonConfigUtils.masterStormCodeKey(topoId)));
+            topoInfo.set_replication_count(getBlobReplicationCount(ConfigUtils.masterStormCodeKey(topoId)));
             return topoInfo;
         } catch (Exception e) {
             LOG.warn("Get topo info exception. (topology id='{}')", topoId, e);
@@ -3482,7 +3482,7 @@ public class Nimbus implements Iface, Shutdownable, DaemonCommon {
             topoPageInfo.set_status(extractStatusStr(base));
             topoPageInfo.set_uptime_secs(Time.deltaSecs(launchTimeSecs));
             topoPageInfo.set_topology_conf(JSONValue.toJSONString(topoConf));
-            topoPageInfo.set_replication_count(getBlobReplicationCount(DaemonConfigUtils.masterStormCodeKey(topoId)));
+            topoPageInfo.set_replication_count(getBlobReplicationCount(ConfigUtils.masterStormCodeKey(topoId)));
             if (base.is_set_component_debug()) {
                 DebugOptions debug = base.get_component_debug().get(topoId);
                 if (debug != null) {

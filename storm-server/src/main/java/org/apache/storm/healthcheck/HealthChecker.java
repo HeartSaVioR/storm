@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 
-package org.apache.storm.utils;
+package org.apache.storm.healthcheck;
 
 import org.apache.storm.DaemonConfig;
+import org.apache.storm.utils.ServerConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class HealthCheckUtils {
+public class HealthChecker {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HealthCheckUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HealthChecker.class);
     private static final String FAILED = "failed";
     private static final String SUCCESS = "success";
     private static final String TIMEOUT = "timeout";

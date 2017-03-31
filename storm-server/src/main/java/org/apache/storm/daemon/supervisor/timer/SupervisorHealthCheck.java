@@ -21,7 +21,7 @@ package org.apache.storm.daemon.supervisor.timer;
 import java.util.Map;
 
 import org.apache.storm.daemon.supervisor.Supervisor;
-import org.apache.storm.utils.HealthCheckUtils;
+import org.apache.storm.healthcheck.HealthChecker;
 
 public class SupervisorHealthCheck implements Runnable {
     private final Supervisor supervisor;
@@ -33,7 +33,7 @@ public class SupervisorHealthCheck implements Runnable {
     @Override
     public void run() {
         Map<String, Object> conf = supervisor.getConf();
-        int healthCode = HealthCheckUtils.healthCheck(conf);
+        int healthCode = HealthChecker.healthCheck(conf);
         if (healthCode != 0) {
             supervisor.shutdownAllWorkers(null, null);
         }

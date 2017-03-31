@@ -39,7 +39,8 @@
 
         <!--
         Dependencies in addition to 'storm-client':
-        Those dependencies should be added to topology uber jar without having 'storm-client'.
+        Those dependencies should be added to topology uber jar without having 'storm-client',
+        when user needs to include 'storm-server' to topology jar due to LocalCluster.
         -->
         <dependency>
             <groupId>org.apache.curator</groupId>

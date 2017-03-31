@@ -124,10 +124,15 @@
             <artifactId>snakeyaml</artifactId>
         </dependency>
 
-        <!--clojure-->
+        <!-- clojure -->
         <dependency>
             <groupId>org.clojure</groupId>
             <artifactId>clojure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.twitter</groupId>
+            <artifactId>carbonite</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <!-- netty -->
@@ -140,13 +145,6 @@
         <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
-        </dependency>
-
-        <!-- carbonite -->
-        <dependency>
-            <groupId>com.twitter</groupId>
-            <artifactId>carbonite</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <!-- zookeeper -->
@@ -173,6 +171,21 @@
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
         </dependency>
+
+        <!-- belows are transitive dependencies which are version managed in storm pom -->
+        <!-- httpclient is derived from thrift -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+
+        <!-- curator-client is derived from curator-framework -->
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-client</artifactId>
+        </dependency>
+
+        <!-- end of transitive dependency management -->
 
         <!-- test -->
         <!-- hamcrest-core dependency is shaded inside the mockito-all and junit depends on newer version of hamcrest-core.

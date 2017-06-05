@@ -19,27 +19,18 @@ package org.apache.storm.common;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.util.Pair;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.Credentials;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.security.token.TokenIdentifier;
-import org.apache.storm.security.INimbusCredentialPlugin;
 import org.apache.storm.security.auth.IAutoCredentials;
-import org.apache.storm.security.auth.ICredentialsRenewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.xml.bind.DatatypeConverter;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -48,65 +39,21 @@ import java.util.Set;
 /**
  * The base class that for auto credential plugins that abstracts out some of the common functionality.
  */
-public abstract class AbstractAutoCreds implements IAutoCredentials, ICredentialsRenewer, INimbusCredentialPlugin {
+public abstract class AbstractAutoCreds implements IAutoCredentials, CredentialKeyProvider {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractAutoCreds.class);
-    public static final String CONFIG_KEY_RESOURCES = "resources";
 
     private Set<String> configKeys = new HashSet<>();
-    private Map<String, Map<String, Object>> configMap = new HashMap<>();
 
     @Override
-    public void prepare(Map conf) {
-        doPrepare(conf);
-        loadConfigKeys(conf);
-        for (String key : configKeys) {
-            if (conf.containsKey(key)) {
-                Map<String, Object> config = (Map<String, Object>) conf.get(key);
-                configMap.put(key, config);
-                LOG.info("configKey = {}, config = {}", key, config);
-            }
-        }
-    }
-
-    @Override
-    public void populateCredentials(Map<String, String> credentials, Map conf) {
-        try {
-            loadConfigKeys(conf);
-            if (!configKeys.isEmpty()) {
-                Map<String, Object> updatedConf = updateConfigs(conf);
-                for (String configKey : configKeys) {
-                    credentials.put(getCredentialKey(configKey),
-                            DatatypeConverter.printBase64Binary(getHadoopCredentials(updatedConf, configKey)));
-                }
-            } else {
-                credentials.put(getCredentialKey(StringUtils.EMPTY),
-                        DatatypeConverter.printBase64Binary(getHadoopCredentials(conf)));
-            }
-            LOG.info("Tokens added to credentials map.");
-        } catch (Exception e) {
-            LOG.error("Could not populate credentials.", e);
-        }
-    }
-
-    private Map<String, Object> updateConfigs(Map topologyConf) {
-        Map<String, Object> res = new HashMap<>(topologyConf);
-        for (String configKey : configKeys) {
-            if (!res.containsKey(configKey) && configMap.containsKey(configKey)) {
-                res.put(configKey, configMap.get(configKey));
-            }
-        }
-        return res;
-    }
-
-    @Override
-    public void renew(Map<String, String> credentials, Map topologyConf) {
-        doRenew(credentials, updateConfigs(topologyConf));
+    public void prepare(Map topoConf) {
+        doPrepare(topoConf);
+        loadConfigKeys(topoConf);
     }
 
     @Override
     public void populateCredentials(Map<String, String> credentials) {
         credentials.put(getCredentialKey(StringUtils.EMPTY),
-                DatatypeConverter.printBase64Binary("dummy place holder".getBytes()));
+            DatatypeConverter.printBase64Binary("dummy place holder".getBytes()));
     }
 
     /**
@@ -118,7 +65,6 @@ public abstract class AbstractAutoCreds implements IAutoCredentials, ICredential
         addTokensToUGI(subject);
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -128,52 +74,16 @@ public abstract class AbstractAutoCreds implements IAutoCredentials, ICredential
         addTokensToUGI(subject);
     }
 
-    protected Set<Pair<String, Credentials>> getCredentials(Map<String, String> credentials) {
-        Set<Pair<String, Credentials>> res = new HashSet<>();
-        if (!configKeys.isEmpty()) {
-            for (String configKey : configKeys) {
-                Credentials cred = doGetCredentials(credentials, configKey);
-                if (cred != null) {
-                    res.add(new Pair(configKey, cred));
-                }
-            }
-        } else {
-            Credentials cred = doGetCredentials(credentials, StringUtils.EMPTY);
-            if (cred != null) {
-                res.add(new Pair(StringUtils.EMPTY, cred));
-            }
-        }
-        return res;
-    }
-
-    protected void fillHadoopConfiguration(Map topoConf, String configKey, Configuration configuration) {
-        Map<String, Object> config = (Map<String, Object>) topoConf.get(configKey);
-        LOG.info("TopoConf {}, got config {}, for configKey {}", topoConf, config, configKey);
-        if (config != null) {
-            List<String> resourcesToLoad = new ArrayList<>();
-            for (Map.Entry<String, Object> entry : config.entrySet()) {
-                if (entry.getKey().equals(CONFIG_KEY_RESOURCES)) {
-                    resourcesToLoad.addAll((List<String>) entry.getValue());
-                } else {
-                    configuration.set(entry.getKey(), String.valueOf(entry.getValue()));
-                }
-            }
-            LOG.info("Resources to load {}", resourcesToLoad);
-            // add configs from resources like hdfs-site.xml
-            for (String pathStr : resourcesToLoad) {
-                configuration.addResource(new Path(Paths.get(pathStr).toUri()));
-            }
-        }
-        LOG.info("Initializing UGI with config {}", configuration);
-        UserGroupInformation.setConfiguration(configuration);
+    public Set<Pair<String, Credentials>> getCredentials(Map<String, String> credentials) {
+        return CredentialUtil.getCredential(this, credentials, configKeys);
     }
 
     /**
      * Prepare the plugin
      *
-     * @param conf the storm cluster conf set via storm.yaml
+     * @param topoConf the topology conf
      */
-    protected abstract void doPrepare(Map conf);
+    protected abstract void doPrepare(Map topoConf);
 
     /**
      * The lookup key for the config key string
@@ -181,17 +91,6 @@ public abstract class AbstractAutoCreds implements IAutoCredentials, ICredential
      * @return the config key string
      */
     protected abstract String getConfigKeyString();
-
-    /**
-     * The key with which the credentials are stored in the credentials map
-     */
-    protected abstract String getCredentialKey(String configKey);
-
-    protected abstract byte[] getHadoopCredentials(Map conf, String configKey);
-
-    protected abstract byte[] getHadoopCredentials(Map conf);
-
-    protected abstract void doRenew(Map<String, String> credentials, Map topologyConf);
 
     @SuppressWarnings("unchecked")
     private void addCredentialToSubject(Subject subject, Map<String, String> credentials) {
@@ -224,23 +123,6 @@ public abstract class AbstractAutoCreds implements IAutoCredentials, ICredential
                 }
             }
         }
-    }
-
-    private Credentials doGetCredentials(Map<String, String> credentials, String configKey) {
-        Credentials credential = null;
-        if (credentials != null && credentials.containsKey(getCredentialKey(configKey))) {
-            try {
-                byte[] credBytes = DatatypeConverter.parseBase64Binary(credentials.get(getCredentialKey(configKey)));
-                ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(credBytes));
-
-                credential = new Credentials();
-                credential.readFields(in);
-            } catch (Exception e) {
-                LOG.error("Could not obtain credentials from credentials map.", e);
-            }
-        }
-        return credential;
-
     }
 
     private void loadConfigKeys(Map conf) {

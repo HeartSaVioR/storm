@@ -36,14 +36,19 @@ import static org.apache.storm.Config.TOPOLOGY_AUTO_CREDENTIALS;
  * This class provides util methods for storm-hdfs connector communicating
  * with secured HDFS.
  */
-public class HdfsSecurityUtil {
+public final class HdfsSecurityUtil {
     public static final String STORM_KEYTAB_FILE_KEY = "hdfs.keytab.file";
     public static final String STORM_USER_NAME_KEY = "hdfs.kerberos.principal";
     public static final String HDFS_CREDENTIALS_CONFIG_KEYS = "hdfsCredentialsConfigKeys";
-
+    public static final String HDFS_CREDENTIALS = "HDFS_CREDENTIALS";
+    public static final String TOPOLOGY_HDFS_URI = "topology.hdfs.uri";
 
     private static final Logger LOG = LoggerFactory.getLogger(HdfsSecurityUtil.class);
     private static AtomicBoolean isLoggedIn = new AtomicBoolean();
+
+    private HdfsSecurityUtil() {
+    }
+
     public static void login(Map conf, Configuration hdfsConfig) throws IOException {
         //If AutoHDFS is specified, do not attempt to login using keytabs, only kept for backward compatibility.
         if(conf.get(TOPOLOGY_AUTO_CREDENTIALS) == null ||

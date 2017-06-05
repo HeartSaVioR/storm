@@ -1,0 +1,10 @@
+diff a/external/storm-autocreds/src/main/java/org/apache/storm/hbase/security/HBaseSecurityUtil.java b/external/storm-autocreds/src/main/java/org/apache/storm/hbase/security/HBaseSecurityUtil.java	(rejected hunks)
+@@ -39,7 +39,7 @@ import static org.apache.storm.Config.TOPOLOGY_AUTO_CREDENTIALS;
+  * This class provides util methods for storm-hbase connector communicating
+  * with secured HBase.
+  */
+-public class HBaseSecurityUtil {
++public final class HBaseSecurityUtil {
+     private static final Logger LOG = LoggerFactory.getLogger(HBaseSecurityUtil.class);
+     private static final long KRB_RELOGIN_INTERVAL_MS = 5 * 60 * 1000; // 5 mins
+     private static Map<UserGroupInformation, ExecutorService> renewThreads = new HashMap<>();

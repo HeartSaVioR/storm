@@ -6,43 +6,25 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.apache.storm.hive.security;
-
-import org.apache.storm.common.AbstractAutoCreds;
-
-import java.util.Map;
-
-import static org.apache.storm.hive.security.HiveSecurityUtil.HIVE_CREDENTIALS;
-import static org.apache.storm.hive.security.HiveSecurityUtil.HIVE_CREDENTIALS_CONFIG_KEYS;
+package org.apache.storm.common;
 
 /**
- * Auto credentials plugin for Hive implementation. This class provides a way to automatically
- * push credentials to a topology and to retrieve them in the worker.
+ * Provider interface for credential key.
  */
-public class AutoHive extends AbstractAutoCreds {
-    @Override
-    public void doPrepare(Map conf) {
-    }
-
-    @Override
-    protected String getConfigKeyString() {
-        return HIVE_CREDENTIALS_CONFIG_KEYS;
-    }
-
-    @Override
-    public String getCredentialKey(String configKey) {
-        return HIVE_CREDENTIALS + configKey;
-    }
-
+public interface CredentialKeyProvider {
+  /**
+   * The lookup key for the config key string
+   *
+   * @return the config key string
+   */
+  String getCredentialKey(String configKey);
 }
-

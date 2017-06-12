@@ -36,3 +36,6 @@ cache:
     - "$HOME/.m2/repository"
     - "$HOME/.rvm"
     - "$NVM_DIR"
+matrix:
+  allow_failures:
+    - env: MODULES='INTEGRATION-TEST'

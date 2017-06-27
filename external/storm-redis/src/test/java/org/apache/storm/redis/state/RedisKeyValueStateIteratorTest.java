@@ -208,7 +208,7 @@ public class RedisKeyValueStateIteratorTest {
     }
 
     private void putTombstoneToMap(NavigableMap<byte[], byte[]> map, byte[] key) {
-        map.put(encoder.encodeKey(key), DefaultStateEncoder.TOMBSTONE);
+        map.put(encoder.encodeKey(key), encoder.getTombstoneValue());
     }
 
     private TreeMap<byte[], byte[]> getBinaryTreeMap() {

@@ -15,14 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.storm.state;
 
 import com.google.common.base.Optional;
 
 /**
- * Helper class for encoding/decoding key values.
+ * Default state encoder class for encoding/decoding key values. This class assumes encoded types of key and value are
+ * both binary (byte array) due to keep backward compatibility.
  */
-public class DefaultStateEncoder<K, V> {
+public class DefaultStateEncoder<K, V> implements StateEncoder<K, V, byte[], byte[]> {
 
     public static final Serializer<Optional<byte[]>> internalValueSerializer = new DefaultStateSerializer<>();
 
@@ -53,15 +55,20 @@ public class DefaultStateEncoder<K, V> {
                     Optional.of(valueSerializer.serialize(value)));
     }
 
-    public K decodeKey(byte[] redisKey) {
-        return keySerializer.deserialize(redisKey);
+    public K decodeKey(byte[] encodedKey) {
+        return keySerializer.deserialize(encodedKey);
     }
 
-    public V decodeValue(byte[] redisValue) {
-        Optional<byte[]> internalValue = internalValueSerializer.deserialize(redisValue);
+    public V decodeValue(byte[] encodedValue) {
+        Optional<byte[]> internalValue = internalValueSerializer.deserialize(encodedValue);
         if (internalValue.isPresent()) {
             return valueSerializer.deserialize(internalValue.get());
         }
         return null;
+    }
+
+    @Override
+    public byte[] getTombstoneValue() {
+        return TOMBSTONE;
     }
 }

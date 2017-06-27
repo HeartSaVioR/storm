@@ -18,9 +18,6 @@
 
 package org.apache.storm.redis.state;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.PeekingIterator;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -32,6 +29,7 @@ import org.apache.storm.state.BaseBinaryStateIterator;
 import org.apache.storm.state.DefaultStateEncoder;
 import org.apache.storm.state.Serializer;
 
+import org.apache.storm.state.StateEncoder;
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
 
@@ -41,7 +39,7 @@ import redis.clients.jedis.ScanResult;
 public class RedisKeyValueStateIterator<K, V> extends BaseBinaryStateIterator<K, V> {
 
     private final byte[] namespace;
-    private final DefaultStateEncoder<K, V> encoder;
+    private final StateEncoder<K, V, byte[], byte[]> encoder;
     private final RedisCommandsInstanceContainer container;
     private final ScanParams scanParams;
 
@@ -95,8 +93,8 @@ public class RedisKeyValueStateIterator<K, V> extends BaseBinaryStateIterator<K,
     }
 
     @Override
-    protected byte[] getTombstoneValue() {
-        return DefaultStateEncoder.TOMBSTONE;
+    protected boolean isTombstoneValue(byte[] value) {
+        return Arrays.equals(value, encoder.getTombstoneValue());
     }
 
     private void loadChunkFromRedis() {

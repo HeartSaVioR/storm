@@ -52,6 +52,8 @@ public class RedisKeyValueState<K, V> implements KeyValueState<K, V> {
     private static final Logger LOG = LoggerFactory.getLogger(RedisKeyValueState.class);
     private static final String COMMIT_TXID_KEY = "commit";
     private static final String PREPARE_TXID_KEY = "prepare";
+    public static final NavigableMap<byte[], byte[]> EMPTY_PENDING_COMMIT_MAP = Maps.unmodifiableNavigableMap(
+            new TreeMap<byte[], byte[]>(UnsignedBytes.lexicographicalComparator()));
 
     private final byte[] namespace;
     private final byte[] prepareNamespace;
@@ -115,12 +117,12 @@ public class RedisKeyValueState<K, V> implements KeyValueState<K, V> {
             commands = container.getInstance();
             if (commands.exists(prepareNamespace)) {
                 LOG.debug("Loading previously prepared commit from {}", prepareNamespace);
-                NavigableMap<byte[], byte[]> pendingCommitMap = createPendingCommitMap();
+                NavigableMap<byte[], byte[]> pendingCommitMap = new TreeMap<>(UnsignedBytes.lexicographicalComparator());
                 pendingCommitMap.putAll(commands.hgetAll(prepareNamespace));
                 pendingCommit = Maps.unmodifiableNavigableMap(pendingCommitMap);
             } else {
                 LOG.debug("No previously prepared commits.");
-                pendingCommit = createPendingCommitMap();
+                pendingCommit = EMPTY_PENDING_COMMIT_MAP;
             }
         } finally {
             container.returnInstance(commands);
@@ -173,7 +175,7 @@ public class RedisKeyValueState<K, V> implements KeyValueState<K, V> {
         LOG.debug("delete key '{}'", key);
         byte[] redisKey = encoder.encodeKey(key);
         V curr = get(key);
-        pendingPrepare.put(redisKey, DefaultStateEncoder.TOMBSTONE);
+        pendingPrepare.put(redisKey, encoder.getTombstoneValue());
         return curr;
     }
 
@@ -227,7 +229,7 @@ public class RedisKeyValueState<K, V> implements KeyValueState<K, V> {
                 for(Map.Entry<byte[], byte[]> entry: pendingCommit.entrySet()) {
                     byte[] key = entry.getKey();
                     byte[] value = entry.getValue();
-                    if (Arrays.equals(DefaultStateEncoder.TOMBSTONE, value)) {
+                    if (Arrays.equals(encoder.getTombstoneValue(), value)) {
                         keysToDelete.add(key);
                     } else {
                         keysToAdd.put(key, value);
@@ -245,7 +247,7 @@ public class RedisKeyValueState<K, V> implements KeyValueState<K, V> {
             txIds.put(COMMIT_TXID_KEY, String.valueOf(txid));
             commands.hmset(txidNamespace, txIds);
             commands.del(prepareNamespace);
-            pendingCommit = createPendingCommitMap();
+            pendingCommit = EMPTY_PENDING_COMMIT_MAP;
         } finally {
             container.returnInstance(commands);
         }
@@ -288,7 +290,7 @@ public class RedisKeyValueState<K, V> implements KeyValueState<K, V> {
                 LOG.debug("hmset txidNamespace {}, txIds {}", txidNamespace, txIds);
                 commands.hmset(txidNamespace, txIds);
             }
-            pendingCommit = createPendingCommitMap();
+            pendingCommit = EMPTY_PENDING_COMMIT_MAP;
             pendingPrepare = createPendingPrepareMap();
         } finally {
             container.returnInstance(commands);
@@ -350,6 +352,6 @@ public class RedisKeyValueState<K, V> implements KeyValueState<K, V> {
     }
 
     private NavigableMap<byte[], byte[]> createPendingCommitMap() {
-        return new TreeMap<>(UnsignedBytes.lexicographicalComparator());
+        return EMPTY_PENDING_COMMIT_MAP;
     }
 }

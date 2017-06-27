@@ -108,7 +108,9 @@ Supported options are listed here:
     --password <arg>    Redis password (default: no password)
 ```
 
-You can provide multiple `namespace` options to migrate multiple namespaces at once. Other options are not mandatory.
+You can provide multiple `namespace` options to migrate multiple namespaces at once. 
+(e.g.: `--namespace total-7 --namespace partialsum-3`)
+Other options are not mandatory.
 Please note that you need to also migrate the key starting with "$checkpointspout-" since it's internal namespace of state. 
 
 ## Checkpoint mechanism

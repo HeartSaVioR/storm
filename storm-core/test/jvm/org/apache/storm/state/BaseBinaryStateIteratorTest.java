@@ -4,6 +4,7 @@ import com.google.common.primitives.UnsignedBytes;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -117,7 +118,7 @@ public class BaseBinaryStateIteratorTest {
   }
 
   private void putTombstoneToMap(NavigableMap<byte[], byte[]> map, byte[] key) {
-    map.put(encoder.encodeKey(key), DefaultStateEncoder.TOMBSTONE);
+    map.put(encoder.encodeKey(key), encoder.getTombstoneValue());
   }
 
   private TreeMap<byte[], byte[]> getBinaryTreeMap() {
@@ -164,7 +165,7 @@ class MockBinaryStateIterator extends BaseBinaryStateIterator<byte[], byte[]> {
   }
 
   @Override
-  protected byte[] getTombstoneValue() {
-    return DefaultStateEncoder.TOMBSTONE;
+  protected boolean isTombstoneValue(byte[] value) {
+    return Arrays.equals(value, encoder.getTombstoneValue());
   }
 }

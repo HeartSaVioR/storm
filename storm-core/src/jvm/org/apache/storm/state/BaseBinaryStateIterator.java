@@ -1,162 +1,83 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.storm.state;
 
 import com.google.common.collect.Iterators;
-import com.google.common.collect.PeekingIterator;
 import com.google.common.primitives.UnsignedBytes;
 
-import java.util.AbstractMap;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Base implementation of iterator over {@link KeyValueState} which is based on binary type.
+ * Base implementation of iterator over {@link KeyValueState} which encoded types of key and value are both binary type.
  */
-public abstract class BaseBinaryStateIterator<K, V> implements Iterator<Map.Entry<K, V>> {
+public abstract class BaseBinaryStateIterator<K, V> extends BaseStateIterator<K, V, byte[], byte[]> {
 
-  private final PeekingIterator<Map.Entry<byte[], byte[]>> pendingPrepareIterator;
-  private final PeekingIterator<Map.Entry<byte[], byte[]>> pendingCommitIterator;
-  private final Set<byte[]> providedKeys;
-
-  private boolean firstLoad = true;
-  private PeekingIterator<Map.Entry<byte[], byte[]>> pendingIterator;
-  private PeekingIterator<Map.Entry<byte[], byte[]>> cachedResultIterator;
-
-  /**
-   * Constructor.
-   *
-   * @param pendingPrepareIterator The iterator of pendingPrepare
-   * @param pendingCommitIterator The iterator of pendingCommit
-   */
-  public BaseBinaryStateIterator(Iterator<Map.Entry<byte[], byte[]>> pendingPrepareIterator,
-      Iterator<Map.Entry<byte[], byte[]>> pendingCommitIterator) {
-    this.pendingPrepareIterator = Iterators.peekingIterator(pendingPrepareIterator);
-    this.pendingCommitIterator = Iterators.peekingIterator(pendingCommitIterator);
-    this.providedKeys = new TreeSet<>(UnsignedBytes.lexicographicalComparator());
-  }
-
-  @Override
-  public boolean hasNext() {
-    if (seekToAvailableEntry(pendingPrepareIterator)) {
-      pendingIterator = pendingPrepareIterator;
-      return true;
+    /**
+     * Constructor.
+     *
+     * @param pendingPrepareIterator The iterator of pendingPrepare
+     * @param pendingCommitIterator The iterator of pendingCommit
+     */
+    public BaseBinaryStateIterator(Iterator<Map.Entry<byte[], byte[]>> pendingPrepareIterator,
+                                   Iterator<Map.Entry<byte[], byte[]>> pendingCommitIterator) {
+        super(Iterators.peekingIterator(pendingPrepareIterator), Iterators.peekingIterator(pendingCommitIterator),
+                new TreeSet<>(UnsignedBytes.lexicographicalComparator()));
     }
 
-    if (seekToAvailableEntry(pendingCommitIterator)) {
-      pendingIterator = pendingCommitIterator;
-      return true;
-    }
+    /**
+     * Load some part of state KVs from storage and returns iterator of cached data from storage.
+     *
+     * @return Iterator of loaded state KVs
+     */
+    protected abstract Iterator<Map.Entry<byte[], byte[]>> loadChunkFromStateStorage();
 
+    /**
+     * Check whether end of data is reached from storage state KVs.
+     *
+     * @return whether end of data is reached from storage state KVs
+     */
+    protected abstract boolean isEndOfDataFromStorage();
 
-    if (firstLoad) {
-      // load the first part of entries
-      fillCachedResultIterator();
-      firstLoad = false;
-    }
+    /**
+     * Decode key to convert byte array to state key type.
+     *
+     * @param key byte array encoded key
+     * @return Decoded value of key
+     */
+    protected abstract K decodeKey(byte[] key);
 
-    while (true) {
-      if (seekToAvailableEntry(cachedResultIterator)) {
-        pendingIterator = cachedResultIterator;
-        return true;
-      }
+    /**
+     * Decode value to convert byte array to state value type.
+     *
+     * @param value byte array encoded value
+     * @return Decoded value of value
+     */
+    protected abstract V decodeValue(byte[] value);
 
-      if (isEndOfDataFromStorage()) {
-        break;
-      }
-
-      fillCachedResultIterator();
-    }
-
-    pendingIterator = null;
-    return false;
-  }
-
-  private void fillCachedResultIterator() {
-    Iterator<Map.Entry<byte[], byte[]>> iterator = loadChunkFromStateStorage();
-    if (iterator != null) {
-      cachedResultIterator = Iterators.peekingIterator(iterator);
-    } else {
-      cachedResultIterator = null;
-    }
-  }
-
-  @Override
-  public Map.Entry<K, V> next() {
-    if (!hasNext()) {
-      throw new NoSuchElementException();
-    }
-
-    Map.Entry<byte[], byte[]> keyValue = pendingIterator.next();
-
-    K key = decodeKey(keyValue.getKey());
-    V value = decodeValue(keyValue.getValue());
-
-    providedKeys.add(keyValue.getKey());
-    return new AbstractMap.SimpleEntry(key, value);
-  }
-
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Load some part of state KVs from storage and returns iterator of cached data from storage.
-   *
-   * @return Iterator of loaded state KVs
-   */
-  protected abstract Iterator<Map.Entry<byte[],byte[]>> loadChunkFromStateStorage();
-
-  /**
-   * Check whether end of data is reached from storage state KVs.
-   *
-   * @return whether end of data is reached from storage state KVs
-   */
-  protected abstract boolean isEndOfDataFromStorage();
-
-  /**
-   * Decode key to convert byte array to state key type.
-   *
-   * @param key byte array encoded key
-   * @return Decoded value of key
-   */
-  protected abstract K decodeKey(byte[] key);
-
-  /**
-   * Decode value to convert byte array to state value type.
-   *
-   * @param value byte array encoded value
-   * @return Decoded value of value
-   */
-  protected abstract V decodeValue(byte[] value);
-
-  /**
-   * Get tombstone (deletion mark) value.
-   *
-   * @return tombstone (deletion mark) value
-   */
-  protected abstract byte[] getTombstoneValue();
-
-  private boolean seekToAvailableEntry(PeekingIterator<Map.Entry<byte[], byte[]>> iterator) {
-    if (iterator != null) {
-      while (iterator.hasNext()) {
-        Map.Entry<byte[], byte[]> entry = iterator.peek();
-        if (!providedKeys.contains(entry.getKey())) {
-          if (Arrays.equals(entry.getValue(), getTombstoneValue())) {
-            providedKeys.add(entry.getKey());
-          } else {
-            return true;
-          }
-        }
-
-        iterator.next();
-      }
-    }
-
-    return false;
-  }
+    /**
+     * Check whether the value is tombstone (deletion mark) value.
+     *
+     * @param value the value to check
+     * @return true if the value is tombstone, false otherwise
+     */
+    protected abstract boolean isTombstoneValue(byte[] value);
 
 }

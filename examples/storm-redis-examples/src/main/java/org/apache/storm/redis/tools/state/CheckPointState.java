@@ -15,11 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.storm.spout;
+package org.apache.storm.redis.tools.state;
 
-import static org.apache.storm.spout.CheckPointState.State.COMMITTED;
-import static org.apache.storm.spout.CheckPointState.State.COMMITTING;
-import static org.apache.storm.spout.CheckPointState.State.PREPARING;
+import org.apache.storm.spout.CheckpointSpout;
+
+import static org.apache.storm.redis.tools.state.CheckPointState.State.COMMITTED;
+import static org.apache.storm.redis.tools.state.CheckPointState.State.COMMITTING;
+import static org.apache.storm.redis.tools.state.CheckPointState.State.PREPARING;
 
 /**
  * Captures the current state of the transaction in {@link CheckpointSpout}. The state transitions are as follows.
@@ -41,7 +43,6 @@ import static org.apache.storm.spout.CheckPointState.State.PREPARING;
 public class CheckPointState {
     private long txid;
     private State state;
-    private long stateVersion;
 
     public enum State {
         /**
@@ -80,13 +81,8 @@ public class CheckPointState {
     }
 
     public CheckPointState(long txid, State state) {
-        this(txid, state, 0L);
-    }
-
-    public CheckPointState(long txid, State state, long stateVersion) {
         this.txid = txid;
         this.state = state;
-        this.stateVersion = stateVersion;
     }
 
     // for kryo
@@ -101,10 +97,6 @@ public class CheckPointState {
         return state;
     }
 
-    public long getStateVersion() {
-        return stateVersion;
-    }
-
     /**
      * Get the next state based on this checkpoint state.
      *
@@ -115,14 +107,13 @@ public class CheckPointState {
         CheckPointState nextState;
         switch (state) {
             case PREPARING:
-                nextState = recovering ? new CheckPointState(txid - 1, COMMITTED, stateVersion) :
-                        new CheckPointState(txid, COMMITTING, stateVersion);
+                nextState = recovering ? new CheckPointState(txid - 1, COMMITTED) : new CheckPointState(txid, COMMITTING);
                 break;
             case COMMITTING:
-                nextState = new CheckPointState(txid, COMMITTED, stateVersion);
+                nextState = new CheckPointState(txid, COMMITTED);
                 break;
             case COMMITTED:
-                nextState = recovering ? this : new CheckPointState(txid + 1, PREPARING, stateVersion);
+                nextState = recovering ? this : new CheckPointState(txid + 1, PREPARING);
                 break;
             default:
                 throw new IllegalStateException("Unknown state " + state);
@@ -157,20 +148,19 @@ public class CheckPointState {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof CheckPointState)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
         CheckPointState that = (CheckPointState) o;
 
-        if (getTxid() != that.getTxid()) return false;
-        if (getStateVersion() != that.getStateVersion()) return false;
-        return getState() == that.getState();
+        if (txid != that.txid) return false;
+        return state == that.state;
+
     }
 
     @Override
     public int hashCode() {
-        int result = (int) (getTxid() ^ (getTxid() >>> 32));
-        result = 31 * result + (getState() != null ? getState().hashCode() : 0);
-        result = 31 * result + (int) (getStateVersion() ^ (getStateVersion() >>> 32));
+        int result = (int) (txid ^ (txid >>> 32));
+        result = 31 * result + (state != null ? state.hashCode() : 0);
         return result;
     }
 
@@ -179,7 +169,6 @@ public class CheckPointState {
         return "CheckPointState{" +
                 "txid=" + txid +
                 ", state=" + state +
-                ", stateVersion=" + stateVersion +
                 '}';
     }
 }

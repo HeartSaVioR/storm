@@ -75,6 +75,11 @@ public class InMemoryKeyValueState<K, V> implements KeyValueState<K, V> {
     }
 
     @Override
+    public long version() {
+        return 0L;
+    }
+
+    @Override
     public Iterator<Map.Entry<K, V>> iterator() {
         return state.entrySet().iterator();
     }

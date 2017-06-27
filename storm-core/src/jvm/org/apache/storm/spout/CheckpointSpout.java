@@ -18,6 +18,7 @@
 package org.apache.storm.spout;
 
 import org.apache.storm.Config;
+import org.apache.storm.state.IncompatibleStateException;
 import org.apache.storm.state.KeyValueState;
 import org.apache.storm.state.StateFactory;
 import org.apache.storm.task.TopologyContext;
@@ -137,12 +138,17 @@ public class CheckpointSpout extends BaseRichSpout {
         KeyValueState<String, CheckPointState> state =
                 (KeyValueState<String, CheckPointState>) StateFactory.getState(namespace, conf, ctx);
         if (state.get(TX_STATE_KEY) == null) {
-            CheckPointState txState = new CheckPointState(-1, COMMITTED);
+            CheckPointState txState = new CheckPointState(-1, COMMITTED, state.version());
             state.put(TX_STATE_KEY, txState);
             state.commit();
             LOG.debug("Initialized checkpoint spout state with txState {}", txState);
         } else {
-            LOG.debug("Got checkpoint spout state {}", state.get(TX_STATE_KEY));
+            CheckPointState txState = state.get(TX_STATE_KEY);
+            LOG.debug("Got checkpoint spout state {}", txState);
+            if (txState.getStateVersion() != state.version()) {
+                throw new IncompatibleStateException("Version mismatch between stored States and provided KeyValueState. "
+                 + "stored version: " + txState.getStateVersion() + " / KeyValueState version: " + state.version());
+            }
         }
         return state;
     }

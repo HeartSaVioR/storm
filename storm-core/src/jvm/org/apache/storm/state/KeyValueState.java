@@ -17,7 +17,6 @@
  */
 package org.apache.storm.state;
 
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -55,4 +54,11 @@ public interface KeyValueState<K, V> extends State, Iterable<Map.Entry<K, V>> {
      * @param key   the key
      */
     V delete(K key);
+
+    /**
+     * Get the version to determine the stored state to be compatible with this State implementation.
+     *
+     * @return the version number
+     */
+    long version();
 }

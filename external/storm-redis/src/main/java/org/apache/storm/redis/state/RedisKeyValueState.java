@@ -48,6 +48,8 @@ import java.util.concurrent.ConcurrentSkipListMap;
  */
 public class RedisKeyValueState<K, V> implements KeyValueState<K, V> {
     public static final int ITERATOR_CHUNK_SIZE = 100;
+    // it should be increased only when there's incompatible change to the state
+    public static final long VERSION = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(RedisKeyValueState.class);
     private static final String COMMIT_TXID_KEY = "commit";
@@ -177,6 +179,11 @@ public class RedisKeyValueState<K, V> implements KeyValueState<K, V> {
         V curr = get(key);
         pendingPrepare.put(redisKey, encoder.getTombstoneValue());
         return curr;
+    }
+
+    @Override
+    public long version() {
+        return VERSION;
     }
 
     @Override

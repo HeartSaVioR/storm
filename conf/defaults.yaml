@@ -313,3 +313,5 @@ worker.metrics:
     "CGroupCpuGuarantee": "org.apache.storm.metric.cgroup.CGroupCpuGuarantee"
 
 num.stat.buckets: 20
+
+topology.spout.recvq.skips: 3  # Check recvQ once every N invocations of Spout's nextTuple() [when ACKs disabled]

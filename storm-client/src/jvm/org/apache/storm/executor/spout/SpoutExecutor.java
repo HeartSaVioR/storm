@@ -135,9 +135,15 @@ public class SpoutExecutor extends Executor {
         init(idToTask);
 
         return new Callable<Object>() {
+            int currentSkip = 0;
+            final int recvqCheckSkipCount = getSpoutRecvqCheckSkipCount();
+
             @Override
             public Object call() throws Exception {
-                receiveQueue.consumeBatch(SpoutExecutor.this);
+                if (currentSkip++ == recvqCheckSkipCount) {
+                    receiveQueue.consumeBatch(SpoutExecutor.this);
+                    currentSkip = 0;
+                }
 
                 final long currCount = emittedCount.get();
                 final boolean throttleOn = backPressureEnabled && SpoutExecutor.this.throttleOn.get();
@@ -181,6 +187,14 @@ public class SpoutExecutor extends Executor {
                     emptyEmitStreak.set(0);
                 }
                 return 0L;
+            }
+
+            public int getSpoutRecvqCheckSkipCount() {
+                if (hasAckers) {
+                    return 0;
+                }
+
+                return ObjectReader.getInt(conf.get(Config.TOPOLOGY_SPOUT_RECVQ_SKIPS), 0);
             }
         };
     }

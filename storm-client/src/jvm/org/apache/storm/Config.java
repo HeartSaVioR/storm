@@ -1555,6 +1555,15 @@ public class Config extends HashMap<String, Object> {
     @isPositiveNumber
     public static final String WORKER_BLOB_UPDATE_POLL_INTERVAL_SECS = "worker.blob.update.poll.interval.secs";
 
+    /**
+     * Check recvQ after every N invocations of Spout's nextTuple() [when ACKing is disabled].
+     * Spouts receive very few msgs if ACK is disabled. This avoids checking the recvQ after each nextTuple().
+     */
+    @isInteger
+    @isPositiveNumber(includeZero = true)
+    @NotNull
+    public static final String TOPOLOGY_SPOUT_RECVQ_SKIPS = "topology.spout.recvq.skips";
+
     public static void setClasspath(Map<String, Object> conf, String cp) {
         conf.put(Config.TOPOLOGY_CLASSPATH, cp);
     }

@@ -41,7 +41,6 @@ public class LoadAwareShuffleGrouping implements LoadAwareCustomStreamGrouping, 
     private int[] unassigned;
     private int[] choices;
     private int[] prepareChoices;
-    private AtomicInteger current;
 
     @Override
     public void prepare(WorkerTopologyContext context, GlobalStreamId stream, List<Integer> targetTasks) {
@@ -62,7 +61,6 @@ public class LoadAwareShuffleGrouping implements LoadAwareCustomStreamGrouping, 
         }
 
         shuffleArray(choices);
-        current = new AtomicInteger(0);
 
         // allocate another array to be switched
         prepareChoices = new int[CAPACITY];
@@ -84,18 +82,7 @@ public class LoadAwareShuffleGrouping implements LoadAwareCustomStreamGrouping, 
 
     @Override
     public List<Integer> chooseTasks(int taskId, List<Object> values, LoadMapping load) {
-        int rightNow;
-        while (true) {
-            rightNow = current.incrementAndGet();
-            if (rightNow < CAPACITY) {
-                return rets[choices[rightNow]];
-            } else if (rightNow == CAPACITY) {
-                current.set(0);
-                return rets[choices[0]];
-            }
-            //race condition with another thread, and we lost
-            // try again
-        }
+        return rets[choices[random.nextInt(CAPACITY)]];
     }
 
     private void updateRing(LoadMapping load) {
@@ -146,14 +133,10 @@ public class LoadAwareShuffleGrouping implements LoadAwareCustomStreamGrouping, 
             }
         }
 
-        shuffleArray(prepareChoices);
-
         // swapping two arrays
         int[] tempForSwap = choices;
         choices = prepareChoices;
         prepareChoices = tempForSwap;
-
-        current.set(0);
     }
 
     private void shuffleArray(int[] arr) {

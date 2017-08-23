@@ -23,6 +23,7 @@ import org.apache.storm.daemon.Shutdownable;
 import org.apache.storm.daemon.Task;
 import org.apache.storm.generated.Credentials;
 import org.apache.storm.generated.ExecutorStats;
+import org.apache.storm.grouping.LoadMapping;
 import org.apache.storm.hooks.ITaskHook;
 import org.apache.storm.spout.ISpout;
 import org.apache.storm.task.IBolt;
@@ -77,6 +78,10 @@ public class ExecutorShutdown implements Shutdownable, IRunningExecutor {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void loadChanged(LoadMapping loadMapping) {
+        executor.reflectNewLoadMapping(loadMapping);
     }
 
     @Override

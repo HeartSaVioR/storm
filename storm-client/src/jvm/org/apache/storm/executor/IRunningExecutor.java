@@ -19,6 +19,7 @@ package org.apache.storm.executor;
 
 import org.apache.storm.generated.Credentials;
 import org.apache.storm.generated.ExecutorStats;
+import org.apache.storm.grouping.LoadMapping;
 
 import java.util.List;
 
@@ -28,4 +29,5 @@ public interface IRunningExecutor {
     List<Long> getExecutorId();
     void credentialsChanged(Credentials credentials);
     Executor getExecutor();
+    void loadChanged(LoadMapping loadMapping);
 }

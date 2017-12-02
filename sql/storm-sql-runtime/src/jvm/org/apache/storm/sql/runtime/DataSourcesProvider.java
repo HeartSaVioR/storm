@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -14,6 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.apache.storm.sql.runtime;
@@ -30,7 +31,7 @@ public interface DataSourcesProvider {
     String scheme();
 
     /**
-     * Construct a new data source.
+     * Construct a new data source for standalone mode.
      * @param uri The URI that specifies the data source. The format of the URI
      *            is fully customizable.
      * @param inputFormatClass the name of the class that deserializes data.
@@ -43,7 +44,17 @@ public interface DataSourcesProvider {
             URI uri, String inputFormatClass, String outputFormatClass,
             List<FieldInfo> fields);
 
-    ISqlTridentDataSource constructTrident(
+    /**
+     * Construct a new data source for streams mode.
+     * @param uri The URI that specifies the data source. The format of the URI
+     *            is fully customizable.
+     * @param inputFormatClass the name of the class that deserializes data.
+     *                         It is null when unspecified.
+     * @param outputFormatClass the name of the class that serializes data. It
+     *                          is null when unspecified.
+     * @param fields The name of the fields and the schema of the table.
+     */
+    ISqlStreamsDataSource constructStreams(
             URI uri, String inputFormatClass, String outputFormatClass,
             Properties properties, List<FieldInfo> fields);
 }

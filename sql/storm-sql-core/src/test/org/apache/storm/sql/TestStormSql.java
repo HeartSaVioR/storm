@@ -25,7 +25,7 @@ import org.apache.storm.sql.runtime.DataSource;
 import org.apache.storm.sql.runtime.DataSourcesProvider;
 import org.apache.storm.sql.runtime.DataSourcesRegistry;
 import org.apache.storm.sql.runtime.FieldInfo;
-import org.apache.storm.sql.runtime.ISqlTridentDataSource;
+import org.apache.storm.sql.runtime.ISqlStreamsDataSource;
 import org.apache.storm.tuple.Values;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -55,9 +55,9 @@ public class TestStormSql {
     }
 
     @Override
-    public ISqlTridentDataSource constructTrident(URI uri, String inputFormatClass, String outputFormatClass,
+    public ISqlStreamsDataSource constructStreams(URI uri, String inputFormatClass, String outputFormatClass,
                                                   Properties properties, List<FieldInfo> fields) {
-      return new TestUtils.MockSqlTridentDataSource();
+      return new TestUtils.MockSqlStreamsDataSource();
     }
   }
 
@@ -75,9 +75,9 @@ public class TestStormSql {
     }
 
     @Override
-    public ISqlTridentDataSource constructTrident(URI uri, String inputFormatClass, String outputFormatClass,
+    public ISqlStreamsDataSource constructStreams(URI uri, String inputFormatClass, String outputFormatClass,
                                                   Properties properties, List<FieldInfo> fields) {
-      return new TestUtils.MockSqlTridentDataSource();
+      return new TestUtils.MockSqlStreamsDataSource();
     }
   }
 
@@ -95,9 +95,9 @@ public class TestStormSql {
     }
 
     @Override
-    public ISqlTridentDataSource constructTrident(URI uri, String inputFormatClass, String outputFormatClass,
+    public ISqlStreamsDataSource constructStreams(URI uri, String inputFormatClass, String outputFormatClass,
                                                   Properties properties, List<FieldInfo> fields) {
-      return new TestUtils.MockSqlTridentGroupedDataSource();
+      return new TestUtils.MockSqlStreamsGroupedDataSource();
     }
   }
 
@@ -115,9 +115,9 @@ public class TestStormSql {
     }
 
     @Override
-    public ISqlTridentDataSource constructTrident(URI uri, String inputFormatClass, String outputFormatClass,
+    public ISqlStreamsDataSource constructStreams(URI uri, String inputFormatClass, String outputFormatClass,
                                                   Properties properties, List<FieldInfo> fields) {
-      return new TestUtils.MockSqlTridentJoinDataSourceEmp();
+      return new TestUtils.MockSqlStreamsJoinDataSourceEmp();
     }
   }
 
@@ -135,9 +135,9 @@ public class TestStormSql {
     }
 
     @Override
-    public ISqlTridentDataSource constructTrident(URI uri, String inputFormatClass, String outputFormatClass,
+    public ISqlStreamsDataSource constructStreams(URI uri, String inputFormatClass, String outputFormatClass,
                                                   Properties properties, List<FieldInfo> fields) {
-      return new TestUtils.MockSqlTridentJoinDataSourceDept();
+      return new TestUtils.MockSqlStreamsJoinDataSourceDept();
     }
   }
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -14,6 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.apache.storm.sql.runtime;
@@ -66,15 +67,15 @@ public class DataSourcesRegistry {
     }
 
     /**
-     * Construct a trident data source.
+     * Construct a stream data source.
      * @param uri data source uri
      * @param inputFormatClass input format class
      * @param outputFormatClass output format class
      * @param properties Properties
      * @param fields fields info list
-     * @return TridentDataSource object
+     * @return StreamsDataSource object
      */
-    public static ISqlTridentDataSource constructTridentDataSource(
+    public static ISqlStreamsDataSource constructStreamsDataSource(
             URI uri, String inputFormatClass, String outputFormatClass,
             Properties properties, List<FieldInfo> fields) {
         DataSourcesProvider provider = providers.get(uri.getScheme());
@@ -82,7 +83,7 @@ public class DataSourcesRegistry {
             return null;
         }
 
-        return provider.constructTrident(uri, inputFormatClass, outputFormatClass, properties, fields);
+        return provider.constructStreams(uri, inputFormatClass, outputFormatClass, properties, fields);
     }
 
     /**

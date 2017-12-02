@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -14,22 +14,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package org.apache.storm.sql.calcite;
+package org.apache.storm.sql.runtime;
 
-import org.apache.calcite.rel.stream.Delta;
-import org.apache.calcite.schema.StreamableTable;
+import org.apache.storm.topology.IRichBolt;
+import org.apache.storm.topology.IRichSpout;
 
 /**
- * Table that can be converted to a stream. This table also has its parallelism information.
- *
- * @see Delta
+ * An ISqlStreamsDataSource specifies how an external data source produces and consumes data.
  */
-public interface ParallelStreamableTable extends StormStreamableTable {
+public interface ISqlStreamsDataSource {
+    /**
+     * Provides instance of IRichSpout which can be used as producer in topology.
+     *
+     * @see org.apache.storm.topology.IRichSpout
+     */
+    IRichSpout getProducer();
 
     /**
-     * Returns parallelism hint of this table. Returns null if don't know.
+     * Provides instance of IRichBolt which can be used as consumer in topology.
      */
-    Integer parallelismHint();
+    IRichBolt getConsumer();
 }

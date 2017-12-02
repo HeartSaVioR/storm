@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -14,22 +14,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
-package org.apache.storm.sql.calcite;
-
-import org.apache.calcite.rel.stream.Delta;
-import org.apache.calcite.schema.StreamableTable;
-
-/**
- * Table that can be converted to a stream. This table also has its parallelism information.
  *
- * @see Delta
  */
-public interface ParallelStreamableTable extends StormStreamableTable {
+package org.apache.storm.sql.planner.streams.rules;
 
-    /**
-     * Returns parallelism hint of this table. Returns null if don't know.
-     */
-    Integer parallelismHint();
+import org.apache.calcite.plan.Convention;
+import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.convert.ConverterRule;
+import org.apache.calcite.rel.logical.LogicalJoin;
+import org.apache.storm.sql.planner.streams.rel.StreamsLogicalConvention;
+
+public class StreamsJoinRule extends ConverterRule {
+  public static final StreamsJoinRule INSTANCE = new StreamsJoinRule();
+
+  private StreamsJoinRule() {
+    super(LogicalJoin.class, Convention.NONE, StreamsLogicalConvention.INSTANCE, "StreamsJoinRule");
+  }
+
+  @Override
+  public RelNode convert(RelNode rel) {
+    throw new UnsupportedOperationException("Join operation is not supported.");
+  }
 }

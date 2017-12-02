@@ -31,6 +31,9 @@ import org.apache.calcite.sql.validate.SqlMonotonicity;
 import org.apache.calcite.util.ImmutableBitSet;
 import org.apache.calcite.util.Util;
 import org.apache.storm.sql.calcite.ParallelStreamableTable;
+import org.apache.storm.sql.calcite.ParallelTable;
+import org.apache.storm.sql.calcite.StormStreamableTable;
+import org.apache.storm.sql.calcite.StormTable;
 import org.apache.storm.sql.parser.ColumnConstraint;
 
 import java.util.ArrayList;
@@ -89,16 +92,31 @@ public class CompilerUtil {
       return this;
     }
 
+    public TableBuilderInfo field(String name, SqlTypeName type, ColumnConstraint constraint) {
+      interpretConstraint(constraint, fields.size());
+      return field(name, typeFactory.createSqlType(type));
+    }
+
+    public TableBuilderInfo field(String name, RelDataType type, ColumnConstraint constraint) {
+      interpretConstraint(constraint, fields.size());
+      fields.add(new FieldType(name, type));
+      return this;
+    }
+
     public TableBuilderInfo field(String name, SqlDataTypeSpec type, ColumnConstraint constraint) {
       RelDataType dataType = type.deriveType(typeFactory);
+      interpretConstraint(constraint, fields.size());
+      fields.add(new FieldType(name, dataType));
+      return this;
+    }
+
+    private void interpretConstraint(ColumnConstraint constraint, int fieldIdx) {
       if (constraint instanceof ColumnConstraint.PrimaryKey) {
         ColumnConstraint.PrimaryKey pk = (ColumnConstraint.PrimaryKey) constraint;
         Preconditions.checkState(primaryKey == -1, "There are more than one primary key in the table");
-        primaryKey = fields.size();
+        primaryKey = fieldIdx;
         primaryKeyMonotonicity = pk.monotonicity();
       }
-      fields.add(new FieldType(name, dataType));
-      return this;
     }
 
     public TableBuilderInfo statistics(Statistic stats) {
@@ -117,9 +135,21 @@ public class CompilerUtil {
       return this;
     }
 
+    // FIXME: we may want to separate Stream and Table, and let output table be Table instead of Stream
+    // FIXME: because we don't need to mind about monotonicity of PK for output table
     public StreamableTable build() {
       final Statistic stat = buildStatistic();
-      final Table tbl = new Table() {
+      final Table tbl = new ParallelTable() {
+        @Override
+        public Integer parallelismHint() {
+          return parallelismHint;
+        }
+
+        @Override
+        public int primaryKey() {
+          return primaryKey;
+        }
+
         @Override
         public RelDataType getRowType(
             RelDataTypeFactory relDataTypeFactory) {
@@ -143,6 +173,11 @@ public class CompilerUtil {
       };
 
       return new ParallelStreamableTable() {
+        @Override
+        public int primaryKey() {
+          return primaryKey;
+        }
+
         @Override
         public Integer parallelismHint() {
           return parallelismHint;

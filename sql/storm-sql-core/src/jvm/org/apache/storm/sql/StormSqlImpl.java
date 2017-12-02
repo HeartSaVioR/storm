@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,16 +6,36 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 package org.apache.storm.sql;
+
+import static org.apache.storm.sql.compiler.CompilerUtil.TableBuilderInfo;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.jar.Attributes;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
 
 import org.apache.calcite.adapter.java.JavaTypeFactory;
 import org.apache.calcite.jdbc.CalciteSchema;
@@ -37,6 +57,7 @@ import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 import org.apache.calcite.tools.Planner;
 import org.apache.storm.StormSubmitter;
+import org.apache.storm.generated.StormTopology;
 import org.apache.storm.generated.SubmitOptions;
 import org.apache.storm.sql.compiler.StormSqlTypeFactoryImpl;
 import org.apache.storm.sql.compiler.backends.standalone.PlanCompiler;
@@ -47,33 +68,13 @@ import org.apache.storm.sql.parser.SqlCreateFunction;
 import org.apache.storm.sql.parser.SqlCreateTable;
 import org.apache.storm.sql.parser.StormParser;
 import org.apache.storm.sql.planner.StormRelUtils;
-import org.apache.storm.sql.planner.trident.QueryPlanner;
+import org.apache.storm.sql.planner.streams.QueryPlanner;
 import org.apache.storm.sql.runtime.AbstractValuesProcessor;
 import org.apache.storm.sql.runtime.ChannelHandler;
 import org.apache.storm.sql.runtime.DataSource;
 import org.apache.storm.sql.runtime.DataSourcesRegistry;
 import org.apache.storm.sql.runtime.FieldInfo;
-import org.apache.storm.sql.runtime.ISqlTridentDataSource;
-import org.apache.storm.trident.TridentTopology;
-
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.jar.Attributes;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
-import java.util.zip.ZipEntry;
-
-import static org.apache.storm.sql.compiler.CompilerUtil.TableBuilderInfo;
+import org.apache.storm.sql.runtime.ISqlStreamsDataSource;
 
 class StormSqlImpl extends StormSql {
   private final JavaTypeFactory typeFactory = new StormSqlTypeFactoryImpl(
@@ -111,18 +112,18 @@ class StormSqlImpl extends StormSql {
       String name, Iterable<String> statements, Map<String, Object> topoConf, SubmitOptions opts,
       StormSubmitter.ProgressListener progressListener, String asUser)
       throws Exception {
-    Map<String, ISqlTridentDataSource> dataSources = new HashMap<>();
+    Map<String, ISqlStreamsDataSource> dataSources = new HashMap<>();
     for (String sql : statements) {
       StormParser parser = new StormParser(sql);
       SqlNode node = parser.impl().parseSqlStmtEof();
       if (node instanceof SqlCreateTable) {
-        handleCreateTableForTrident((SqlCreateTable) node, dataSources);
+        handleCreateTableForStreams((SqlCreateTable) node, dataSources);
       } else if (node instanceof SqlCreateFunction) {
         handleCreateFunction((SqlCreateFunction) node);
       }  else {
         QueryPlanner planner = new QueryPlanner(schema);
-        AbstractTridentProcessor processor = planner.compile(dataSources, sql);
-        TridentTopology topo = processor.build();
+        AbstractStreamsProcessor processor = planner.compile(dataSources, sql);
+        StormTopology topo = processor.build();
 
         Path jarPath = null;
         try {
@@ -133,7 +134,7 @@ class StormSqlImpl extends StormSql {
           jarPath = Files.createTempFile("storm-sql", ".jar");
           System.setProperty("storm.jar", jarPath.toString());
           packageTopology(jarPath, processor);
-          StormSubmitter.submitTopologyAs(name, topoConf, topo.build(), opts, progressListener, asUser);
+          StormSubmitter.submitTopologyAs(name, topoConf, topo, opts, progressListener, asUser);
         } finally {
           if (jarPath != null) {
             Files.delete(jarPath);
@@ -145,7 +146,7 @@ class StormSqlImpl extends StormSql {
 
   @Override
   public void explain(Iterable<String> statements) throws Exception {
-    Map<String, ISqlTridentDataSource> dataSources = new HashMap<>();
+    Map<String, ISqlStreamsDataSource> dataSources = new HashMap<>();
     for (String sql : statements) {
       StormParser parser = new StormParser(sql);
       SqlNode node = parser.impl().parseSqlStmtEof();
@@ -156,7 +157,7 @@ class StormSqlImpl extends StormSql {
       System.out.println("-----------------------------------------------------------");
 
       if (node instanceof SqlCreateTable) {
-        handleCreateTableForTrident((SqlCreateTable) node, dataSources);
+        handleCreateTableForStreams((SqlCreateTable) node, dataSources);
         System.out.println("No plan presented on DDL");
       } else if (node instanceof SqlCreateFunction) {
         handleCreateFunction((SqlCreateFunction) node);
@@ -177,7 +178,7 @@ class StormSqlImpl extends StormSql {
     }
   }
 
-  private void packageTopology(Path jar, AbstractTridentProcessor processor) throws IOException {
+  private void packageTopology(Path jar, AbstractStreamsProcessor processor) throws IOException {
     Manifest manifest = new Manifest();
     Attributes attr = manifest.getMainAttributes();
     attr.put(Attributes.Name.MANIFEST_VERSION, "1.0");
@@ -239,10 +240,10 @@ class StormSqlImpl extends StormSql {
     return null;
   }
 
-  private void handleCreateTableForTrident(
-      SqlCreateTable n, Map<String, ISqlTridentDataSource> dataSources) {
+  private void handleCreateTableForStreams(
+      SqlCreateTable n, Map<String, ISqlStreamsDataSource> dataSources) {
     List<FieldInfo> fields = updateSchema(n);
-    ISqlTridentDataSource ds = DataSourcesRegistry.constructTridentDataSource(n.location(), n
+    ISqlStreamsDataSource ds = DataSourcesRegistry.constructStreamsDataSource(n.location(), n
         .inputFormatClass(), n.outputFormatClass(), n.properties(), fields);
     if (ds == null) {
       throw new RuntimeException("Failed to find data source for " + n

@@ -22,12 +22,14 @@ import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
+import org.apache.storm.hdfs.bolt.HdfsBolt;
 import org.apache.storm.hdfs.trident.HdfsState;
 import org.apache.storm.hdfs.trident.HdfsStateFactory;
 import org.apache.storm.hdfs.trident.HdfsUpdater;
 import org.apache.storm.sql.runtime.DataSourcesRegistry;
 import org.apache.storm.sql.runtime.FieldInfo;
-import org.apache.storm.sql.runtime.ISqlTridentDataSource;
+import org.apache.storm.sql.runtime.ISqlStreamsDataSource;
+import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.trident.state.StateUpdater;
 import org.apache.storm.trident.tuple.TridentTuple;
 import org.junit.After;
@@ -88,46 +90,13 @@ public class TestHdfsDataSourcesProvider {
     @SuppressWarnings("unchecked")
     @Test
     public void testHdfsSink() throws Exception {
-        ISqlTridentDataSource ds = DataSourcesRegistry.constructTridentDataSource(
+        ISqlStreamsDataSource ds = DataSourcesRegistry.constructStreamsDataSource(
             URI.create(hdfsURI), null, null, TBL_PROPERTIES, FIELDS);
         Assert.assertNotNull(ds);
 
-        ISqlTridentDataSource.SqlTridentConsumer consumer = ds.getConsumer();
+        IRichBolt consumer = ds.getConsumer();
 
-        Assert.assertEquals(HdfsStateFactory.class, consumer.getStateFactory().getClass());
-        Assert.assertEquals(HdfsUpdater.class, consumer.getStateUpdater().getClass());
-
-        HdfsState state = (HdfsState) consumer.getStateFactory().makeState(Collections.emptyMap(), null, 0, 1);
-        StateUpdater stateUpdater = consumer.getStateUpdater();
-
-        HdfsFileOptions options = mock(HdfsFileOptions.class);
-        Field optionsField = state.getClass().getDeclaredField("options");
-        optionsField.setAccessible(true);
-        optionsField.set(state, options);
-
-        List<TridentTuple> tupleList = mockTupleList();
-
-        for (TridentTuple t : tupleList) {
-            stateUpdater.updateState(state, Collections.singletonList(t), null);
-            try {
-                verify(options).execute(Collections.singletonList(t));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private static List<TridentTuple> mockTupleList() {
-        List<TridentTuple> tupleList = new ArrayList<>();
-        TridentTuple t0 = mock(TridentTuple.class);
-        TridentTuple t1 = mock(TridentTuple.class);
-        doReturn(1).when(t0).get(0);
-        doReturn(2).when(t1).get(0);
-        doReturn(Lists.<Object>newArrayList(1, "2")).when(t0).getValues();
-        doReturn(Lists.<Object>newArrayList(2, "3")).when(t1).getValues();
-        tupleList.add(t0);
-        tupleList.add(t1);
-        return tupleList;
+        Assert.assertEquals(HdfsBolt.class, consumer.getClass());
     }
 
 }

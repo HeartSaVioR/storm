@@ -22,9 +22,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.calcite.DataContext;
 import org.apache.calcite.adapter.java.JavaTypeFactory;
+import org.apache.calcite.config.CalciteConnectionConfigImpl;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.jdbc.JavaTypeFactoryImpl;
 import org.apache.calcite.plan.Contexts;
@@ -77,8 +79,9 @@ public class QueryPlanner {
         List<SqlOperatorTable> sqlOperatorTables = new ArrayList<>();
         sqlOperatorTables.add(SqlStdOperatorTable.instance());
         sqlOperatorTables.add(new CalciteCatalogReader(CalciteSchema.from(schema),
-                false,
-                Collections.<String>emptyList(), typeFactory));
+                Collections.emptyList(),
+                typeFactory,
+                new CalciteConnectionConfigImpl(new Properties())));
 
         FrameworkConfig config = Frameworks.newConfigBuilder()
                 .defaultSchema(schema)

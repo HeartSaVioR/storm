@@ -18,6 +18,7 @@
 package org.apache.storm.sql.compiler.backends.standalone;
 
 import org.apache.calcite.adapter.java.JavaTypeFactory;
+import org.apache.calcite.config.CalciteConnectionConfigImpl;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.jdbc.JavaTypeFactoryImpl;
 import org.apache.calcite.plan.RelOptUtil;
@@ -45,6 +46,7 @@ import org.apache.storm.sql.compiler.CompilerUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 public class TestCompilerUtils {
 
@@ -95,8 +97,9 @@ public class TestCompilerUtils {
         List<SqlOperatorTable> sqlOperatorTables = new ArrayList<>();
         sqlOperatorTables.add(SqlStdOperatorTable.instance());
         sqlOperatorTables.add(new CalciteCatalogReader(CalciteSchema.from(schema),
-                false,
-                Collections.<String>emptyList(), typeFactory));
+                Collections.emptyList(),
+                typeFactory,
+                new CalciteConnectionConfigImpl(new Properties())));
         SqlOperatorTable chainedSqlOperatorTable = new ChainedSqlOperatorTable(sqlOperatorTables);
         FrameworkConfig config = Frameworks.newConfigBuilder().defaultSchema(
                 schema).operatorTable(chainedSqlOperatorTable).build();
@@ -150,8 +153,9 @@ public class TestCompilerUtils {
         List<SqlOperatorTable> sqlOperatorTables = new ArrayList<>();
         sqlOperatorTables.add(SqlStdOperatorTable.instance());
         sqlOperatorTables.add(new CalciteCatalogReader(CalciteSchema.from(schema),
-                                                       false,
-                                                       Collections.<String>emptyList(), typeFactory));
+                Collections.emptyList(),
+                typeFactory,
+                new CalciteConnectionConfigImpl(new Properties())));
         SqlOperatorTable chainedSqlOperatorTable = new ChainedSqlOperatorTable(sqlOperatorTables);
         FrameworkConfig config = Frameworks.newConfigBuilder().defaultSchema(
                 schema).operatorTable(chainedSqlOperatorTable).build();

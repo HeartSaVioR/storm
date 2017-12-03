@@ -20,12 +20,15 @@ package org.apache.storm.sql.compiler;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import org.apache.calcite.config.CalciteConnectionConfig;
 import org.apache.calcite.rel.RelCollations;
 import org.apache.calcite.rel.RelFieldCollation;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.schema.*;
+import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlDataTypeSpec;
+import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.sql.validate.SqlMonotonicity;
 import org.apache.calcite.util.ImmutableBitSet;
@@ -170,6 +173,17 @@ public class CompilerUtil {
         public Schema.TableType getJdbcTableType() {
           return Schema.TableType.STREAM;
         }
+
+        @Override
+        public boolean isRolledUp(String s) {
+          return false;
+        }
+
+        @Override
+        public boolean rolledUpColumnValidInsideAgg(String s, SqlCall sqlCall, SqlNode sqlNode,
+                                                    CalciteConnectionConfig calciteConnectionConfig) {
+          return false;
+        }
       };
 
       return new ParallelStreamableTable() {
@@ -201,6 +215,17 @@ public class CompilerUtil {
         @Override
         public Schema.TableType getJdbcTableType() {
           return Schema.TableType.STREAM;
+        }
+
+        @Override
+        public boolean isRolledUp(String s) {
+          return false;
+        }
+
+        @Override
+        public boolean rolledUpColumnValidInsideAgg(String s, SqlCall sqlCall, SqlNode sqlNode,
+                                                    CalciteConnectionConfig calciteConnectionConfig) {
+          return false;
         }
       };
     }

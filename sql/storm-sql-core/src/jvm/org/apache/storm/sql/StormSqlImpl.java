@@ -32,12 +32,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
 import org.apache.calcite.adapter.java.JavaTypeFactory;
+import org.apache.calcite.config.CalciteConnectionConfigImpl;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.rel.RelNode;
@@ -280,8 +282,9 @@ class StormSqlImpl extends StormSql {
       List<SqlOperatorTable> sqlOperatorTables = new ArrayList<>();
       sqlOperatorTables.add(SqlStdOperatorTable.instance());
       sqlOperatorTables.add(new CalciteCatalogReader(CalciteSchema.from(schema),
-                                                     false,
-                                                     Collections.<String>emptyList(), typeFactory));
+                                                     Collections.emptyList(),
+                                                     typeFactory,
+                                                     new CalciteConnectionConfigImpl(new Properties())));
       return Frameworks.newConfigBuilder().defaultSchema(schema)
               .operatorTable(new ChainedSqlOperatorTable(sqlOperatorTables)).build();
     } else {

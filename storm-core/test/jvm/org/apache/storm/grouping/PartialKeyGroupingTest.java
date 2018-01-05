@@ -22,6 +22,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -51,6 +52,16 @@ public class PartialKeyGroupingTest {
     @Test
     public void testChooseTasksFields() {
         PartialKeyGrouping pkg = new PartialKeyGrouping(new Fields("test"));
+        doTestChooseTasksFields(pkg);
+    }
+
+    @Test
+    public void testChooseTasksStringListFields() {
+        PartialKeyGrouping pkg = new PartialKeyGrouping(Collections.singletonList("test"));
+        doTestChooseTasksFields(pkg);
+    }
+
+    private void doTestChooseTasksFields(PartialKeyGrouping pkg) {
         WorkerTopologyContext context = mock(WorkerTopologyContext.class);
         when(context.getComponentOutputFields(any(GlobalStreamId.class))).thenReturn(new Fields("test"));
         pkg.prepare(context, null, Lists.newArrayList(0, 1, 2, 3, 4, 5));

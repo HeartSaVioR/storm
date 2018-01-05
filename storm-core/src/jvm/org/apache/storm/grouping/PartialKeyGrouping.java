@@ -43,6 +43,10 @@ public class PartialKeyGrouping implements CustomStreamGrouping, Serializable {
         //Empty
     }
 
+    public PartialKeyGrouping(List<String> fields) {
+        this.fields = new Fields(fields);
+    }
+
     public PartialKeyGrouping(Fields fields) {
         this.fields = fields;
     }

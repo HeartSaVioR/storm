@@ -18,19 +18,18 @@
 
 package org.apache.storm.blobstore;
 
+import java.nio.ByteBuffer;
+import java.util.TreeSet;
+import java.util.List;
+
+import org.apache.curator.framework.CuratorFramework;
 import org.apache.storm.generated.KeyNotFoundException;
 import org.apache.storm.nimbus.NimbusInfo;
-import org.apache.curator.framework.CuratorFramework;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.ByteBuffer;
-import java.util.TreeSet;
-import java.util.Map;
-import java.util.List;
 
 /**
  * Class hands over the key sequence number which implies the number of updates made to a blob.
@@ -131,9 +130,8 @@ public class KeySequenceNumber {
         this.nimbusInfo = nimbusInfo;
     }
 
-    public synchronized int getKeySequenceNumber(Map<String, Object> conf) throws KeyNotFoundException {
+    public synchronized int getKeySequenceNumber(CuratorFramework zkClient) throws KeyNotFoundException {
         TreeSet<Integer> sequenceNumbers = new TreeSet<Integer>();
-        CuratorFramework zkClient = BlobStoreUtils.createZKClient(conf);
         try {
             // Key has not been created yet and it is the first time it is being created
             if (zkClient.checkExists().forPath(BLOBSTORE_SUBTREE + "/" + key) == null) {
@@ -207,10 +205,6 @@ public class KeySequenceNumber {
             // in other case, just set this to 0 to trigger re-sync later
             LOG.error("Exception {}", e);
             return INITIAL_SEQUENCE_NUMBER - 1;
-        } finally {
-            if (zkClient != null) {
-                zkClient.close();
-            }
         }
     }
 

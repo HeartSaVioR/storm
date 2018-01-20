@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 public class BlobStoreUtils {
     private static final String BLOBSTORE_SUBTREE="/blobstore";
+
     private static final Logger LOG = LoggerFactory.getLogger(BlobStoreUtils.class);
 
     public static CuratorFramework createZKClient(Map<String, Object> conf) {
@@ -268,6 +269,4 @@ public class BlobStoreUtils {
             throw new RuntimeException(exp);
         }
     }
-
-
 }

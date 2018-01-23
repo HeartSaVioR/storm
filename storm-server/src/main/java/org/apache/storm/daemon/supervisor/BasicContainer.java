@@ -18,6 +18,7 @@
 
 package org.apache.storm.daemon.supervisor;
 
+import static org.apache.storm.daemon.nimbus.Nimbus.MIN_VERSION_SUPPORT_RPC_HEARTBEAT;
 import static org.apache.storm.utils.Utils.OR;
 
 import com.google.common.base.Joiner;
@@ -42,6 +43,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.storm.Config;
 import org.apache.storm.DaemonConfig;
 import org.apache.storm.container.ResourceIsolationInterface;
+import org.apache.storm.daemon.nimbus.Nimbus;
 import org.apache.storm.generated.LocalAssignment;
 import org.apache.storm.generated.ProfileAction;
 import org.apache.storm.generated.ProfileRequest;
@@ -754,7 +756,14 @@ public class BasicContainer extends Container {
         commandList.add(getWorkerMain(topoVersion));
         commandList.add(_topologyId);
         commandList.add(_supervisorId);
-        commandList.add(String.valueOf(_supervisorPort));
+
+        // supervisor port should be only presented to worker which supports RPC heartbeat
+        // unknown version should be treated as "current version", which supports RPC heartbeat
+        if ((topoVersion.getMajor() == -1 && topoVersion.getMinor() == -1) ||
+                topoVersion.compareTo(MIN_VERSION_SUPPORT_RPC_HEARTBEAT) >= 0) {
+            commandList.add(String.valueOf(_supervisorPort));
+        }
+
         commandList.add(String.valueOf(_port));
         commandList.add(_workerId);
         

@@ -303,12 +303,18 @@ public class Config extends HashMap<String, Object> {
     public static final String TOPOLOGY_STATE_PROVIDER_CONFIG = "topology.state.provider.config";
 
     /**
-     * Topology configuration to specify the checkpoint interval (in millis) at which the
-     * topology state is saved when {@link org.apache.storm.topology.IStatefulBolt} bolts are involved.
+     * Topology configuration to specify the checkpoint interval (in millis) at which the topology state is saved.
      */
     @isInteger
     @isPositiveNumber
     public static final String TOPOLOGY_STATE_CHECKPOINT_INTERVAL = "topology.state.checkpoint.interval.ms";
+
+    /**
+     * Topology configuration to specify the checkpoint operation timeout (in millis).
+     */
+    @isInteger
+    @isPositiveNumber
+    public static final String TOPOLOGY_STATE_CHECKPOINT_OPERATION_TIMEOUT = "topology.state.checkpoint.operation.timeout.ms";
 
     /**
      * A per topology config that specifies the maximum amount of memory a worker can use for that specific topology

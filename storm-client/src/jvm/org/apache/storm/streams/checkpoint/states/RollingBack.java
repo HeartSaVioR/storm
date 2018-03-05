@@ -29,7 +29,7 @@ import org.apache.storm.utils.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RollingBack extends BaseCheckpointState {
+public class RollingBack extends BaseCheckpointState implements WaitingTasks {
     private static final Logger LOG = LoggerFactory.getLogger(RollingBack.class);
 
     private final Set<Integer> waitingTasks;
@@ -100,6 +100,7 @@ public class RollingBack extends BaseCheckpointState {
     }
 
     @VisibleForTesting
+    @Override
     public Set<Integer> getWaitingTasks() {
         return waitingTasks;
     }

@@ -57,6 +57,7 @@ public class ClusterUtils {
     public static final String LOGCONFIG_ROOT = "logconfigs";
     public static final String PROFILERCONFIG_ROOT = "profilerconfigs";
     public static final String SECRET_KEYS_ROOT = "secretkeys";
+    public static final String STATE_CHECKPOINT_COORDINATOR_ROOT = "statecoordinator";
 
     public static final String ASSIGNMENTS_SUBTREE = ZK_SEPERATOR + ASSIGNMENTS_ROOT;
     public static final String STORMS_SUBTREE = ZK_SEPERATOR + STORMS_ROOT;
@@ -71,6 +72,7 @@ public class ClusterUtils {
     public static final String LOGCONFIG_SUBTREE = ZK_SEPERATOR + LOGCONFIG_ROOT;
     public static final String PROFILERCONFIG_SUBTREE = ZK_SEPERATOR + PROFILERCONFIG_ROOT;
     public static final String SECRET_KEYS_SUBTREE = ZK_SEPERATOR + SECRET_KEYS_ROOT;
+    public static final String STATE_CHECKPOINT_COORDINATOR_SUBTREE = ZK_SEPERATOR + STATE_CHECKPOINT_COORDINATOR_ROOT;
 
     // A singleton instance allows us to mock delegated static methods in our
     // tests by subclassing.
@@ -222,6 +224,16 @@ public class ClusterUtils {
      */
     public static String secretKeysPath(WorkerTokenServiceType type, String topologyId, long version) {
         return secretKeysPath(type, topologyId) + ZK_SEPERATOR + version;
+    }
+
+    /**
+     * Get the path to state checkpoint coordinator information.
+     *
+     * @param id The ID. The value should not be shared across different topologies.
+     * @return the path to the state checkpoint coordinator information.
+     */
+    public static String stateCheckpointCoordinatorPath(String id) {
+        return STATE_CHECKPOINT_COORDINATOR_SUBTREE + ZK_SEPERATOR + id;
     }
 
     public static <T> T maybeDeserialize(byte[] serialized, Class<T> clazz) {

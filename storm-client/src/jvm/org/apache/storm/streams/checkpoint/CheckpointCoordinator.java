@@ -24,7 +24,6 @@ import java.util.Map;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.storm.streams.checkpoint.states.CheckpointState;
-import org.apache.storm.streams.state.KeyValueState;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichBolt;
@@ -36,8 +35,7 @@ import org.apache.storm.utils.TupleUtils;
 public class CheckpointCoordinator implements IRichBolt {
     public static final int TICK_FREQ_MS = 100;
 
-    // FIXME: store to Zookeeper for coordinator?
-    private KeyValueState<String, String> state;
+    private ICheckpointCoordinationState coordState;
 
     private CheckpointStateFactory stateFactory;
     private CheckpointState currentState;
@@ -45,14 +43,13 @@ public class CheckpointCoordinator implements IRichBolt {
     @Override
     public void prepare(Map<String, Object> topoConf, TopologyContext context, OutputCollector collector) {
         // initialize state
-        stateFactory = new CheckpointStateFactory(topoConf, context, collector, state);
+        stateFactory = new CheckpointStateFactory(topoConf, context, collector, coordState);
         currentState = stateFactory.initialize();
     }
 
-    // FIXME: how to inject state?
     @VisibleForTesting
-    void injectState(KeyValueState<String, String> coordinatorState) {
-        this.state = coordinatorState;
+    void injectCoordinationState(ICheckpointCoordinationState coordState) {
+        this.coordState = coordState;
     }
 
     @Override
@@ -128,7 +125,7 @@ public class CheckpointCoordinator implements IRichBolt {
     }
 
     @VisibleForTesting
-    KeyValueState<String, String> getState() {
-        return state;
+    ICheckpointCoordinationState getCoordState() {
+        return coordState;
     }
 }

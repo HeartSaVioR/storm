@@ -29,7 +29,7 @@ import org.apache.storm.utils.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Checkpointing extends BaseCheckpointState {
+public class Checkpointing extends BaseCheckpointState implements WaitingTasks {
     private static final Logger LOG = LoggerFactory.getLogger(Checkpointing.class);
 
     private final Set<Integer> waitingTasks;
@@ -97,6 +97,7 @@ public class Checkpointing extends BaseCheckpointState {
     }
 
     @VisibleForTesting
+    @Override
     public Set<Integer> getWaitingTasks() {
         return waitingTasks;
     }

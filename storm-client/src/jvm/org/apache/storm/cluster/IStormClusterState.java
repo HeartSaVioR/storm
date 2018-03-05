@@ -209,6 +209,22 @@ public interface IStormClusterState {
     Set<String> idsOfTopologiesWithPrivateWorkerKeys();
 
     /**
+     * Set the coordinator information of state checkpoint. The value of id should be guaranteed to be unique and non-concurrent use.
+     *
+     * @param id The ID. The value should not be shared across different topologies.
+     * @param information The checkpoint information for that ID. The reason for the value to be map is for flexibility.
+     */
+    void setStateCoordinatorInformation(String id, Map<String, Object> information);
+
+    /**
+     * Read the coordinator information of state checkpoint. The value of id should be guaranteed to be unique and non-concurrent use.
+     *
+     * @param id The ID. The value should not be shared across different topologies.
+     * @return The checkpoint information for that ID.
+     */
+    Map<String, Object> readStateCoordinatorInformation(String id);
+
+    /**
      * Get all of the supervisors with the ID as the key.
      */
     default Map<String, SupervisorInfo> allSupervisorInfo() {

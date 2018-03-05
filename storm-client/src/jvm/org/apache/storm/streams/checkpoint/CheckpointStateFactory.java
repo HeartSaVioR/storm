@@ -20,6 +20,7 @@
 package org.apache.storm.streams.checkpoint;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +32,6 @@ import org.apache.storm.streams.checkpoint.states.Checkpointing;
 import org.apache.storm.streams.checkpoint.states.ReadyCheckpointState;
 import org.apache.storm.streams.checkpoint.states.RollbackRequestQueued;
 import org.apache.storm.streams.checkpoint.states.RollingBack;
-import org.apache.storm.streams.state.KeyValueState;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Values;
@@ -44,16 +44,20 @@ public class CheckpointStateFactory {
     private final int checkpointIntervalMs;
     private final int operationTimeoutMs;
     private final OutputCollector collector;
-    private final KeyValueState<String, String> state;
+    private final ICheckpointCoordinationState state;
     private final Set<Integer> upstreamTasks;
+    private final String coordinationId;
 
     public CheckpointStateFactory(Map<String, Object> topoConf, TopologyContext topologyContext, OutputCollector collector,
-                                  KeyValueState<String, String> state) {
+                                  ICheckpointCoordinationState state) {
         this.checkpointIntervalMs = loadCheckpointInterval(topoConf);
         this.operationTimeoutMs = loadCheckpointOperationTimeout(topoConf);
         this.collector = collector;
         this.state = state;
         this.upstreamTasks = calculateUpstreamTasks(topologyContext);
+
+        // FIXME: unique id must be configured, other than storm topology ID which can't be reused
+        this.coordinationId = topologyContext.getStormId();
     }
 
     public int getCheckpointIntervalMs() {
@@ -68,7 +72,7 @@ public class CheckpointStateFactory {
         return collector;
     }
 
-    public KeyValueState<String, String> getState() {
+    public ICheckpointCoordinationState getState() {
         return state;
     }
 
@@ -76,15 +80,8 @@ public class CheckpointStateFactory {
         return upstreamTasks;
     }
 
-    public void storeNewCheckpointState(long newCheckpointId, long newSuccessCheckpointTimestamp) {
-        if (state == null) {
-            throw new IllegalStateException("State is not yet initialized.");
-        }
-
-        state.put(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID, String.valueOf(newCheckpointId));
-        state.put(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_TIMESTAMP, String.valueOf(newSuccessCheckpointTimestamp));
-
-        state.snapshot(CheckpointConstants.COORDINATOR_TRANSACTION_ID);
+    public String getCoordinationId() {
+        return coordinationId;
     }
 
     public CheckpointState initialize() {
@@ -92,10 +89,9 @@ public class CheckpointStateFactory {
             throw new IllegalStateException("State is not yet initialized.");
         }
 
-        state.restore(CheckpointConstants.COORDINATOR_TRANSACTION_ID);
-
-        long lastSuccessCheckpointId = readLastSuccessCheckpointId(state);
-        long lastSuccessCheckpointTimestamp = readLastSuccessCheckpointTimestamp(state);
+        Map<String, Object> stateInfo = readCheckpointState();
+        long lastSuccessCheckpointId = readLastSuccessCheckpointId(stateInfo);
+        long lastSuccessCheckpointTimestamp = readLastSuccessCheckpointTimestamp(stateInfo);
 
         // initiate rollback to last success checkpoint when coordinator is starting / restarting
         collector.emit(CheckpointConstants.CHECKPOINT_STREAM_ID, new Values(CheckpointConstants.ROLLBACK_REQUEST_DUMMY_TXID,
@@ -157,12 +153,28 @@ public class CheckpointStateFactory {
         return Collections.unmodifiableSet(ret);
     }
 
-    private long readLastSuccessCheckpointId(KeyValueState<String, String> state) {
-        return Long.valueOf(state.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID, String.valueOf(CheckpointConstants.INITIAL_CHECKPOINT_ID)));
+    public void storeNewCheckpointState(long newCheckpointId, long newSuccessCheckpointTimestamp) {
+        if (state == null) {
+            throw new IllegalStateException("State is not yet initialized.");
+        }
+
+        Map<String, Object> stateInfo = new HashMap<>();
+        stateInfo.put(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID, newCheckpointId);
+        stateInfo.put(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_TIMESTAMP, newSuccessCheckpointTimestamp);
+
+        state.set(coordinationId, stateInfo);
     }
 
-    private long readLastSuccessCheckpointTimestamp(KeyValueState<String, String> state) {
-        return Long.valueOf(state.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_TIMESTAMP, String.valueOf(CheckpointConstants.INITIAL_LAST_SUCCESS_CHECKPOINT_TIMESTAMP)));
+    private Map<String, Object> readCheckpointState() {
+        return state.get(coordinationId);
+    }
+
+    private long readLastSuccessCheckpointId(Map<String, Object> stateInfo) {
+        return (Long) stateInfo.getOrDefault(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID, CheckpointConstants.INITIAL_CHECKPOINT_ID);
+    }
+
+    private long readLastSuccessCheckpointTimestamp(Map<String, Object> stateInfo) {
+        return (Long) stateInfo.getOrDefault(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_TIMESTAMP, CheckpointConstants.INITIAL_LAST_SUCCESS_CHECKPOINT_TIMESTAMP);
     }
 }
 

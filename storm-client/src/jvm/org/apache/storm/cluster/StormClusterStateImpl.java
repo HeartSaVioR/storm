@@ -19,6 +19,7 @@
 package org.apache.storm.cluster;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,9 +54,11 @@ import org.apache.storm.generated.WorkerTokenServiceType;
 import org.apache.storm.nimbus.NimbusInfo;
 import org.apache.storm.utils.Time;
 import org.apache.storm.utils.Utils;
+import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.data.ACL;
+import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,7 +153,8 @@ public class StormClusterStateImpl implements IStormClusterState {
                               ClusterUtils.BLOBSTORE_SUBTREE, 
                               ClusterUtils.NIMBUSES_SUBTREE, 
                               ClusterUtils.LOGCONFIG_SUBTREE,
-                              ClusterUtils.BACKPRESSURE_SUBTREE };
+                              ClusterUtils.BACKPRESSURE_SUBTREE,
+                              ClusterUtils.STATE_CHECKPOINT_COORDINATOR_SUBTREE };
         for (String path : pathlist) {
             this.stateStorage.mkdirs(path, defaultAcls);
         }
@@ -839,7 +843,33 @@ public class StormClusterStateImpl implements IStormClusterState {
         }
         return ret;
     }
-    
+
+    @Override
+    public void setStateCoordinatorInformation(String id, Map<String, Object> information) {
+        try {
+            byte[] bytes = JSONValue.toJSONString(information).getBytes(Charset.forName("UTF-8"));
+            String path = ClusterUtils.stateCheckpointCoordinatorPath(id);
+            stateStorage.set_data(path, bytes, defaultAcls);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Map<String, Object> readStateCoordinatorInformation(String id) {
+        try {
+            String path = ClusterUtils.stateCheckpointCoordinatorPath(id);
+            byte[] values = stateStorage.get_data(path, false);
+            if (values == null) {
+                return null;
+            }
+
+            return (Map<String, Object>) JSONValue.parseWithException(new String(values, Charset.forName("UTF-8")));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static List<String> tokenizePath(String path) {
         String[] toks = path.split("/");
         java.util.ArrayList<String> rtn = new ArrayList<>();

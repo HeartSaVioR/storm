@@ -833,6 +833,12 @@ public class Config extends HashMap<String, Object> {
     public static final String TOPOLOGY_PRIORITY = "topology.priority";
 
     /**
+     * The root directory in ZooKeeper for metadata about state snapshot support. (currently only supported on streams API).
+     */
+    @isString
+    public static final String TOPOLOGY_STATE_COORDINATOR_ZOOKEEPER_ROOT = "topology.streams.state.coordinator.zookeeper.root";
+
+    /**
      * The root directory in ZooKeeper for metadata about TransactionalSpouts.
      */
     @isString

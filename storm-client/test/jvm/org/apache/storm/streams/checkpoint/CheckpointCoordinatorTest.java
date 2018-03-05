@@ -25,11 +25,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.storm.Config;
@@ -37,16 +38,12 @@ import org.apache.storm.Constants;
 import org.apache.storm.generated.GlobalStreamId;
 import org.apache.storm.generated.Grouping;
 import org.apache.storm.generated.NullStruct;
-import org.apache.storm.state.DefaultStateSerializer;
 import org.apache.storm.streams.checkpoint.states.CheckpointState;
 import org.apache.storm.streams.checkpoint.states.Checkpointing;
 import org.apache.storm.streams.checkpoint.states.ReadyCheckpointState;
 import org.apache.storm.streams.checkpoint.states.RollbackRequestQueued;
 import org.apache.storm.streams.checkpoint.states.RollingBack;
-import org.apache.storm.streams.state.KeyValueState;
-import org.apache.storm.streams.state.StateStorage;
-import org.apache.storm.streams.testutil.DummyKeyValueState;
-import org.apache.storm.streams.testutil.DummyStateStorage;
+import org.apache.storm.streams.checkpoint.states.WaitingTasks;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Tuple;
@@ -62,9 +59,6 @@ import org.mockito.ArgumentMatchers;
 
 public class CheckpointCoordinatorTest {
 
-    private static final String NAMESPACE = "testNamespace";
-    private static final byte[] NAMESPACE_BYTES = NAMESPACE.getBytes(Charset.forName("UTF-8"));
-
     private static final int TEST_CHECKPOINT_INTERVAL = 10;
     private static final int TEST_CHECKPOINT_OPERATION_TIMEOUT = 100;
 
@@ -72,16 +66,27 @@ public class CheckpointCoordinatorTest {
 
     public static final int START_TERMINAL_TASK_INDEX = 1001;
     public static final int TEST_COORDINATOR_TASK_ID = -2;
+    public static final String STORM_ID_TEST = "STORM_TEST";
 
-    private StateStorage testStateStorage;
-    private KeyValueState<String, String> testKeyValueState;
-    private DefaultStateSerializer<String> serializer;
+    private ICheckpointCoordinationState testCoordState;
 
     @Before
     public void setUp() {
-        testStateStorage = new DummyStateStorage();
-        serializer = new DefaultStateSerializer<>();
-        testKeyValueState = new DummyKeyValueState<>(testStateStorage, NAMESPACE_BYTES, serializer, serializer);
+        testCoordState = new TestCheckpointCoordinationState();
+    }
+
+    static class TestCheckpointCoordinationState implements ICheckpointCoordinationState {
+        private final Map<String, Map<String, Object>> coordInfoMap = new HashMap<>();
+
+        @Override
+        public void set(String id, Map<String, Object> coordInfo) {
+            coordInfoMap.put(id, coordInfo);
+        }
+
+        @Override
+        public Map<String, Object> get(String id) {
+            return coordInfoMap.getOrDefault(id, Collections.emptyMap());
+        }
     }
 
     @FunctionalInterface
@@ -92,7 +97,7 @@ public class CheckpointCoordinatorTest {
 
     private void runTestWithTestCoordinatorEnvironment(CoordinatorTestFunction func) {
         try (SimulatedTime time = new SimulatedTime()) {
-            initializeStateForCoordinator();
+            initializeStateForCoordinator(STORM_ID_TEST);
 
             Map<String, Object> topoConf = getTestTopologyConfiguration();
             Map<String, List<Integer>> terminalTasksMap = ComponentToTasksMapGenerator.createTerminalTasks("sink", 2, 3);
@@ -163,7 +168,7 @@ public class CheckpointCoordinatorTest {
 
     private CheckpointCoordinator initializeCheckpointCoordinator(Map<String, Object> topoConf, TopologyContext mockedContext, OutputCollector mockedCollector) {
         CheckpointCoordinator coordinator = new CheckpointCoordinator();
-        coordinator.injectState(testKeyValueState);
+        coordinator.injectCoordinationState(testCoordState);
         coordinator.prepare(topoConf, mockedContext, mockedCollector);
 
         // check rollback is triggered from the start of coordinator
@@ -178,11 +183,14 @@ public class CheckpointCoordinatorTest {
         return coordinator;
     }
 
-    private void initializeStateForCoordinator() {
-        testKeyValueState.put(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID, String.valueOf(TEST_LAST_SUCCESS_CHECKPOINT_ID));
+    private void initializeStateForCoordinator(String coordId) {
+        Map<String, Object> stateInfo = new HashMap<>();
+
+        stateInfo.put(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID, TEST_LAST_SUCCESS_CHECKPOINT_ID);
         // 1 second before current
-        testKeyValueState.put(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_TIMESTAMP, String.valueOf(Time.currentTimeMillis() - 1000));
-        testKeyValueState.snapshot(CheckpointConstants.COORDINATOR_TRANSACTION_ID);
+        stateInfo.put(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_TIMESTAMP, Time.currentTimeMillis() - 1000);
+
+        testCoordState.set(coordId, stateInfo);
     }
 
     private void verifyCheckpointSuccessCase(CheckpointCoordinator coordinator, List<Integer> terminalTasks,
@@ -223,10 +231,11 @@ public class CheckpointCoordinatorTest {
         Assert.assertEquals(expectOperationFinishedTimestamp, currentState.getLastSuccessCheckpointTimestamp());
 
         // checkpoint information is being stored to state storage
-        String lastSuccessTransactionId = testKeyValueState.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID);
-        String lastSuccessTransactionTimestamp = testKeyValueState.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_TIMESTAMP);
-        Assert.assertEquals(Long.valueOf(newCheckpointId), Long.valueOf(lastSuccessTransactionId));
-        Assert.assertEquals(Long.valueOf(expectOperationFinishedTimestamp), Long.valueOf(lastSuccessTransactionTimestamp));
+        Map<String, Object> stateInfo = testCoordState.get(STORM_ID_TEST);
+        Long lastSuccessCheckpointId = (Long) stateInfo.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID);
+        Long lastSuccessCheckpointTimestamp = (Long) stateInfo.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_TIMESTAMP);
+        Assert.assertEquals(Long.valueOf(newCheckpointId), lastSuccessCheckpointId);
+        Assert.assertEquals(Long.valueOf(expectOperationFinishedTimestamp), lastSuccessCheckpointTimestamp);
     }
 
     private void verifyCheckpointFailCase(CheckpointCoordinator coordinator, List<Integer> terminalTasks, TopologyContext mockedContext,
@@ -337,12 +346,13 @@ public class CheckpointCoordinatorTest {
 
         // relaunched coordinator is not in progress of checkpoint
         // checkpoint message being ignored
-        String lastSuccessTransactionIdFromStateStore = testKeyValueState.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID);
+        Map<String, Object> stateInfo = testCoordState.get(STORM_ID_TEST);
+        Long lastSuccessCheckpointIdFromStateStore = (Long) stateInfo.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID);
 
         currentState = newCoordinator.getCurrentState();
         Assert.assertFalse(currentState instanceof Checkpointing);
         Assert.assertTrue(currentState instanceof RollbackRequestQueued);
-        Assert.assertEquals(Long.valueOf(lastSuccessTransactionIdFromStateStore), Long.valueOf(currentState.getLastSuccessCheckpointId()));
+        Assert.assertEquals(lastSuccessCheckpointIdFromStateStore, Long.valueOf(currentState.getLastSuccessCheckpointId()));
     }
 
     private void verifyRollbackSuccessCase(CheckpointCoordinator coordinator, List<Integer> terminalTasks,
@@ -354,7 +364,7 @@ public class CheckpointCoordinatorTest {
 
         long rollbackStartedTimestamp = Time.currentTimeMillis();
 
-        CheckpointActionTriggeredVerifier.verifyRollbackRequested(coordinator, mockedCollector, testKeyValueState);
+        CheckpointActionTriggeredVerifier.verifyRollbackRequested(coordinator, mockedCollector, testCoordState);
 
         CheckpointState currentState = coordinator.getCurrentState();
         String currentTxId = currentState.getCurrentTxId();
@@ -390,7 +400,7 @@ public class CheckpointCoordinatorTest {
 
         long rollbackStartedTimestamp = Time.currentTimeMillis();
 
-        CheckpointActionTriggeredVerifier.verifyRollbackRequested(coordinator, mockedCollector, testKeyValueState);
+        CheckpointActionTriggeredVerifier.verifyRollbackRequested(coordinator, mockedCollector, testCoordState);
 
         CheckpointState currentState = coordinator.getCurrentState();
         String currentTxId = currentState.getCurrentTxId();
@@ -420,7 +430,7 @@ public class CheckpointCoordinatorTest {
         coordinator.execute(MockTupleUtils.mockRollbackRequestTuple(TEST_COORDINATOR_TASK_ID));
         nextTickWithForwardingTime(coordinator, checkpointIntervalMs);
 
-        CheckpointActionTriggeredVerifier.verifyRollbackRequested(coordinator, mockedCollector, testKeyValueState);
+        CheckpointActionTriggeredVerifier.verifyRollbackRequested(coordinator, mockedCollector, testCoordState);
 
         CheckpointState currentState = coordinator.getCurrentState();
         String currentTxId = currentState.getCurrentTxId();
@@ -445,7 +455,7 @@ public class CheckpointCoordinatorTest {
 
         long rollbackStartedTimestamp = Time.currentTimeMillis();
 
-        CheckpointActionTriggeredVerifier.verifyRollbackRequested(coordinator, mockedCollector, testKeyValueState);
+        CheckpointActionTriggeredVerifier.verifyRollbackRequested(coordinator, mockedCollector, testCoordState);
 
         CheckpointState currentState = coordinator.getCurrentState();
         String currentTxId = currentState.getCurrentTxId();
@@ -473,11 +483,12 @@ public class CheckpointCoordinatorTest {
 
         // relaunched coordinator is not in progress of checkpoint
         // rollback message being ignored
-        String lastSuccessCheckpointIdFromStateStore = testKeyValueState.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID);
+        Map<String, Object> stateInfo = testCoordState.get(STORM_ID_TEST);
+        Long lastSuccessCheckpointIdFromStateStore = (Long) stateInfo.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID);
 
         currentState = newCoordinator.getCurrentState();
         Assert.assertFalse(currentState instanceof RollingBack);
-        Assert.assertEquals(Long.valueOf(lastSuccessCheckpointIdFromStateStore), Long.valueOf(currentState.getLastSuccessCheckpointId()));
+        Assert.assertEquals(lastSuccessCheckpointIdFromStateStore, Long.valueOf(currentState.getLastSuccessCheckpointId()));
     }
 
     private void nextTickWithForwardingTime(CheckpointCoordinator coordinator, int forwardingTimeMs) {
@@ -510,6 +521,9 @@ public class CheckpointCoordinatorTest {
 
         when(context.getThisSources()).thenReturn(sources);
 
+        // FIXME: now coupled with how coordination id is defined - must be fixed!
+        when(context.getStormId()).thenReturn(STORM_ID_TEST);
+
         return context;
     }
 
@@ -517,35 +531,31 @@ public class CheckpointCoordinatorTest {
         public static void successCheckpointTuples(CheckpointCoordinator coordinator, List<Integer> terminalTasks, int count,
                                                    OutputCollector mockedCollector, long checkpointStartedTimestamp,
                                                    String currentTxId, long newCheckpointId) {
-            for (int i = 0 ; i < count ; i++) {
-                // provide success checkpoint tuple
-                Integer taskId = terminalTasks.get(i);
-                coordinator.execute(MockTupleUtils.mockCheckpointTuple(taskId, currentTxId, newCheckpointId));
-
-                CheckpointState currentState = coordinator.getCurrentState();
-                Assert.assertTrue(currentState instanceof Checkpointing);
-                Assert.assertEquals(currentTxId, currentState.getCurrentTxId());
-                Assert.assertEquals(checkpointStartedTimestamp, currentState.getCurrentTxStartTimestamp());
-
-                Assert.assertTrue(((Checkpointing) currentState).getWaitingTasks().contains(taskId));
-            }
-
-            verifyNoMoreInteractions(mockedCollector);
+            successTuples(coordinator, terminalTasks, count, mockedCollector, checkpointStartedTimestamp, currentTxId,
+                    (taskId) -> MockTupleUtils.mockCheckpointTuple(taskId, currentTxId, newCheckpointId), Checkpointing.class);
         }
 
         public static void successRollbackTuples(CheckpointCoordinator coordinator, List<Integer> terminalTasks, int count,
                                                  OutputCollector mockedCollector, long rollbackStartedTimestamp, String currentTxId, long checkpointId) {
+            successTuples(coordinator, terminalTasks, count, mockedCollector, rollbackStartedTimestamp, currentTxId,
+                    (taskId) -> MockTupleUtils.mockRollbackTuple(taskId, currentTxId, checkpointId), RollingBack.class);
+        }
+
+        private static void successTuples(CheckpointCoordinator coordinator, List<Integer> terminalTasks, int count,
+                                          OutputCollector mockedCollector, long operationStartedTimestamp, String currentTxId,
+                                          Function<Integer, Tuple> successTupleGeneratorFn, Class<? extends CheckpointState> expectedStateClass) {
             for (int i = 0 ; i < count ; i++) {
-                // provide success rollback tuple
+                // provide success tuple
                 Integer taskId = terminalTasks.get(i);
-                coordinator.execute(MockTupleUtils.mockRollbackTuple(taskId, currentTxId, checkpointId));
+                coordinator.execute(successTupleGeneratorFn.apply(taskId));
 
                 CheckpointState currentState = coordinator.getCurrentState();
-                Assert.assertTrue(currentState instanceof RollingBack);
+                Assert.assertTrue(currentState.getClass() == expectedStateClass);
+                Assert.assertTrue(WaitingTasks.class.isAssignableFrom(currentState.getClass()));
                 Assert.assertEquals(currentTxId, currentState.getCurrentTxId());
-                Assert.assertEquals(rollbackStartedTimestamp, currentState.getCurrentTxStartTimestamp());
+                Assert.assertEquals(operationStartedTimestamp, currentState.getCurrentTxStartTimestamp());
 
-                Assert.assertTrue(((RollingBack) currentState).getWaitingTasks().contains(taskId));
+                Assert.assertTrue(((WaitingTasks) currentState).getWaitingTasks().contains(taskId));
             }
 
             verifyNoMoreInteractions(mockedCollector);
@@ -553,39 +563,27 @@ public class CheckpointCoordinatorTest {
 
         public static long halfSuccessCheckpointAndHalfRollbackTuples(CheckpointCoordinator coordinator, List<Integer> terminalTasks,
                                                                       OutputCollector mockedCollector, String currentTxId, long checkpointId) {
-            long expectFirstRollbackRequestTimestamp = -1;
-            for (int i = 0 ; i < terminalTasks.size() ; i++) {
-                // provide checkpoint tuples from half of tasks
-                // provide rollback request tuples from another half of tasks
-
-                Integer taskId = terminalTasks.get(i);
-                if (i % 2 == 0) {
-                    coordinator.execute(MockTupleUtils.mockCheckpointTuple(taskId, currentTxId, checkpointId));
-                    Time.advanceTime(1);
-                } else {
-                    coordinator.execute(MockTupleUtils.mockRollbackRequestTuple(taskId));
-                    if (expectFirstRollbackRequestTimestamp < 0) {
-                        expectFirstRollbackRequestTimestamp = Time.currentTimeMillis();
-                    }
-                    Time.advanceTime(1);
-                }
-            }
-
-            verifyNoMoreInteractions(mockedCollector);
-
-            return expectFirstRollbackRequestTimestamp;
+            return halfSucessAndHalfRollbackRequestTuples(coordinator, terminalTasks, mockedCollector, currentTxId, checkpointId,
+                    (taskId) -> MockTupleUtils.mockCheckpointTuple(taskId, currentTxId, checkpointId));
         }
 
         public static long halfSuccessRollbackAndHalfRollbackTuples(CheckpointCoordinator coordinator, List<Integer> terminalTasks,
                                                                     OutputCollector mockedCollector, String currentTxId, long checkpointId) {
+            return halfSucessAndHalfRollbackRequestTuples(coordinator, terminalTasks, mockedCollector, currentTxId, checkpointId,
+                    (taskId) -> MockTupleUtils.mockRollbackTuple(taskId, currentTxId, checkpointId));
+        }
+
+        private static long halfSucessAndHalfRollbackRequestTuples(CheckpointCoordinator coordinator, List<Integer> terminalTasks,
+                                                                   OutputCollector mockedCollector, String currentTxId, long checkpointId,
+                                                                   Function<Integer, Tuple> successTupleGeneratorFn) {
             long expectFirstRollbackRequestTimestamp = -1;
             for (int i = 0 ; i < terminalTasks.size() ; i++) {
-                // provide rollback tuples from half of tasks
+                // provide success tuples from half of tasks
                 // provide rollback request tuples from another half of tasks
 
                 Integer taskId = terminalTasks.get(i);
                 if (i % 2 == 0) {
-                    coordinator.execute(MockTupleUtils.mockRollbackTuple(taskId, currentTxId, checkpointId));
+                    coordinator.execute(successTupleGeneratorFn.apply(taskId));
                     Time.advanceTime(1);
                 } else {
                     coordinator.execute(MockTupleUtils.mockRollbackRequestTuple(taskId));
@@ -616,16 +614,18 @@ public class CheckpointCoordinatorTest {
         }
 
         public static void verifyRollbackRequested(CheckpointCoordinator coordinator, OutputCollector mockedCollector,
-                                                   KeyValueState<String, String> keyValueState) {
+                                                   ICheckpointCoordinationState coordState) {
             CheckpointState currentState = coordinator.getCurrentState();
 
             long rollbackStartedTimestamp = Time.currentTimeMillis();
             // check that checkpoint information is being loaded from state storage
-            String lastSuccessTransactionIdFromStateStore = keyValueState.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID);
-            String lastSuccessTransactionTimestampFromStateStore = keyValueState.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_TIMESTAMP);
 
-            Assert.assertEquals(Long.valueOf(lastSuccessTransactionIdFromStateStore), Long.valueOf(currentState.getLastSuccessCheckpointId()));
-            Assert.assertEquals(Long.valueOf(lastSuccessTransactionTimestampFromStateStore), Long.valueOf(currentState.getLastSuccessCheckpointTimestamp()));
+            Map<String, Object> stateInfo = coordState.get(STORM_ID_TEST);
+            Long lastSuccessCheckpointIdFromStateStore = (Long) stateInfo.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_ID);
+            Long lastSuccessCheckpointTimestampFromStateStore = (Long) stateInfo.get(CheckpointConstants.STATE_KEY_LAST_SUCCESS_CHECKPOINT_TIMESTAMP);
+
+            Assert.assertEquals(lastSuccessCheckpointIdFromStateStore, Long.valueOf(currentState.getLastSuccessCheckpointId()));
+            Assert.assertEquals(lastSuccessCheckpointTimestampFromStateStore, Long.valueOf(currentState.getLastSuccessCheckpointTimestamp()));
 
             String currentTxId = currentState.getCurrentTxId();
             long checkpointId = currentState.getLastSuccessCheckpointId();

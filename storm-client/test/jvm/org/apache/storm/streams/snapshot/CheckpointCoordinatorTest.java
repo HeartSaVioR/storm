@@ -17,7 +17,7 @@
  *
  */
 
-package org.apache.storm.streams.executors;
+package org.apache.storm.streams.snapshot;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;

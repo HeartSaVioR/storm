@@ -17,7 +17,7 @@
  *
  */
 
-package org.apache.storm.streams.executors;
+package org.apache.storm.streams.snapshot;
 
 import java.util.Arrays;
 import java.util.Collections;

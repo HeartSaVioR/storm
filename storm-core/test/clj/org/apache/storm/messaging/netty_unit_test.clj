@@ -352,3 +352,52 @@
                           STORM-ZOOKEEPER-TOPOLOGY-AUTH-PAYLOAD (str (Utils/secureRandomLong) ":" (Utils/secureRandomLong)))]
    (test-server-always-reconnects-fn storm-conf)          ;; test with sasl authentication disabled
    (test-server-always-reconnects-fn storm-conf-sasl)))   ;; test with sasl authentication enabled
+
+
+(defn- bind-to-fixed-port [storm-conf port-num]
+  (log-message "7. should be able to rebind to a port quickly")
+  (let [req_msg (String. "0123456789abcdefghijklmnopqrstuvwxyz")
+        context (TransportFactory/makeContext storm-conf)
+        resp    (atom nil)
+        server  (.bind context nil port-num)
+        _       (register-callback (fn [message] (reset! resp message)) server)
+        client  (.connect context nil "localhost" (.getPort server) (make-array AtomicBoolean 2))
+        _       (wait-until-ready [server client])
+        _       (.send client task (.getBytes req_msg))]
+    (wait-for-not-nil resp)
+    (is (= task (.task @resp)))
+    (is (= req_msg (String. (.message @resp))))
+    (.close client)
+    (.close server)
+    (.term context)))
+
+(deftest test-rebinding-to-port
+  (let [storm-conf {STORM-MESSAGING-TRANSPORT "org.apache.storm.messaging.netty.Context"
+                    STORM-MESSAGING-NETTY-AUTHENTICATION false
+                    STORM-MESSAGING-NETTY-BUFFER-SIZE 1024
+                    STORM-MESSAGING-NETTY-MAX-RETRIES 10
+                    STORM-MESSAGING-NETTY-MIN-SLEEP-MS 1000
+                    STORM-MESSAGING-NETTY-MAX-SLEEP-MS 5000
+                    STORM-MESSAGING-NETTY-SERVER-WORKER-THREADS 1
+                    STORM-MESSAGING-NETTY-CLIENT-WORKER-THREADS 1
+                    STORM-MESSAGING-NETTY-BUFFER-LOW-WATERMARK 8388608
+                    STORM-MESSAGING-NETTY-BUFFER-HIGH-WATERMARK 16777216
+                    TOPOLOGY-BACKPRESSURE-WAIT-PROGRESSIVE-LEVEL1-COUNT  1
+                    TOPOLOGY-BACKPRESSURE-WAIT-PROGRESSIVE-LEVEL2-COUNT  1000
+                    TOPOLOGY-BACKPRESSURE-WAIT-PROGRESSIVE-LEVEL3-SLEEP-MILLIS 1
+                    TOPOLOGY-KRYO-FACTORY "org.apache.storm.serialization.DefaultKryoFactory"
+                    TOPOLOGY-TUPLE-SERIALIZER "org.apache.storm.serialization.types.ListDelegateSerializer"
+                    TOPOLOGY-FALL-BACK-ON-JAVA-SERIALIZATION false
+                    TOPOLOGY-SKIP-MISSING-KRYO-REGISTRATIONS false}
+        storm-conf-sasl (assoc storm-conf
+                               STORM-MESSAGING-NETTY-AUTHENTICATION true
+                               TOPOLOGY-NAME "topo1-netty-sasl"
+                               STORM-ZOOKEEPER-TOPOLOGY-AUTH-PAYLOAD (str (Utils/secureRandomLong) ":" (Utils/secureRandomLong)))]
+    (dotimes [n 10]
+      (let [start-time (System/nanoTime)]
+        (log-message "binding to port 6700 iter: " (+ 1 n))
+        (bind-to-fixed-port storm-conf 6700) ;; rebind to same port
+        (log-message "Expected time taken should be less than 5 sec, actual time taken is: "
+                 (/ (- (System/nanoTime) start-time) 1.0E6)
+                 " ms")
+        (is (< (- (System/nanoTime) start-time) 5.0E9))))))
